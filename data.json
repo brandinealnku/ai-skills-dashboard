@@ -13,22 +13,22 @@
   ],
   "charts": {
     "aiMentionsTrend": {
-      "title": "AI mentions in job postings are rising (Indeed AI Tracker)",
+      "title": "AI mentions in job postings are rising (Indeed Hiring Lab — Indeed AI Tracker)",
       "labels": ["2020", "2021", "2022", "2023", "2024", "Dec 2025"],
       "values": [1.0, 1.6, 1.2, 2.0, 3.0, 4.2],
-      "note": "Keep these as placeholders until you replace them with exact points from the Indeed AI Tracker chart. The anchor point is 4.2% in Dec 2025."
+      "note": "Placeholders until you replace with exact points from the Indeed AI Tracker chart. Anchor point: 4.2% in Dec 2025 (Indeed Hiring Lab, Jan 22, 2026)."
     },
     "aiMentionsByFamily": {
-      "title": "AI mentions differ by job family (Dec 2025)",
+      "title": "AI mentions differ by job family (Dec 2025, Indeed Hiring Lab)",
       "labels": ["Data & Analytics", "Marketing", "Human Resources"],
       "values": [45.0, 14.9, 8.8],
-      "note": "From Indeed Hiring Lab’s Jan 22, 2026 labor market update."
+      "note": "From Indeed Hiring Lab’s Jan 22, 2026 U.S. Labor Market Update (shares of postings mentioning AI by occupational group)."
     },
     "aiOutsideITShare": {
-      "title": "AI demand extends beyond IT/CS (2024)",
+      "title": "AI demand extends beyond IT/CS (job-posting analytics benchmark)",
       "labels": ["Outside IT/CS", "IT/CS"],
       "values": [51, 49],
-      "note": "From Lightcast reporting: share of postings requiring AI skills outside IT/CS (as of 2024)."
+      "note": "This specific split is a commonly cited benchmark from Lightcast (private labor-market analytics). Keep as a placeholder unless you have access to the underlying Lightcast report/data. Government sources (BLS/O*NET) provide authoritative labor/occupation context but do not publish this exact IT-vs-non-IT posting split."
     }
   },
   "jobFamilies": {
@@ -53,16 +53,24 @@
   },
   "sources": [
     {
-      "name": "Indeed Hiring Lab — Jan 2026 Labor Market Update (AI Tracker 4.2% in Dec 2025; 45% data & analytics; ~15% marketing; ~9% HR)",
+      "name": "Indeed Hiring Lab — January 2026 U.S. Labor Market Update (Indeed AI Tracker 4.2% in Dec 2025; ~45% Data & Analytics; 14.9% Marketing; 8.8% HR)",
       "url": "https://www.hiringlab.org/2026/01/22/january-labor-market-update-jobs-mentioning-ai-are-growing-amid-broader-hiring-weakness/"
     },
     {
-      "name": "Indeed Career Advice — AI in job postings (context + trend discussion, updated Jan 2026)",
-      "url": "https://www.indeed.com/career-advice/news/ai-in-job-postings"
+      "name": "U.S. Bureau of Labor Statistics (BLS) — Incorporating AI impacts in BLS employment projections (Monthly Labor Review, 2025)",
+      "url": "https://www.bls.gov/opub/mlr/2025/article/incorporating-ai-impacts-in-bls-employment-projections.htm"
     },
     {
-      "name": "Lightcast — AI skills outside IT/CS (press release summary)",
-      "url": "https://lightcast.io/resources/blog/beyond-the-buzz-press-release-2025-07-23"
+      "name": "U.S. Bureau of Labor Statistics (BLS) — AI impacts in BLS employment projections (TED: The Economics Daily, 2025)",
+      "url": "https://www.bls.gov/opub/ted/2025/ai-impacts-in-bls-employment-projections.htm"
+    },
+    {
+      "name": "U.S. Department of Labor / O*NET Resource Center — O*NET updates + “Hot Technologies” and “In Demand” technology skills (December 2025 update)",
+      "url": "https://www.onetcenter.org/whatsnew.html"
+    },
+    {
+      "name": "Lightcast — Beyond the Buzz / AI postings benchmark context (private labor-market analytics; use only if you can access the research report behind the numbers)",
+      "url": "https://lightcast.io/resources/research/the-lightcast-global-ai-skills-outlook"
     }
   ]
 }
