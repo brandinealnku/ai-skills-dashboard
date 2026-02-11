@@ -1,5 +1,5 @@
 /* ==========================================================
-   NKU Executive Dashboard (Deans / Chairs) — “Wow” Script
+   NKU AI Skills Dashboard
    - Cleaner structure, premium interactions, KPI strip support
    - Better chart styling + accessibility
    - Resilient loading + graceful fallback UI
@@ -103,7 +103,7 @@ function setExecutiveKPIs(data) {
   setText("kpiCoverageGapSub", "High employer signal + requires cross-college coverage");
 
   setText("kpiNextMove", "Baseline AI literacy in core + applied pathways");
-  setText("kpiNextMoveSub", "1–2 week modules + role-based depth (power-user / builder / governance)");
+  setText("kpiNextMoveSub", "INF 125: AI Literacy + role-based depth (power-user / builder / governance)");
 }
 
 /* ---------------------------
