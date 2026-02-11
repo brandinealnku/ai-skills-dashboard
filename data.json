@@ -1,0 +1,103 @@
+{
+  "lastUpdated": "2026-02-11",
+  "hero": {
+    "title": "AI Skills for Job-Market Readiness",
+    "takeaway": [
+      "Employers increasingly expect graduates to use AI tools for research, analysis, communication, and workflow automation.",
+      "The strongest preparation combines shared foundational AI literacy with discipline-specific practice tailored to job family needs."
+    ]
+  },
+  "coreSkills": [
+    {
+      "title": "AI Literacy and Model Awareness",
+      "description": "Understand what modern AI can and cannot do, including common failure modes, bias risks, and confidence calibration."
+    },
+    {
+      "title": "Prompting and Task Framing",
+      "description": "Translate ambiguous goals into clear prompts, constraints, and evaluation criteria to produce useful outputs consistently."
+    },
+    {
+      "title": "Verification and Critical Evaluation",
+      "description": "Fact-check AI outputs against trusted sources, evaluate reasoning quality, and identify hallucinations before reuse."
+    },
+    {
+      "title": "Data and Workflow Fluency",
+      "description": "Use spreadsheets, lightweight automation, and AI-assisted analysis to accelerate repetitive tasks and decision cycles."
+    },
+    {
+      "title": "Ethics, Policy, and Responsible Use",
+      "description": "Apply privacy, copyright, security, and fairness principles when using AI in academic and professional contexts."
+    }
+  ],
+  "charts": {
+    "aiMentionsTrend": {
+      "labels": ["2019", "2020", "2021", "2022", "2023", "2024", "2025"],
+      "values": [4, 5, 7, 11, 16, 23, 31],
+      "yAxisLabel": "Share of postings mentioning AI (%)"
+    },
+    "aiMentionsByFamily": {
+      "labels": [
+        "Software & Data",
+        "Marketing & Sales",
+        "Finance & Operations",
+        "Healthcare",
+        "Education",
+        "Human Resources"
+      ],
+      "values": [58, 34, 29, 23, 21, 19],
+      "xAxisLabel": "Job family",
+      "yAxisLabel": "Postings mentioning AI (%)"
+    },
+    "aiOutsideITShare": {
+      "labels": ["Outside IT/CS", "IT/CS"],
+      "values": [62, 38]
+    }
+  },
+  "jobFamilies": {
+    "nonTechnical": {
+      "label": "Non-technical",
+      "skills": [
+        "AI-assisted writing, summarization, and stakeholder communication",
+        "Customer and market insight extraction from qualitative data",
+        "Responsible use of AI for documentation, planning, and reporting",
+        "Human-in-the-loop review for tone, compliance, and brand safety"
+      ]
+    },
+    "technical": {
+      "label": "Technical",
+      "skills": [
+        "AI coding copilots for prototyping, testing, and refactoring",
+        "Data pipeline literacy and model performance monitoring",
+        "API-based automation and tool integration",
+        "Security, privacy, and governance practices for AI-enabled systems"
+      ]
+    },
+    "highStakes": {
+      "label": "High-stakes",
+      "skills": [
+        "Evidence-based verification for decisions affecting people or safety",
+        "Bias detection and mitigation in sensitive workflows",
+        "Documentation for auditability and accountability",
+        "Escalation protocols when AI output uncertainty is high"
+      ]
+    }
+  },
+  "sources": [
+    {
+      "title": "Lightcast: Generative AI and the Labor Market",
+      "url": "https://lightcast.io/resources/research/generative-ai-and-the-labor-market"
+    },
+    {
+      "title": "OECD: AI and the Future of Skills",
+      "url": "https://www.oecd.org/en/topics/artificial-intelligence.html"
+    },
+    {
+      "title": "World Economic Forum: Future of Jobs Report",
+      "url": "https://www.weforum.org/reports/the-future-of-jobs-report-2025/"
+    },
+    {
+      "title": "LinkedIn Economic Graph: Jobs on the Rise and AI Skills",
+      "url": "https://economicgraph.linkedin.com/"
+    }
+  ]
+}
