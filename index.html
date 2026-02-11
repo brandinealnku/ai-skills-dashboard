@@ -164,6 +164,79 @@
         <ul id="selected-family-skills" aria-label="Skills for selected job family"></ul>
       </div>
     </section>
+    <!-- Market Pulse -->
+<section class="section" aria-labelledby="pulse-heading" id="pulse">
+  <h2 id="pulse-heading">Market Pulse</h2>
+
+  <p class="meta" style="margin-top:-0.25rem;">
+    A live view of AI demand signals from <strong>public U.S. government job postings</strong>, a <strong>broader commercial snapshot</strong>,
+    and a <strong>standardized skills taxonomy</strong> used nationally for workforce planning.
+  </p>
+
+  <div class="skills-grid" style="grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));">
+    <!-- Pulse: USAJOBS -->
+    <article class="skill-card" role="listitem">
+      <h3 style="margin-bottom:0.35rem;">Government Signal (USAJOBS)</h3>
+      <p class="meta" style="margin:0 0 0.35rem;">Public U.S. government postings • Trend backbone</p>
+      <p style="margin:0; color: var(--muted);">
+        This dashboard’s trend line is computed from the <strong>USAJOBS Historic Job Opportunity Announcements (JOA)</strong> dataset.
+        It measures how frequently AI-related terms appear in job-posting titles over time—an executive-friendly leading indicator.
+      </p>
+
+      <ul style="margin-top:0.75rem;">
+        <li><strong>What we measure:</strong> % of postings mentioning AI terms (monthly)</li>
+        <li><strong>Why it matters:</strong> employer language shifts before curricula and workforce outcomes</li>
+        <li><strong>Source type:</strong> U.S. government dataset (public API)</li>
+      </ul>
+    </article>
+
+    <!-- Pulse: Adzuna -->
+    <article class="skill-card" role="listitem">
+      <h3 style="margin-bottom:0.35rem;">Broader Market Snapshot (Adzuna)</h3>
+      <p class="meta" style="margin:0 0 0.35rem;">Commercial job-posting sample • Market pulse</p>
+
+      <p style="margin:0; color: var(--muted);">
+        A rolling snapshot of recent U.S. job postings to complement the government trend line. Useful for directional context
+        like <strong>top categories</strong> and <strong>emerging AI terms</strong>.
+      </p>
+
+      <div style="margin-top:0.85rem;">
+        <p class="kpi-label" style="margin:0;">AI share in recent sample</p>
+        <p class="kpi-value" id="pulseAdzunaShare" style="margin:0.2rem 0 0.1rem;">—</p>
+        <p class="kpi-sub" id="pulseAdzunaMeta" style="margin:0;">—</p>
+      </div>
+
+      <div style="margin-top:0.75rem;">
+        <p class="kpi-label" style="margin:0 0 0.35rem;">Top categories in sample</p>
+        <ul id="pulseAdzunaCategories" style="margin:0; padding-left:1.15rem;"></ul>
+      </div>
+
+      <div style="margin-top:0.75rem;">
+        <p class="kpi-label" style="margin:0 0 0.35rem;">Top AI terms appearing in titles</p>
+        <ul id="pulseAdzunaTerms" style="margin:0; padding-left:1.15rem;"></ul>
+      </div>
+    </article>
+
+    <!-- Pulse: O*NET -->
+    <article class="skill-card" role="listitem">
+      <h3 style="margin-bottom:0.35rem;">Skills Language (O*NET)</h3>
+      <p class="meta" style="margin:0 0 0.35rem;">U.S. Department of Labor-backed taxonomy • Curriculum mapping</p>
+
+      <p style="margin:0; color: var(--muted);">
+        O*NET provides standardized occupation language used nationally. We pull <strong>Hot Technologies</strong> (occupation-linked technology signals)
+        to help NKU translate labor-market signals into <strong>clear, defensible curriculum outcomes</strong>.
+      </p>
+
+      <div style="margin-top:0.85rem;">
+        <p class="kpi-label" style="margin:0 0 0.35rem;">Hot technologies by occupation (top examples)</p>
+        <div id="pulseOnetBlock" class="explorer-panel" style="padding:0.85rem;">
+          <p class="meta" style="margin:0;">Loading O*NET highlights…</p>
+        </div>
+      </div>
+    </article>
+  </div>
+</section>
+
 
     <!-- Sources -->
     <section class="section" aria-labelledby="sources-heading" id="sources">
