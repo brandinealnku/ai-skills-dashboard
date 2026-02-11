@@ -3,7 +3,7 @@ name: Update dashboard data (weekly)
 on:
   workflow_dispatch:
   schedule:
-    # Mondays at 6:05am America/New_York (11:05 UTC during Standard Time)
+    # Mondays at ~6:05am America/New_York (cron is UTC)
     - cron: "5 11 * * 1"
 
 permissions:
@@ -27,11 +27,16 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
-      - name: Build data.json from public job postings
+      - name: Build data.json (USAJOBS + Adzuna + O*NET)
         env:
-          # Optional: tune these without editing code
           MONTHS_BACK: "24"
           SNAPSHOT_MONTHS_BACK: "1"
+
+          ADZUNA_APP_ID: ${{ secrets.ADZUNA_APP_ID }}
+          ADZUNA_APP_KEY: ${{ secrets.ADZUNA_APP_KEY }}
+
+          ONET_USERNAME: ${{ secrets.ONET_USERNAME }}
+          ONET_PASSWORD: ${{ secrets.ONET_PASSWORD }}
         run: |
           python scripts/build_data_json.py
 
