@@ -9,23 +9,23 @@
     ]
   },
   "marketLenses": {
-  "usajobsPulse": {
-    "enabled": true,
-    "windowDays": 30,
-    "sampledResults": 0,
-    "aiFlaggedResults": 0,
-    "aiShareInSamplePct": 0,
-    "topOrganizations": [],
-    "topAITermsInTitles": [],
-    "note": "Computed from USAJOBS Search API (open federal postings)."
+    "usajobsPulse": {
+      "enabled": true,
+      "windowDays": 30,
+      "sampledResults": 0,
+      "aiFlaggedResults": 0,
+      "aiShareInSamplePct": 0,
+      "topOrganizations": [],
+      "topAITermsInTitles": [],
+      "note": "Computed from USAJOBS Search API (open federal postings)."
+    },
+    "onetHotTechnologies": {
+      "enabled": true,
+      "asOf": "",
+      "topHotTechnologies": [],
+      "note": "From O*NET OnLine Hot Technologies export (job-posting-derived skills)."
+    }
   },
-  "onetHotTechnologies": {
-    "enabled": true,
-    "asOf": "",
-    "topHotTechnologies": [],
-    "note": "From O*NET OnLine Hot Technologies export (job-posting-derived skills)."
-  }
-}
   "coreSkills": [
     {
       "title": "AI literacy & professional judgment",
