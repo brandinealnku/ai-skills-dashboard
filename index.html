@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="AI skills dashboard for job-market readiness across disciplines." />
+  <title>AI Skills for Job-Market Readiness</title>
+  <link rel="stylesheet" href="styles.css" />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+  <a class="skip-link" href="#main-content">Skip to main content</a>
+
+  <header class="hero section">
+    <div class="container">
+      <h1 id="hero-title"></h1>
+      <p id="hero-takeaway-1" class="takeaway"></p>
+      <p id="hero-takeaway-2" class="takeaway"></p>
+      <p class="meta">Last updated: <time id="last-updated" datetime=""></time></p>
+      <p>
+        <a class="download-button" href="data.json" download aria-label="Download source data JSON file">Download data.json</a>
+      </p>
+    </div>
+  </header>
+
+  <main id="main-content" class="container">
+    <section class="section" aria-labelledby="core-skills-heading">
+      <h2 id="core-skills-heading">Core Skills for All Students</h2>
+      <div id="core-skills-grid" class="skills-grid" role="list"></div>
+    </section>
+
+    <section class="section" aria-labelledby="chart-1-heading">
+      <h2 id="chart-1-heading">AI mentions in job postings are rising</h2>
+      <div class="chart-wrap">
+        <canvas id="aiMentionsTrendChart" aria-label="Line chart showing AI mentions in job postings over time" role="img"></canvas>
+      </div>
+    </section>
+
+    <section class="section" aria-labelledby="chart-2-heading">
+      <h2 id="chart-2-heading">AI mentions by job family</h2>
+      <div class="chart-wrap">
+        <canvas id="aiMentionsByFamilyChart" aria-label="Bar chart showing AI mentions by job family" role="img"></canvas>
+      </div>
+    </section>
+
+    <section class="section" aria-labelledby="chart-3-heading">
+      <h2 id="chart-3-heading">AI demand extends beyond IT/CS</h2>
+      <div class="chart-wrap chart-wrap--small">
+        <canvas id="aiOutsideITShareChart" aria-label="Donut chart showing share of AI demand outside IT and CS" role="img"></canvas>
+      </div>
+    </section>
+
+    <section class="section" aria-labelledby="explorer-heading">
+      <h2 id="explorer-heading">Job Family Explorer</h2>
+      <div id="job-family-buttons" class="button-group" role="tablist" aria-label="Choose a job family"></div>
+      <div class="explorer-panel" aria-live="polite" aria-atomic="true">
+        <h3 id="selected-family-title"></h3>
+        <ul id="selected-family-skills"></ul>
+      </div>
+    </section>
+
+    <section class="section" aria-labelledby="sources-heading">
+      <h2 id="sources-heading">Sources</h2>
+      <ul id="sources-list" class="sources-list"></ul>
+    </section>
+  </main>
+
+  <footer class="section footer">
+    <div class="container">
+      <p>Built as a static GitHub Pages-ready dashboard using vanilla HTML, CSS, and JavaScript.</p>
+    </div>
+  </footer>
+
+  <script src="app.js"></script>
+</body>
+</html>
