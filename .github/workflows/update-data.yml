@@ -1,0 +1,42 @@
+name: Update dashboard data (weekly)
+
+on:
+  workflow_dispatch:
+  schedule:
+    # Mondays at 6:05am America/New_York (11:05 UTC during Standard Time)
+    - cron: "5 11 * * 1"
+
+permissions:
+  contents: write
+
+jobs:
+  build-data:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Build data.json from public job postings
+        env:
+          # Optional: tune these without editing code
+          MONTHS_BACK: "24"
+          SNAPSHOT_MONTHS_BACK: "1"
+        run: |
+          python scripts/build_data_json.py
+
+      - name: Commit changes (if any)
+        uses: EndBug/add-and-commit@v9
+        with:
+          message: "chore(data): auto-update dashboard data.json"
+          add: "data.json"
