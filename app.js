@@ -379,66 +379,70 @@ function renderSources(data) {
   });
 }
 /* ---------------------------
-   Market Pulse (Adzuna + O*NET)
-   Populates:
+   Market Pulse (Public-data edition)
+   - Government signal: USAJOBS (open federal postings)
+   - Skills language: O*NET Hot Technologies export
+
+   Expects data.json:
+   marketLenses.usajobsPulse: {
+     enabled, windowDays, sampledResults, aiFlaggedResults, aiShareInSamplePct,
+     topOrganizations: [{name,count}], topAITermsInTitles: [{term,count}], note
+   }
+
+   marketLenses.onetHotTechnologies: {
+     enabled, asOf, topHotTechnologies: [{name, postings}], note
+   }
+
+   Uses existing HTML IDs (no HTML changes needed):
    - pulseAdzunaShare, pulseAdzunaMeta
    - pulseAdzunaCategories, pulseAdzunaTerms
    - pulseOnetBlock
 ---------------------------- */
 function renderMarketPulse(data) {
-  const adzuna = data.marketLenses?.adzunaUSSnapshot;
-  const onet = data.marketLenses?.onetHotTechnologies;
+  // ---------- USAJOBS ----------
+  const gov = data.marketLenses?.usajobsPulse;
 
-  // --- Adzuna ---
   const shareEl = document.getElementById("pulseAdzunaShare");
   const metaEl = document.getElementById("pulseAdzunaMeta");
-  const catsEl = document.getElementById("pulseAdzunaCategories");
+  const orgsEl = document.getElementById("pulseAdzunaCategories");
   const termsEl = document.getElementById("pulseAdzunaTerms");
 
-  if (shareEl && metaEl && catsEl && termsEl) {
-    catsEl.innerHTML = "";
+  if (shareEl && metaEl && orgsEl && termsEl) {
+    orgsEl.innerHTML = "";
     termsEl.innerHTML = "";
 
-    // If Adzuna block not present in data.json, show a clear status
-    if (!adzuna) {
+    if (!gov) {
       shareEl.textContent = "—";
-      metaEl.textContent = "Not available (marketLenses.adzunaUSSnapshot missing from data.json).";
-      catsEl.innerHTML = "<li>—</li>";
+      metaEl.textContent = "Not available (marketLenses.usajobsPulse missing from data.json).";
+      orgsEl.innerHTML = "<li>—</li>";
       termsEl.innerHTML = "<li>—</li>";
-    }
-    // If present but disabled (likely missing API keys), show status
-    else if (!adzuna.enabled) {
+    } else if (!gov.enabled) {
       shareEl.textContent = "Not connected";
-      metaEl.textContent = adzuna.note ?? "Add API credentials to enable this commercial snapshot.";
-      catsEl.innerHTML = "<li>—</li>";
+      metaEl.textContent = gov.note ?? "USAJOBS pulse is disabled or not configured.";
+      orgsEl.innerHTML = "<li>—</li>";
       termsEl.innerHTML = "<li>—</li>";
-    }
-    // If enabled but no results, show actionable message
-    else if (!adzuna.sampledResults || adzuna.sampledResults === 0) {
-      shareEl.textContent = "0.00%";
+    } else if (!gov.sampledResults || gov.sampledResults === 0) {
+      shareEl.textContent = "—";
       metaEl.textContent =
-        adzuna.error ??
-        "No postings returned. Check Adzuna query (what=...) and the time window.";
-      catsEl.innerHTML = "<li>—</li>";
+        "Ready to auto-update. No USAJOBS results loaded yet — run your updater to populate marketLenses.usajobsPulse.";
+      orgsEl.innerHTML = "<li>—</li>";
       termsEl.innerHTML = "<li>—</li>";
-    }
-    // Normal happy path
-    else {
-      const pct = Number(adzuna.aiShareInSamplePct ?? 0);
+    } else {
+      const pct = Number(gov.aiShareInSamplePct ?? 0);
       shareEl.textContent = `${pct.toFixed(2)}%`;
 
-      metaEl.textContent = `Last ${adzuna.windowDays ?? "—"} days • Sampled ${
-        adzuna.sampledResults ?? "—"
-      } postings • AI-flagged ${adzuna.aiFlaggedResults ?? "—"}`;
+      metaEl.textContent = `USAJOBS (last ${gov.windowDays ?? "—"} days) • Sampled ${
+        gov.sampledResults
+      } postings • AI-flagged ${gov.aiFlaggedResults ?? "—"}`;
 
-      (adzuna.topCategories ?? []).forEach((c) => {
+      (gov.topOrganizations ?? []).forEach((o) => {
         const li = document.createElement("li");
-        li.textContent = `${c.name} (${c.count})`;
-        catsEl.appendChild(li);
+        li.textContent = `${o.name} (${o.count})`;
+        orgsEl.appendChild(li);
       });
-      if (!catsEl.childElementCount) catsEl.innerHTML = "<li>—</li>";
+      if (!orgsEl.childElementCount) orgsEl.innerHTML = "<li>—</li>";
 
-      (adzuna.topAITermsInTitles ?? []).forEach((t) => {
+      (gov.topAITermsInTitles ?? []).forEach((t) => {
         const li = document.createElement("li");
         li.textContent = `${t.term} (${t.count})`;
         termsEl.appendChild(li);
@@ -447,72 +451,54 @@ function renderMarketPulse(data) {
     }
   }
 
-  // --- O*NET ---
+  // ---------- O*NET Hot Technologies ----------
+  const onet = data.marketLenses?.onetHotTechnologies;
   const onetBlock = document.getElementById("pulseOnetBlock");
+
   if (onetBlock) {
     if (!onet) {
-      onetBlock.innerHTML = `<p class="meta" style="margin:0;">Not available (marketLenses.onetHotTechnologies missing from data.json).</p>`;
+      onetBlock.innerHTML =
+        `<p class="meta" style="margin:0;">Not available (marketLenses.onetHotTechnologies missing from data.json).</p>`;
       return;
     }
 
     if (!onet.enabled) {
-      onetBlock.innerHTML = `<p class="meta" style="margin:0;">${
-        onet.note ?? "Not connected. Add O*NET configuration to enable this panel."
-      }</p>`;
+      onetBlock.innerHTML =
+        `<p class="meta" style="margin:0;">${onet.note ?? "O*NET lens is disabled or not configured."}</p>`;
       return;
     }
 
-    const occs = onet.occupations ?? [];
-    if (!occs.length) {
-      onetBlock.innerHTML = `<p class="meta" style="margin:0;">No O*NET results returned.</p>`;
+    const top = onet.topHotTechnologies ?? [];
+    if (!top.length) {
+      onetBlock.innerHTML =
+        `<p class="meta" style="margin:0;">Ready to auto-update. No O*NET Hot Technologies loaded yet — run your updater to populate marketLenses.onetHotTechnologies.</p>`;
       return;
     }
 
-    const html = occs
-      .map((o) => {
-        if (o.error) {
-          return `
-            <div style="margin-bottom:0.75rem;">
-              <strong>${o.occupation ?? o.onetSoc ?? "Occupation"}</strong>
-              <p class="meta" style="margin:0.2rem 0 0;">Could not load: ${o.error}</p>
-            </div>
-          `;
-        }
+    const asOf = onet.asOf ? `As of ${onet.asOf}` : "";
 
-        const tops = (o.hotTechnologies ?? []).slice(0, 6);
-        const items = tops
-          .map((t) => {
-            const pct = t.percentage != null ? `${t.percentage}%` : "—";
-            const flags = [
-              t.inDemand ? "In Demand" : null,
-              t.hotTechnology ? "Hot Tech" : null
-            ].filter(Boolean);
-
-            return `
-              <li style="margin:0.15rem 0;">
-                <span style="font-weight:650;">${t.title ?? "Technology"}</span>
-                <span class="meta" style="margin-left:0.35rem;">(${pct}${
-                  flags.length ? " • " + flags.join(", ") : ""
-                })</span>
-              </li>
-            `;
-          })
-          .join("");
-
-        return `
-          <div style="margin-bottom:0.85rem;">
-            <strong>${o.occupation ?? o.onetSoc ?? "Occupation"}</strong>
-            <ul style="margin:0.35rem 0 0; padding-left:1.1rem;">
-              ${items || "<li>—</li>"}
-            </ul>
-          </div>
-        `;
+    const items = top
+      .slice(0, 10)
+      .map((x) => {
+        const name = x.name ?? x.tech ?? "Technology";
+        const postings = Number(x.postings ?? x.count ?? 0);
+        const suffix = Number.isFinite(postings) && postings > 0
+          ? ` <span class="meta">• ${postings.toLocaleString()} postings</span>`
+          : "";
+        return `<li style="margin:0.2rem 0;"><strong>${name}</strong>${suffix}</li>`;
       })
       .join("");
 
-    onetBlock.innerHTML =
-      html +
-      `<p class="meta" style="margin:0.25rem 0 0;">Source: O*NET Web Services • Hot Technologies are occupation-linked signals.</p>`;
+    onetBlock.innerHTML = `
+      <div style="display:flex; align-items:baseline; justify-content:space-between; gap:1rem;">
+        <strong>Hot Technologies (O*NET)</strong>
+        <span class="meta" style="margin:0;">${asOf}</span>
+      </div>
+      <ul style="margin:0.5rem 0 0; padding-left:1.1rem;">
+        ${items || "<li>—</li>"}
+      </ul>
+      ${onet.note ? `<p class="meta" style="margin:0.55rem 0 0;">${onet.note}</p>` : ""}
+    `;
   }
 }
 
