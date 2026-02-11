@@ -1,5 +1,13 @@
 {
   "lastUpdated": "2026-02-11",
+  "takeaway": {
+    "headline": "NKU is well-positioned to lead: make AI literacy a universal baseline, then build role-based depth across every college.",
+    "subhead": "Multiple high-credibility labor market and government sources show AI capability is becoming a cross-discipline expectation—not just a tech specialty. The highest-impact approach is a shared foundation (AI literacy + data literacy + responsible use) paired with job-family pathways (power-user, builder, and high-stakes governance).",
+    "executiveNotes": [
+      "This dashboard combines near–real-time job-posting signals (Indeed Hiring Lab) with authoritative government frameworks for occupations and skills (U.S. BLS and U.S. Department of Labor/O*NET).",
+      "Job postings provide a leading indicator of employer demand; BLS and O*NET provide durable context for workforce planning, occupation definitions, and skill language that translates cleanly to curriculum."
+    ]
+  },
   "marketLenses": {
   "usajobsPulse": {
     "enabled": true,
@@ -18,14 +26,6 @@
     "note": "From O*NET OnLine Hot Technologies export (job-posting-derived skills)."
   }
 }
-  "takeaway": {
-    "headline": "NKU is well-positioned to lead: make AI literacy a universal baseline, then build role-based depth across every college.",
-    "subhead": "Multiple high-credibility labor market and government sources show AI capability is becoming a cross-discipline expectation—not just a tech specialty. The highest-impact approach is a shared foundation (AI literacy + data literacy + responsible use) paired with job-family pathways (power-user, builder, and high-stakes governance).",
-    "executiveNotes": [
-      "This dashboard combines near–real-time job-posting signals (Indeed Hiring Lab) with authoritative government frameworks for occupations and skills (U.S. BLS and U.S. Department of Labor/O*NET).",
-      "Job postings provide a leading indicator of employer demand; BLS and O*NET provide durable context for workforce planning, occupation definitions, and skill language that translates cleanly to curriculum."
-    ]
-  },
   "coreSkills": [
     {
       "title": "AI literacy & professional judgment",
