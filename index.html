@@ -3,74 +3,205 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="description" content="AI skills dashboard for job-market readiness across disciplines." />
-  <title>AI Skills for Job-Market Readiness</title>
+  <meta name="description" content="Executive-ready AI skills dashboard for job-market readiness across NKU disciplines." />
+  <title>NKU | AI Skills & Job-Market Readiness Dashboard</title>
+
+  <!-- Styles -->
   <link rel="stylesheet" href="styles.css" />
+
+  <!-- Charts -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
+
 <body>
   <a class="skip-link" href="#main-content">Skip to main content</a>
 
-  <header class="hero section">
-    <div class="container">
-      <h1 id="hero-title"></h1>
-      <p id="hero-takeaway-1" class="takeaway"></p>
-      <p id="hero-takeaway-2" class="takeaway"></p>
-      <p class="meta">Last updated: <time id="last-updated" datetime=""></time></p>
-      <p>
-        <a class="download-button" href="data.json" download aria-label="Download source data JSON file">Download data.json</a>
-      </p>
+  <!-- Optional: Sticky top bar (works with the CSS I gave you earlier) -->
+  <header class="topbar" role="banner">
+    <div class="container topbar-inner">
+      <div class="brandline">
+        <strong>NKU — AI Skills & Workforce Readiness Dashboard</strong>
+        <span>
+          Updated: <time id="last-updated-top" datetime=""></time>
+          <span aria-hidden="true">•</span>
+          Audience: Deans / Associate Deans / Chairs / Directors
+        </span>
+      </div>
+
+      <div style="display:flex; gap:0.6rem; align-items:center;">
+        <a class="ghost-button" href="#sources">Sources</a>
+        <a class="ghost-button" href="data.json" download aria-label="Download source data JSON file">Download data.json</a>
+        <a class="download-button" href="#" onclick="window.print(); return false;" aria-label="Print or save as PDF">Print / PDF</a>
+      </div>
     </div>
   </header>
 
-  <main id="main-content" class="container">
+  <!-- Hero -->
+  <section class="hero section" aria-labelledby="hero-title">
+    <div class="container">
+      <div class="hero-card">
+        <h1 id="hero-title">AI Skills for Job-Market Readiness</h1>
+
+        <p id="hero-takeaway-1" class="takeaway"></p>
+        <p id="hero-takeaway-2" class="takeaway"></p>
+
+        <p class="meta">
+          Last updated:
+          <time id="last-updated" datetime=""></time>
+        </p>
+
+        <!-- KPI strip (exec-friendly) -->
+        <div class="kpi-grid" aria-label="Executive summary metrics">
+          <div class="kpi">
+            <div class="kpi-top">
+              <p class="kpi-label">Top Skill Family</p>
+              <span class="kpi-badge">Now</span>
+            </div>
+            <p class="kpi-value" id="kpiTopFamily">—</p>
+            <p class="kpi-sub" id="kpiTopFamilySub">—</p>
+          </div>
+
+          <div class="kpi">
+            <div class="kpi-top">
+              <p class="kpi-label">Fastest Growing</p>
+              <span class="kpi-badge">Trend</span>
+            </div>
+            <p class="kpi-value" id="kpiFastestGrowing">—</p>
+            <p class="kpi-sub" id="kpiFastestGrowingSub">—</p>
+          </div>
+
+          <div class="kpi">
+            <div class="kpi-top">
+              <p class="kpi-label">Largest Coverage Gap</p>
+              <span class="kpi-badge">NKU</span>
+            </div>
+            <p class="kpi-value" id="kpiCoverageGap">—</p>
+            <p class="kpi-sub" id="kpiCoverageGapSub">—</p>
+          </div>
+
+          <div class="kpi">
+            <div class="kpi-top">
+              <p class="kpi-label">Recommended Next Move</p>
+              <span class="kpi-badge">Next</span>
+            </div>
+            <p class="kpi-value" id="kpiNextMove" style="font-size:1.35rem;">—</p>
+            <p class="kpi-sub" id="kpiNextMoveSub">—</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <main id="main-content" class="container" role="main">
+    <!-- Core skills -->
     <section class="section" aria-labelledby="core-skills-heading">
-      <h2 id="core-skills-heading">Core Skills for All Students</h2>
-      <div id="core-skills-grid" class="skills-grid" role="list"></div>
+      <h2 id="core-skills-heading">Core Skills for All NKU Students</h2>
+      <p class="meta" style="margin-top:-0.25rem;">
+        These skills show up across job families and help students contribute effectively in AI-enabled workplaces.
+      </p>
+      <div id="core-skills-grid" class="skills-grid" role="list" aria-label="Core skills list"></div>
     </section>
 
+    <!-- Trend chart -->
     <section class="section" aria-labelledby="chart-1-heading">
       <h2 id="chart-1-heading">AI mentions in job postings are rising</h2>
-      <div class="chart-wrap">
+      <div class="chart-wrap" role="group" aria-labelledby="chart-1-heading">
+        <div class="chart-wrap-header">
+          <div>
+            <p class="chart-title">Trend Over Time</p>
+            <p class="chart-subtitle"><strong>So what:</strong> AI is increasingly a baseline expectation, not a niche specialty.</p>
+          </div>
+          <span class="kpi-badge" id="trend-window">Rolling window</span>
+        </div>
         <canvas id="aiMentionsTrendChart" aria-label="Line chart showing AI mentions in job postings over time" role="img"></canvas>
       </div>
     </section>
 
+    <!-- By family chart -->
     <section class="section" aria-labelledby="chart-2-heading">
       <h2 id="chart-2-heading">AI mentions by job family</h2>
-      <div class="chart-wrap">
+      <div class="chart-wrap" role="group" aria-labelledby="chart-2-heading">
+        <div class="chart-wrap-header">
+          <div>
+            <p class="chart-title">Where AI Shows Up Most</p>
+            <p class="chart-subtitle"><strong>So what:</strong> prioritize curriculum touchpoints for the top families while building electives for depth.</p>
+          </div>
+          <span class="kpi-badge">By family</span>
+        </div>
         <canvas id="aiMentionsByFamilyChart" aria-label="Bar chart showing AI mentions by job family" role="img"></canvas>
       </div>
     </section>
 
+    <!-- Outside IT share chart -->
     <section class="section" aria-labelledby="chart-3-heading">
       <h2 id="chart-3-heading">AI demand extends beyond IT/CS</h2>
-      <div class="chart-wrap chart-wrap--small">
+      <div class="chart-wrap chart-wrap--small" role="group" aria-labelledby="chart-3-heading">
+        <div class="chart-wrap-header">
+          <div>
+            <p class="chart-title">Share Outside IT / CS</p>
+            <p class="chart-subtitle"><strong>So what:</strong> every college needs an AI-ready pathway (baseline + applied use cases).</p>
+          </div>
+          <span class="kpi-badge">Share</span>
+        </div>
         <canvas id="aiOutsideITShareChart" aria-label="Donut chart showing share of AI demand outside IT and CS" role="img"></canvas>
       </div>
     </section>
 
+    <!-- Explorer -->
     <section class="section" aria-labelledby="explorer-heading">
       <h2 id="explorer-heading">Job Family Explorer</h2>
-      <div id="job-family-buttons" class="button-group" role="tablist" aria-label="Choose a job family"></div>
+      <p class="meta" style="margin-top:-0.25rem;">
+        Select a job family to see the skills most frequently requested and what students should practice in coursework.
+      </p>
+
+      <div id="job-family-buttons"
+           class="button-group"
+           role="tablist"
+           aria-label="Choose a job family"></div>
+
       <div class="explorer-panel" aria-live="polite" aria-atomic="true">
-        <h3 id="selected-family-title"></h3>
-        <ul id="selected-family-skills"></ul>
+        <h3 id="selected-family-title" style="margin-bottom:0.6rem;"></h3>
+        <ul id="selected-family-skills" aria-label="Skills for selected job family"></ul>
       </div>
     </section>
 
-    <section class="section" aria-labelledby="sources-heading">
+    <!-- Sources -->
+    <section class="section" aria-labelledby="sources-heading" id="sources">
       <h2 id="sources-heading">Sources</h2>
-      <ul id="sources-list" class="sources-list"></ul>
+      <p class="meta" style="margin-top:-0.25rem;">
+        Sources used to compile the dataset and define skill categories. (Links populated from <code>data.json</code>.)
+      </p>
+      <ul id="sources-list" class="sources-list" aria-label="Source list"></ul>
     </section>
   </main>
 
-  <footer class="section footer">
+  <footer class="section footer" role="contentinfo">
     <div class="container">
-      <p>Built as a static GitHub Pages-ready dashboard using vanilla HTML, CSS, and JavaScript.</p>
+      <p style="margin:0;">
+        Built as a static, GitHub Pages-ready dashboard using vanilla HTML, CSS, and JavaScript.
+        <span aria-hidden="true">•</span>
+        Tip: Use <strong>Print / PDF</strong> for an exec-friendly one-pager.
+      </p>
     </div>
   </footer>
 
   <script src="app.js"></script>
+
+  <!-- Small helper: keep the topbar "Updated" time in sync with your existing #last-updated -->
+  <script>
+    (function syncUpdatedTime() {
+      const a = document.getElementById("last-updated");
+      const b = document.getElementById("last-updated-top");
+      if (!a || !b) return;
+
+      const observer = new MutationObserver(() => {
+        b.textContent = a.textContent || "";
+        const dt = a.getAttribute("datetime") || "";
+        if (dt) b.setAttribute("datetime", dt);
+      });
+
+      observer.observe(a, { childList: true, subtree: true, characterData: true, attributes: true });
+    })();
+  </script>
 </body>
 </html>
