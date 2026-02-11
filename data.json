@@ -1,5 +1,23 @@
 {
   "lastUpdated": "2026-02-11",
+  "marketLenses": {
+  "usajobsPulse": {
+    "enabled": true,
+    "windowDays": 30,
+    "sampledResults": 0,
+    "aiFlaggedResults": 0,
+    "aiShareInSamplePct": 0,
+    "topOrganizations": [],
+    "topAITermsInTitles": [],
+    "note": "Computed from USAJOBS Search API (open federal postings)."
+  },
+  "onetHotTechnologies": {
+    "enabled": true,
+    "asOf": "",
+    "topHotTechnologies": [],
+    "note": "From O*NET OnLine Hot Technologies export (job-posting-derived skills)."
+  }
+}
   "takeaway": {
     "headline": "NKU is well-positioned to lead: make AI literacy a universal baseline, then build role-based depth across every college.",
     "subhead": "Multiple high-credibility labor market and government sources show AI capability is becoming a cross-discipline expectation—not just a tech specialty. The highest-impact approach is a shared foundation (AI literacy + data literacy + responsible use) paired with job-family pathways (power-user, builder, and high-stakes governance).",
