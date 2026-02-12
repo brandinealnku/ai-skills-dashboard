@@ -1,9 +1,5 @@
 /* ==========================================================
    NKU AI Skills Dashboard (Executive Edition)
-   - Clear modules + “wow” polish
-   - Resilient loading + user-friendly failures
-   - Chart lifecycle management (no duplicates)
-   - KPI strip support + accessible explorer
    ========================================================== */
 
 let dashboardData;
@@ -204,6 +200,52 @@ function renderTrendChart(data) {
       }
     }
   });
+}
+function renderSegmentation() {
+  const seg = dashboardData.segmentation[currentAudience];
+  setText("#segLabel", seg.label);
+
+  const canvas = document.getElementById("segChart");
+  if (!canvas) return;
+
+  // If CDN blocked / Chart.js missing, show a one-time fallback and stop
+  if (!window.Chart) {
+    const box = canvas.parentElement;
+    box.innerHTML = `<div class="muted" style="font-size:12px">
+      Chart.js not available. Replace with a static image or approved chart library.
+    </div>`;
+    return;
+  }
+
+  // Create chart ONCE, then update data on later calls
+  if (!segChart) {
+    segChart = new Chart(canvas, {
+      type: "bar",
+      data: {
+        labels: seg.labels,
+        datasets: [{ label: seg.label, data: seg.values }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false, // important with the fixed-height .chart-box
+        animation: false,
+        plugins: {
+          legend: { display: false },
+          tooltip: { enabled: true }
+        },
+        scales: {
+          y: { beginAtZero: true, ticks: { precision: 0 } }
+        }
+      }
+    });
+    return;
+  }
+
+  // Update existing chart (no growth, no duplicates)
+  segChart.data.labels = seg.labels;
+  segChart.data.datasets[0].label = seg.label;
+  segChart.data.datasets[0].data = seg.values;
+  segChart.update();
 }
 
 function renderFamilyChart(data) {
