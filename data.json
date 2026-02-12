@@ -1,5 +1,5 @@
 {
-  "lastUpdated": "2026-02-11",
+  "lastUpdated": "2026-02-12",
   "takeaway": {
     "headline": "NKU is well-positioned to lead: make AI literacy a universal baseline, then build role-based depth across every college.",
     "subhead": "Multiple high-credibility labor market and government sources show AI capability is becoming a cross-discipline expectation—not just a tech specialty. The highest-impact approach is a shared foundation (AI literacy + data literacy + responsible use) paired with job-family pathways (power-user, builder, and high-stakes governance).",
@@ -10,20 +10,20 @@
   },
   "marketLenses": {
     "usajobsPulse": {
-      "enabled": true,
+      "enabled": false,
       "windowDays": 30,
       "sampledResults": 0,
       "aiFlaggedResults": 0,
       "aiShareInSamplePct": 0,
       "topOrganizations": [],
       "topAITermsInTitles": [],
-      "note": "Computed from USAJOBS Search API (open federal postings)."
+      "note": "Missing USAJOBS_API_KEY / USAJOBS_USER_AGENT. Add as GitHub Secrets to enable this lens."
     },
     "onetHotTechnologies": {
-      "enabled": true,
-      "asOf": "",
+      "enabled": false,
+      "asOf": "2026-02-12",
       "topHotTechnologies": [],
-      "note": "From O*NET OnLine Hot Technologies export (job-posting-derived skills)."
+      "note": "Could not fetch O*NET Hot Technologies CSV from the standard export URL. If this persists, we’ll switch to pulling from O*NET Web Services or pinning a downloaded CSV in-repo."
     }
   },
   "coreSkills": [
@@ -51,22 +51,50 @@
   "charts": {
     "aiMentionsTrend": {
       "title": "AI mentions in job postings continue to rise (Indeed Hiring Lab — Indeed AI Tracker)",
-      "labels": ["2020", "2021", "2022", "2023", "2024", "Dec 2025"],
-      "values": [1.0, 1.6, 1.2, 2.0, 3.0, 4.2],
+      "labels": [
+        "2020",
+        "2021",
+        "2022",
+        "2023",
+        "2024",
+        "Dec 2025"
+      ],
+      "values": [
+        1,
+        1.6,
+        1.2,
+        2,
+        3,
+        4.2
+      ],
       "note": "These values are placeholders for the visual trend line until exact points are transcribed from the Indeed AI Tracker chart. The key anchor point reflected here is 4.2% of U.S. job postings mentioning AI in Dec 2025, as reported by Indeed Hiring Lab (Jan 22, 2026).",
       "whyItMatters": "This is a leading indicator: employer language is changing now, which typically precedes curriculum and workforce shifts. It supports scaling baseline AI literacy beyond tech majors."
     },
     "aiMentionsByFamily": {
       "title": "AI mentions differ by job family (Dec 2025 snapshot, Indeed Hiring Lab)",
-      "labels": ["Data & Analytics", "Marketing", "Human Resources"],
-      "values": [45.0, 14.9, 8.8],
+      "labels": [
+        "Data & Analytics",
+        "Marketing",
+        "Human Resources"
+      ],
+      "values": [
+        45,
+        14.9,
+        8.8
+      ],
       "note": "From Indeed Hiring Lab’s Jan 22, 2026 U.S. Labor Market Update. These percentages represent the share of postings within each listed job family that mention AI (not the share of all postings).",
       "whyItMatters": "This supports an NKU strategy of ‘foundation + pathways’: everyone gets baseline readiness, while programs tailor depth based on how AI shows up in that discipline’s work."
     },
     "aiOutsideITShare": {
       "title": "AI demand extends beyond IT/CS (benchmark from job-posting analytics)",
-      "labels": ["Outside IT/CS", "IT/CS"],
-      "values": [51, 49],
+      "labels": [
+        "Outside IT/CS",
+        "IT/CS"
+      ],
+      "values": [
+        51,
+        49
+      ],
       "note": "This split is widely cited from private job-posting analytics (Lightcast). Treat as a benchmark placeholder unless NKU has access to the underlying Lightcast report/data. Government sources (BLS/O*NET) provide authoritative occupation and skill taxonomies but do not publish this exact IT vs non-IT posting split.",
       "whyItMatters": "Even as a benchmark, it reinforces a key executive message: AI-readiness is an institution-wide priority, not a single-department initiative."
     }
