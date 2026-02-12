@@ -509,7 +509,7 @@
           <div class="hd">
             <div>
               <h2>Top Skills Now vs. Fastest Rising</h2>
-              <p>Grouped into skill families for an executive-friendly view (toggle audience above).</p>
+              <p>Grouped into skill families for a user-friendly view (toggle audience above).</p>
             </div>
             <div class="meta">
               <span class="chip" title="Scope of skills shown">Window: <strong id="windowNow">Last 90 days</strong> · Rising: <strong id="windowRising">YoY</strong></span>
@@ -574,7 +574,9 @@
             </div>
           </div>
           <div class="bd">
-            <canvas id="segChart" height="240" aria-label="Segmentation chart" role="img"></canvas>
+            <div class="chart-box" aria-label="Segmentation chart">
+              <canvas id="segChart" aria-label="Segmentation chart" role="img"></canvas>
+            </div>
             <p class="muted" style="margin:10px 0 0; font-size:12px">
               Keep this visual simple and consistent—executives should grasp it in <strong>&lt; 10 seconds</strong>.
             </p>
