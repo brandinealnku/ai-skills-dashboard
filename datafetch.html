@@ -1,0 +1,1192 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>NKU - AI Skillsets for Hiring (Executive Dashboard)</title>
+
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+
+  <style>
+    :root{
+      --bg:#f8fafc;
+      --surface:#ffffff;
+      --text:#0f172a;
+      --muted:#475569;
+      --muted-2:#64748b;
+      --border:#dbe3ef;
+      --shadow: 0 12px 30px rgba(15, 23, 42, 0.08);
+      --accent:#2563eb;
+      --accent-2:#1d4ed8;
+
+      --ok:#16a34a;
+      --warn:#f59e0b;
+      --bad:#ef4444;
+
+      --radius:18px;
+      --radius-sm:14px;
+    }
+
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
+      background:var(--bg);
+      color:var(--text);
+      line-height:1.5;
+    }
+    a{color:var(--accent); text-decoration:none}
+    a:hover{text-decoration:underline}
+    .skip-link{
+      position:absolute; left:-999px; top:auto; width:1px; height:1px; overflow:hidden;
+    }
+    .skip-link:focus{
+      left:1rem; top:1rem; width:auto; height:auto;
+      padding:.6rem .9rem; background:var(--surface); border:1px solid var(--border);
+      border-radius:12px; box-shadow:var(--shadow); z-index:9999;
+    }
+    .sources-btn{
+      border:1px solid var(--border);
+      background:var(--surface);
+      border-radius:999px;
+      padding:8px 10px;
+      cursor:pointer;
+      font-weight:700;
+      font-size:13px;
+      color:var(--muted);
+    }
+    header{
+      position:sticky; top:0; z-index:50;
+      background: rgba(248,250,252,.78);
+      backdrop-filter: blur(10px);
+      border-bottom:1px solid rgba(219,227,239,.7);
+    }
+    .wrap{max-width:1200px; margin:0 auto; padding:18px 18px}
+    .topbar{
+      display:flex; gap:12px; align-items:center; justify-content:space-between; flex-wrap:wrap;
+    }
+    .brand{
+      display:flex; gap:10px; align-items:flex-start;
+    }
+    .badge{
+      font-size:12px; color:#0b1220;
+      background: rgba(37,99,235,.10);
+      border:1px solid rgba(37,99,235,.18);
+      padding:6px 10px; border-radius:999px;
+      display:inline-flex; gap:8px; align-items:center;
+    }
+    .badge strong{font-weight:650}
+    .title{
+      margin:0;
+      font-size:18px;
+      letter-spacing:-.02em;
+    }
+    .subtitle{
+      margin:2px 0 0;
+      font-size:13px;
+      color:var(--muted);
+    }
+    .toolbar{
+      display:flex; gap:10px; align-items:center; flex-wrap:wrap;
+    }
+    .pillset{
+      background:var(--surface);
+      border:1px solid var(--border);
+      border-radius:999px;
+      padding:6px;
+      display:flex; gap:6px; align-items:center;
+      box-shadow: 0 6px 18px rgba(15, 23, 42, 0.05);
+    }
+    .pillset button{
+      border:0; background:transparent; cursor:pointer;
+      padding:8px 10px; border-radius:999px;
+      color:var(--muted);
+      font-weight:600;
+      font-size:13px;
+      transition: background .15s ease, color .15s ease;
+    }
+    .pillset button[aria-pressed="true"]{
+      background: rgba(37,99,235,.12);
+      color: var(--accent-2);
+    }
+    .meta{
+      font-size:12px; color:var(--muted-2);
+      display:flex; gap:10px; align-items:center; flex-wrap:wrap;
+    }
+    .dot{width:6px; height:6px; border-radius:999px; background:var(--accent); display:inline-block}
+
+    main{padding:20px 0 34px}
+    .grid{display:grid; gap:14px;}
+    .grid.kpis{grid-template-columns: repeat(12, 1fr)}
+    .card{
+      background:var(--surface);
+      border:1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      overflow:hidden;
+    }
+    .card .hd{
+      padding:14px 16px 10px;
+      display:flex; align-items:flex-start; justify-content:space-between; gap:12px; flex-wrap:wrap;
+      border-bottom:1px solid rgba(219,227,239,.65);
+    }
+    .card .hd h2{margin:0;font-size:14px;letter-spacing:-.01em;}
+    .card .hd p{margin:4px 0 0;font-size:12px;color:var(--muted);}
+    .card .bd{padding:14px 16px}
+
+    /* KPI cards */
+    .kpi{padding:14px 14px 12px;display:flex;flex-direction:column;gap:8px;min-height:120px;}
+    .kpi-top{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;}
+    .kpi-label{font-size:12px;color:var(--muted);font-weight:650;}
+    .kpi-value{font-size:26px;letter-spacing:-.03em;font-weight:750;margin-top:2px;}
+    .kpi-delta{
+      font-size:12px;font-weight:700;display:inline-flex;gap:6px;align-items:center;
+      padding:4px 8px;border-radius:999px;border:1px solid rgba(219,227,239,.9);
+      background: rgba(2,6,23,.02);color:var(--muted);white-space:nowrap;
+    }
+    .kpi-delta.up{color:#0f6b2a;background:rgba(22,163,74,.10);border-color:rgba(22,163,74,.20)}
+    .spark{
+      width:100%; height:36px;border-radius:12px;
+      background: linear-gradient(180deg, rgba(37,99,235,.10), rgba(37,99,235,.02));
+      border:1px solid rgba(37,99,235,.18);
+      overflow:hidden;
+    }
+    .spark svg{display:block;width:100%;height:100%}
+
+    /* Layout */
+    .kpi.span-3{grid-column: span 3}
+    .span-6{grid-column: span 6}
+    .span-7{grid-column: span 7}
+    .span-5{grid-column: span 5}
+    .span-12{grid-column: span 12}
+
+    @media (max-width: 980px){
+      .kpi.span-3{grid-column: span 6}
+      .span-7,.span-5,.span-6{grid-column: span 12}
+    }
+    @media (max-width: 520px){
+      .kpi.span-3{grid-column: span 12}
+    }
+
+    /* Ranked lists */
+    .lists{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+    @media (max-width: 980px){.lists{grid-template-columns:1fr}}
+    .rank{border:1px solid rgba(219,227,239,.75);border-radius:var(--radius-sm);overflow:hidden;}
+    .rank .rh{padding:12px 12px 10px;background:rgba(2,6,23,.02);border-bottom:1px solid rgba(219,227,239,.75);}
+    .rank .rh strong{font-size:13px}
+    .rank .rh div{margin-top:4px;font-size:12px;color:var(--muted)}
+    .rank ul{margin:0;padding:0;list-style:none;}
+    .rank li{
+      display:flex;gap:10px;align-items:flex-start;justify-content:space-between;
+      padding:10px 12px;border-bottom:1px solid rgba(219,227,239,.55);
+    }
+    .rank li:last-child{border-bottom:0}
+    .rank .left{display:flex;gap:10px;align-items:flex-start;min-width:0;}
+    .rank .num{
+      width:24px;height:24px;border-radius:8px;display:grid;place-items:center;
+      background:rgba(37,99,235,.10);border:1px solid rgba(37,99,235,.18);
+      color:var(--accent-2);font-weight:800;font-size:12px;flex:0 0 auto;
+    }
+    .rank .skill{font-weight:750;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:360px;}
+    .rank .fam{font-size:12px;color:var(--muted);margin-top:2px}
+    .rank .right{text-align:right;flex:0 0 auto;}
+    .rank .metric{font-weight:800;font-size:13px;}
+    .rank .note{font-size:12px;color:var(--muted);margin-top:2px}
+
+    /* Heatmap */
+    .heat-wrap{overflow:auto}
+    table{width:100%;border-collapse:separate;border-spacing:0;min-width:920px;}
+    th,td{padding:10px 10px;border-bottom:1px solid rgba(219,227,239,.7);font-size:12px;vertical-align:middle;background:var(--surface);}
+    th{
+      position:sticky;top:0;z-index:2;background:#f9fbff;color:#0b1220;
+      font-size:12px;font-weight:800;border-bottom:1px solid rgba(219,227,239,.95);
+      text-align:left;white-space:nowrap;
+    }
+    td:first-child, th:first-child{position:sticky;left:0;z-index:1;background:#fff;}
+    .chip{
+      display:inline-flex;align-items:center;gap:6px;padding:5px 9px;border-radius:999px;
+      border:1px solid rgba(219,227,239,.9);background: rgba(2,6,23,.02);
+      font-weight:700;white-space:nowrap;
+    }
+    .cell{
+      cursor:pointer;border-radius:12px;border:1px solid rgba(219,227,239,.85);
+      padding:8px 10px;display:flex;align-items:center;justify-content:space-between;gap:10px;
+      transition: transform .08s ease, border-color .12s ease;user-select:none;min-width:140px;
+    }
+    .cell:hover{transform: translateY(-1px);border-color: rgba(37,99,235,.35);}
+    .lvl{font-weight:850;font-size:12px;}
+    .lvl0{background: rgba(239,68,68,.10); border-color: rgba(239,68,68,.22)}
+    .lvl1{background: rgba(245,158,11,.12); border-color: rgba(245,158,11,.24)}
+    .lvl2{background: rgba(37,99,235,.10); border-color: rgba(37,99,235,.22)}
+    .lvl3{background: rgba(22,163,74,.12); border-color: rgba(22,163,74,.22)}
+    .muted{color:var(--muted)}
+
+    /* Side panel */
+    .drawer{
+      position:fixed;right:14px;top:82px;width:min(420px, calc(100vw - 28px));
+      max-height: calc(100vh - 96px);overflow:auto;border-radius:18px;
+      border:1px solid rgba(219,227,239,.95);background: rgba(255,255,255,.92);
+      backdrop-filter: blur(10px);box-shadow: var(--shadow);display:none;z-index:100;
+    }
+    .drawer.open{display:block}
+    .drawer .dh{
+      padding:14px 14px 10px;border-bottom:1px solid rgba(219,227,239,.75);
+      display:flex;align-items:flex-start;justify-content:space-between;gap:10px;
+    }
+    .drawer h3{margin:0;font-size:14px;letter-spacing:-.01em;}
+    .drawer .close{
+      border:1px solid rgba(219,227,239,.95);background:#fff;border-radius:12px;
+      padding:8px 10px;cursor:pointer;font-weight:800;color:var(--muted);
+    }
+    .drawer .db{padding:12px 14px 14px}
+    .drawer .section{margin:0 0 12px}
+    .drawer .section strong{font-size:12px}
+    .drawer .section p,.drawer .section ul{margin:6px 0 0;font-size:12px;color:var(--muted);}
+    .drawer ul{padding-left:18px}
+
+    /* Action board */
+    .actions{display:grid;grid-template-columns: repeat(3, 1fr);gap:12px;}
+    @media (max-width: 980px){ .actions{grid-template-columns:1fr} }
+    .action{
+      border:1px solid rgba(219,227,239,.75);
+      border-radius: var(--radius-sm);
+      padding:12px;background: rgba(2,6,23,.015);
+    }
+    .action .tag{
+      display:inline-flex;align-items:center;gap:6px;
+      padding:4px 8px;border-radius:999px;border:1px solid rgba(219,227,239,.85);
+      background:#fff;font-size:12px;font-weight:800;color:var(--muted);margin-bottom:8px;
+    }
+    .action h4{margin:0 0 6px;font-size:13px}
+    .action p{margin:0;font-size:12px;color:var(--muted)}
+    .footnote{
+      margin-top:10px;font-size:12px;color:var(--muted);
+      display:flex;gap:10px;align-items:flex-start;flex-wrap:wrap;
+    }
+    .kbd{
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      font-size:11px;border:1px solid rgba(219,227,239,.9);background:#fff;padding:2px 6px;
+      border-radius:8px;color:#0b1220;white-space:nowrap;
+    }
+    .chart-box{height:260px;}
+  </style>
+</head>
+
+<body>
+  <a class="skip-link" href="#main">Skip to dashboard</a>
+
+  <header>
+    <div class="wrap">
+      <div class="topbar">
+        <div class="brand">
+          <div>
+            <div class="badge" title="Executive, one-page view with drilldowns">
+              <span class="dot" aria-hidden="true"></span>
+              <strong>Executive Dashboard - Presented at AI Panel Discussion</strong> · AI Skillsets for Hiring Now
+            </div>
+            <h1 class="title">NKU — AI Skillset Needs for Graduates Getting Hired Today</h1>
+            <p class="subtitle">Top skills now · fastest-rising skills · NKU coverage gaps · opportunities board</p>
+            <button type="button" class="sources-btn" id="openSources">Data sources</button>
+          </div>
+        </div>
+
+        <div class="toolbar" aria-label="Dashboard filters">
+          <div class="pillset" role="group" aria-label="Audience / Population Toggle" id="audienceToggle">
+            <button type="button" data-audience="all" aria-pressed="true">All NKU Grads</button>
+            <button type="button" data-audience="business" aria-pressed="false">Business</button>
+            <button type="button" data-audience="informatics" aria-pressed="false">Informatics</button>
+            <button type="button" data-audience="health" aria-pressed="false">Health</button>
+          </div>
+
+          <div class="meta">
+            <span><span class="dot" aria-hidden="true"></span> Last refresh: <strong id="lastRefresh">—</strong></span>
+            <span title="Example sources: Remotive API + keyword filter"><strong>Sources:</strong> Remotive jobs API</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main id="main">
+    <div class="wrap">
+
+      <!-- KPI STRIP -->
+      <section class="grid kpis" aria-label="Key performance indicators">
+        <div class="card kpi span-3" role="region" aria-label="AI-skill job share">
+          <div class="kpi-top">
+            <div>
+              <div class="kpi-label">AI-skill job share</div>
+              <div class="kpi-value" id="kpi-aiShare">—</div>
+            </div>
+            <div class="kpi-delta up" id="kpi-aiShareDelta">▲ —</div>
+          </div>
+          <div class="muted" style="font-size:12px">Share of jobs matching AI keyword filter</div>
+          <div class="spark" aria-hidden="true">
+            <svg viewBox="0 0 120 36" preserveAspectRatio="none">
+              <polyline id="spark-aiShare" fill="none" stroke="rgba(37,99,235,.8)" stroke-width="2" points=""></polyline>
+            </svg>
+          </div>
+        </div>
+
+        <div class="card kpi span-3" role="region" aria-label="Fastest-growing skill family">
+          <div class="kpi-top">
+            <div>
+              <div class="kpi-label">Top AI category (share)</div>
+              <div class="kpi-value" id="kpi-fastFamily">—</div>
+            </div>
+            <div class="kpi-delta up" id="kpi-fastFamilyDelta">▲ —</div>
+          </div>
+          <div class="muted" style="font-size:12px">Most common category among AI-matched postings</div>
+          <div class="spark" aria-hidden="true">
+            <svg viewBox="0 0 120 36" preserveAspectRatio="none">
+              <polyline id="spark-fastFamily" fill="none" stroke="rgba(37,99,235,.8)" stroke-width="2" points=""></polyline>
+            </svg>
+          </div>
+        </div>
+
+        <div class="card kpi span-3" role="region" aria-label="Non-CS share of AI demand">
+          <div class="kpi-top">
+            <div>
+              <div class="kpi-label">Non-dev share (proxy)</div>
+              <div class="kpi-value" id="kpi-noncsShare">—</div>
+            </div>
+            <div class="kpi-delta up" id="kpi-noncsDelta">▲ —</div>
+          </div>
+          <div class="muted" style="font-size:12px">Share of AI-matched jobs not in software/data categories</div>
+          <div class="spark" aria-hidden="true">
+            <svg viewBox="0 0 120 36" preserveAspectRatio="none">
+              <polyline id="spark-noncs" fill="none" stroke="rgba(37,99,235,.8)" stroke-width="2" points=""></polyline>
+            </svg>
+          </div>
+        </div>
+
+        <div class="card kpi span-3" role="region" aria-label="Estimated wage premium">
+          <div class="kpi-top">
+            <div>
+              <div class="kpi-label">New postings (14 days)</div>
+              <div class="kpi-value" id="kpi-wagePremium">—</div>
+            </div>
+            <div class="kpi-delta up" id="kpi-wageDelta">▲ —</div>
+          </div>
+          <div class="muted" style="font-size:12px">AI-matched postings published in last 14 days</div>
+          <div class="spark" aria-hidden="true">
+            <svg viewBox="0 0 120 36" preserveAspectRatio="none">
+              <polyline id="spark-wage" fill="none" stroke="rgba(37,99,235,.8)" stroke-width="2" points=""></polyline>
+            </svg>
+          </div>
+        </div>
+      </section>
+
+      <!-- TOP SKILLS + TRENDING -->
+      <section class="grid" style="margin-top:14px">
+        <div class="card span-12" role="region" aria-label="Top skills now and trending">
+          <div class="hd">
+            <div>
+              <h2>Top Skills Now vs. Fastest Rising (keyword proxy)</h2>
+              <p>Derived from keyword/tag mentions in the fetched job postings.</p>
+            </div>
+            <div class="meta">
+              <span class="chip" title="Scope of skills shown">Window: <strong id="windowNow">Last 90 days</strong> · Rising: <strong id="windowRising">Last 30 vs prior 30</strong></span>
+            </div>
+          </div>
+          <div class="bd">
+            <div class="lists">
+              <div class="rank" aria-label="Top skills now">
+                <div class="rh">
+                  <strong>Top AI Skills in Postings</strong>
+                  <div>Ranked by mention count (from titles/descriptions/tags)</div>
+                </div>
+                <ul id="listNow"></ul>
+              </div>
+
+              <div class="rank" aria-label="Fastest rising skills">
+                <div class="rh">
+                  <strong>Fastest Rising Skills</strong>
+                  <div>Ranked by growth (last 30 days vs prior 30 days)</div>
+                </div>
+                <ul id="listRising"></ul>
+              </div>
+            </div>
+
+            <div class="footnote">
+              <span class="chip">Tip: Click a heatmap cell below to open the drilldown panel.</span>
+              <span class="chip">Keyboard: <span class="kbd">Esc</span> closes drilldown</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- COVERAGE GAP MATRIX + SEGMENTATION -->
+      <section class="grid" style="margin-top:14px">
+        <div class="card span-7" role="region" aria-label="NKU coverage gap matrix">
+          <div class="hd">
+            <div>
+              <h2>NKU Coverage Gap Matrix</h2>
+              <p>Curriculum map is local/static. Market demand index can be updated from live data later.</p>
+            </div>
+            <div class="meta">
+              <span class="chip" title="Coverage scale">0 None · 1 Mentioned · 2 Practiced · 3 Assessed</span>
+              <span class="chip" title="Market demand proxy">Rightmost = Market Demand Index</span>
+            </div>
+          </div>
+
+          <div class="bd heat-wrap">
+            <table aria-label="Coverage heatmap table" id="heatTable"></table>
+          </div>
+        </div>
+
+        <div class="card span-5" role="region" aria-label="Where the jobs are">
+          <div class="hd">
+            <div>
+              <h2>Where the Jobs Are</h2>
+              <p>Live: category distribution from Remotive postings.</p>
+            </div>
+            <div class="meta">
+              <span class="chip" id="segLabel">Job categories</span>
+            </div>
+          </div>
+          <div class="bd">
+            <div class="chart-box" aria-label="Segmentation chart">
+              <canvas id="segChart" aria-label="Segmentation chart" role="img"></canvas>
+            </div>
+            <p class="muted" style="margin:10px 0 0; font-size:12px" id="segSource">
+              Source: Remotive Jobs API (live) · Client-side keyword filter
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <!-- RESPONSIBLE AI + ACTIONS -->
+      <section class="grid" style="margin-top:14px">
+        <div class="card span-6" role="region" aria-label="Trust and governance skills">
+          <div class="hd">
+            <div>
+              <h2>Trust & Governance Skills (Credibility Boost)</h2>
+              <p>Signals NKU builds employable + trustworthy AI capability (not just tools).</p>
+            </div>
+            <div class="meta">
+              <span class="chip">Responsible AI · Risk · Privacy · Security</span>
+            </div>
+          </div>
+          <div class="bd">
+            <ul class="muted" style="margin:0; padding-left:18px; font-size:12px">
+              <li><strong>Responsible AI</strong>: fairness, transparency, human oversight</li>
+              <li><strong>AI risk management</strong>: evaluation, monitoring, documentation</li>
+              <li><strong>Security & privacy</strong>: data handling, access control, policy</li>
+              <li><strong>Governance</strong>: acceptable use, model selection, vendor risk</li>
+            </ul>
+            <p class="muted" style="margin:10px 0 0; font-size:12px">
+              Quick add: embed a 1–2 week module + rubric into gen-ed / gateway courses.
+            </p>
+          </div>
+        </div>
+
+        <div class="card span-6" role="region" aria-label="Action board">
+          <div class="hd">
+            <div>
+              <h2>Opportunities Board</h2>
+              <p>Turn insight into decisions (owners + timelines).</p>
+            </div>
+            <div class="meta">
+              <span class="chip">Quick wins</span>
+            </div>
+          </div>
+          <div class="bd">
+            <div class="actions" id="actions"></div>
+          </div>
+        </div>
+      </section>
+
+    </div>
+  </main>
+
+  <!-- Drilldown Drawer -->
+  <aside class="drawer" id="drawer" aria-label="Skill drilldown panel" role="dialog" aria-modal="false">
+    <div class="dh">
+      <div>
+        <h3 id="drawerTitle">Skill Drilldown</h3>
+        <div class="muted" style="font-size:12px" id="drawerSubtitle">Click a heatmap cell to populate details.</div>
+      </div>
+      <button class="close" type="button" id="drawerClose" aria-label="Close drilldown">Close</button>
+    </div>
+    <div class="db" id="drawerBody"></div>
+  </aside>
+
+  <script>
+    /************************************************************
+     * LIVE DATA CONFIG (Remotive API + client-side filtering)
+     ************************************************************/
+    const LIVE = {
+      endpoint: "https://remotive.com/api/remote-jobs",
+      limit: 500,
+      cacheKey: "nku_remotive_cache_execdash_v1",
+      cacheMaxAgeMs: 3 * 60 * 60 * 1000,
+      // keyword proxy for "AI-related jobs"
+      keywords: ["ai","artificial intelligence","machine learning","ml","llm","genai","chatgpt","copilot","prompt","transformer"],
+      // "top skills" extraction dictionary (feel free to customize!)
+      skillLexicon: [
+        { skill:"Prompting & workflow design", family:"GenAI workflows", terms:["prompt","prompting","workflow","automation","agent","agentic"] },
+        { skill:"AI tool proficiency (Copilot/ChatGPT)", family:"GenAI tools", terms:["chatgpt","copilot","claude","gemini","openai","anthropic"] },
+        { skill:"Python for automation", family:"Automation", terms:["python","scripting"] },
+        { skill:"Data literacy (SQL / dashboards)", family:"Data foundations", terms:["sql","power bi","tableau","dashboard","analytics","reporting"] },
+        { skill:"Model evaluation & testing", family:"Governance", terms:["evaluation","eval","testing","red team","red-team","monitoring"] },
+        { skill:"AI ethics & responsible use", family:"Governance", terms:["responsible","ethics","fairness","bias","governance","policy","compliance"] },
+        { skill:"Security & privacy", family:"Trust", terms:["privacy","security","pii","gdpr","risk"] },
+        { skill:"Stakeholder communication", family:"Human skills", terms:["stakeholder","communication","presentation","storytelling"] },
+      ],
+      // "software/data categories" for a rough non-CS proxy
+      devishCategories: new Set([
+        "Software Development","Data","Data Analysis","Devops / Sysadmin","AI / ML","Product"
+      ])
+    };
+
+    /************************************************************
+     * STATIC (NKU-centric) content stays local
+     ************************************************************/
+    const dashboardData = {
+      lastRefresh: "—",
+      audiences: ["all","business","informatics","health"],
+
+      // These will be overwritten by live computations for "all"
+      kpis: {
+        all: {
+          aiShare: { value:"—", delta:"—", trend:[10,11,11,12,13,13,14,15,16,17,18,18] },
+          fastFamily: { value:"—", delta:"—", trend:[12,13,14,16,18,21,24,28,31,34,37,40] },
+          noncsShare: { value:"—", delta:"—", trend:[50,51,52,53,55,56,57,58,60,61,62,62] },
+          wagePremium: { value:"—", delta:"—", trend:[8,9,10,10,11,12,12,13,14,15,16,17] },
+        },
+        // Keep your audience presets (optional) — can be made live later
+        business: {
+          aiShare: { value:"14.2%", delta:"+1.6 pts", trend:[8,8,9,9,10,10,11,12,12,13,14,14] },
+          fastFamily: { value:"AI Workflows", delta:"+31% YoY", trend:[10,11,11,12,14,16,18,20,22,25,28,31] },
+          noncsShare: { value:"78%", delta:"+5 pts", trend:[70,71,71,72,73,74,75,76,77,78,78,78] },
+          wagePremium: { value:"+10–15%", delta:"+2 pts", trend:[7,7,8,9,9,10,10,11,12,12,13,14] },
+        },
+        informatics: {
+          aiShare: { value:"24.7%", delta:"+2.8 pts", trend:[15,16,16,17,18,19,20,21,22,23,24,25] },
+          fastFamily: { value:"Model Ops", delta:"+42% YoY", trend:[12,13,15,17,19,22,25,28,32,35,39,42] },
+          noncsShare: { value:"44%", delta:"+4 pts", trend:[36,36,37,38,39,40,41,42,43,44,44,44] },
+          wagePremium: { value:"+15–22%", delta:"+3 pts", trend:[10,11,12,12,13,14,15,16,17,18,19,20] },
+        },
+        health: {
+          aiShare: { value:"12.9%", delta:"+1.2 pts", trend:[7,7,8,8,9,9,10,10,11,12,12,13] },
+          fastFamily: { value:"AI Compliance", delta:"+27% YoY", trend:[8,8,9,9,10,11,12,14,16,18,22,27] },
+          noncsShare: { value:"81%", delta:"+7 pts", trend:[70,71,72,73,74,75,76,77,78,79,80,81] },
+          wagePremium: { value:"+8–12%", delta:"+1 pt", trend:[5,5,6,6,7,7,8,8,9,10,11,12] },
+        }
+      },
+
+      // These will be overwritten by live computations for "all"
+      topNow: { all: [], business: [], informatics: [], health: [] },
+      rising: { all: [], business: [], informatics: [], health: [] },
+
+      // Static curriculum coverage (keep as-is)
+      coverage: {
+        columns: ["INF 125 (AI Literacy)", "INF 120 (Python)", "INF 286 (Web)", "IS/BA Analytics", "Gen-Ed / Core"],
+        rows: [
+          { family:"GenAI tools & workflows", demandIndex: 92, cells:[2,1,1,2,2], drill:{ roles:["Business Analyst","Marketing Analyst","Operations Specialist","Junior Developer"], keywords:["prompting","workflow automation","copilot","chatgpt","ai assistant"], quickWins:["Add a 1-week lab: ‘Design a repeatable AI workflow’ (inputs → prompts → checks → outputs).","Require a citation + verification checklist for AI-assisted work.","Assess with a rubric (clarity, safety, iteration, documentation)."] } },
+          { family:"Data foundations (SQL / BI)", demandIndex: 88, cells:[1,2,1,3,1], drill:{ roles:["Data Analyst","Operations Analyst","Finance Analyst"], keywords:["sql","dashboard","power bi","tableau","data literacy"], quickWins:["Embed a ‘data-to-decision’ mini-project in a gateway course.","Add a ‘dashboard critique’ assignment (executive storytelling)."] } },
+          { family:"Automation (Python / scripting)", demandIndex: 79, cells:[1,3,1,2,0], drill:{ roles:["Junior Developer","Automation Analyst","Systems Analyst"], keywords:["python","automation","scripting","api","etl"], quickWins:["Add ‘small automation’ labs tied to real business tasks (CSV → cleaned output).","Introduce ‘build once, reuse’ packaging mindset."] } },
+          { family:"Governance (evaluation, policy, ethics)", demandIndex: 74, cells:[3,1,0,1,2], drill:{ roles:["Compliance Analyst","Risk Analyst","Project Manager"], keywords:["responsible ai","evaluation","risk","policy","governance"], quickWins:["Add a 30-min ‘AI risk’ module + reflection + rubric.","Require documentation: model/tool used, data sensitivity, limitations."] } },
+          { family:"Human skills (communication, change mgmt)", demandIndex: 69, cells:[2,1,1,2,3], drill:{ roles:["Project Coordinator","Business Analyst","Customer Success"], keywords:["stakeholder","communication","change management","presentation"], quickWins:["Require ‘exec-ready 1-pager’ deliverables for projects.","Add a ‘communicate uncertainty’ micro-lesson."] } }
+        ]
+      },
+
+      // Will be overwritten by live computations for "all"
+      segmentation: {
+        all: { label:"Job categories", labels:[], values:[] },
+        business: { label:"Occupation groups", labels:["Analytics","Marketing","Operations","Finance","Sales"], values:[30,22,18,20,10] },
+        informatics: { label:"Occupation groups", labels:["Software","Data/ML","Cyber","IT Ops","Product"], values:[28,26,18,16,12] },
+        health: { label:"Industry clusters", labels:["Hospitals","Insurance","Public Health","Biotech","Vendors"], values:[30,22,18,12,18] },
+      },
+
+      actionBoard: [
+        { tag:"Quick win (30–60 days)", title:"Embed AI workflow labs + rubric", desc:"Add a repeatable AI workflow assignment (inputs → prompts → checks → outputs) in 2–3 gateway courses." },
+        { tag:"Quick win (30–60 days)", title:"Standardize AI usage policy language", desc:"Simple, student-friendly guidance: what’s allowed, what must be cited, and what must be verified." },
+        { tag:"1 semester", title:"Launch micro-badges by skill family", desc:"GenAI workflows, Data literacy, Automation, Governance—each with 1 project + assessment." },
+        { tag:"1 semester", title:"Partner project pilots", desc:"Align 3 employer projects to the top 3 coverage gaps (deliverables: exec dashboard + demo)." },
+        { tag:"12 months", title:"Program-level mapping & reporting", desc:"Create a living coverage map of AI skills across programs and measure improvements each term." },
+        { tag:"12 months", title:"Assessment + outcomes story", desc:"Report: skills coverage, student artifacts, placement data, and employer feedback." }
+      ],
+
+      // ✅ Add sources so your “Data sources” drawer doesn’t error
+      sources: {
+        primary: [
+          { name:"Remotive Remote Jobs API", use:"Public job postings feed used for live proxy metrics (category counts, keyword mentions).", notes:"Fetched without search; filtered client-side for AI-related keywords." }
+        ],
+        definitions: [
+          { term:"AI-matched job", definition:"A posting whose title/description/tags contains one or more AI keyword terms (configurable)." },
+          { term:"Top skills", definition:"Count of configured skill-term mentions across postings (lexicon-based proxy, not a standardized taxonomy)." },
+          { term:"Fastest rising", definition:"Change in mention count in last 30 days vs prior 30 days." }
+        ],
+        refreshCadence: "Live on page load + cached in session for up to 3 hours (adjustable)."
+      }
+    };
+
+    /************************************************************
+     * STATE + UTILITIES
+     ************************************************************/
+    let currentAudience = "all";
+    let segChart = null;
+
+    const $ = (sel, root=document) => root.querySelector(sel);
+    const $$ = (sel, root=document) => Array.from(root.querySelectorAll(sel));
+
+    function setText(sel, txt){ const el = $(sel); if(el) el.textContent = txt; }
+
+    function escapeHtml(s){
+      return String(s)
+        .replaceAll("&","&amp;")
+        .replaceAll("<","&lt;")
+        .replaceAll(">","&gt;")
+        .replaceAll('"',"&quot;")
+        .replaceAll("'","&#039;");
+    }
+
+    function sparkPoints(values){
+      const max = Math.max(...values);
+      const min = Math.min(...values);
+      const range = (max - min) || 1;
+      return values.map((v,i)=>{
+        const x = (i/(values.length-1)) * 120;
+        const y = 34 - ((v - min)/range)*30;
+        return `${x.toFixed(1)},${y.toFixed(1)}`;
+      }).join(" ");
+    }
+
+    function coverageClass(level){ return ["lvl0","lvl1","lvl2","lvl3"][level] || "lvl0"; }
+    function coverageLabel(level){ return ["None","Mentioned","Practiced","Assessed"][level] || "None"; }
+
+    function pct(n){ return `${(n*100).toFixed(1)}%`; }
+
+    function safeDate(s){
+      const d = new Date(s);
+      return isNaN(d.getTime()) ? null : d;
+    }
+
+    /************************************************************
+     * LIVE FETCH + COMPUTE (updates dashboardData for audience=all)
+     ************************************************************/
+    function buildLiveUrl(){
+      return `${LIVE.endpoint}?limit=${encodeURIComponent(LIVE.limit)}`;
+    }
+
+    async function fetchLiveJobs(){
+      const cachedRaw = sessionStorage.getItem(LIVE.cacheKey);
+      if (cachedRaw){
+        try{
+          const cached = JSON.parse(cachedRaw);
+          if (cached?.ts && (Date.now() - cached.ts) < LIVE.cacheMaxAgeMs && Array.isArray(cached.jobs)){
+            return { jobs: cached.jobs, fromCache:true, status:200 };
+          }
+        }catch(_){}
+      }
+
+      const url = buildLiveUrl();
+      const res = await fetch(url, { cache:"no-store" });
+      const status = res.status;
+      const json = await res.json();
+      const jobs = Array.isArray(json?.jobs) ? json.jobs : [];
+
+      sessionStorage.setItem(LIVE.cacheKey, JSON.stringify({ ts: Date.now(), jobs }));
+      return { jobs, fromCache:false, status };
+    }
+
+    function normText(job){
+      const t = `${job?.title ?? ""} ${job?.category ?? ""} ${job?.description ?? ""} ${(Array.isArray(job?.tags) ? job.tags.join(" ") : "")}`;
+      return t.toLowerCase();
+    }
+
+    function filterAiJobs(allJobs){
+      const kws = LIVE.keywords;
+      return allJobs.filter(j=>{
+        const t = normText(j);
+        return kws.some(k => t.includes(k));
+      });
+    }
+
+    function groupCount(arr, keyFn){
+      const m = new Map();
+      for (const x of arr){
+        const k = (keyFn(x) || "Other").trim() || "Other";
+        m.set(k, (m.get(k)||0)+1);
+      }
+      return Array.from(m.entries()).sort((a,b)=>b[1]-a[1]);
+    }
+
+    function computeTopSkills(jobs, startDate=null, endDate=null){
+      const counts = new Map();
+      const filtered = jobs.filter(j=>{
+        if (!startDate && !endDate) return true;
+        const d = safeDate(j.publication_date);
+        if (!d) return false;
+        if (startDate && d < startDate) return false;
+        if (endDate && d >= endDate) return false;
+        return true;
+      });
+
+      for (const j of filtered){
+        const text = normText(j);
+        for (const entry of LIVE.skillLexicon){
+          const hit = entry.terms.some(t => text.includes(t));
+          if (hit){
+            counts.set(entry.skill, (counts.get(entry.skill)||0) + 1);
+          }
+        }
+      }
+
+      // map into objects
+      const out = Array.from(counts.entries())
+        .sort((a,b)=>b[1]-a[1])
+        .slice(0,8)
+        .map(([skill, c])=>{
+          const meta = LIVE.skillLexicon.find(x=>x.skill===skill);
+          return { skill, family: meta?.family || "Other", metric: String(c), note: "mentions" };
+        });
+
+      return out;
+    }
+
+    function computeRisingSkills(jobs){
+      const now = new Date();
+      const end = now;
+      const start30 = new Date(now.getTime() - 30*24*60*60*1000);
+      const start60 = new Date(now.getTime() - 60*24*60*60*1000);
+
+      const last30 = computeCountsBySkill(jobs, start30, end);
+      const prior30 = computeCountsBySkill(jobs, start60, start30);
+
+      const rising = [];
+      for (const entry of LIVE.skillLexicon){
+        const a = last30.get(entry.skill) || 0;
+        const b = prior30.get(entry.skill) || 0;
+        if (a === 0 && b === 0) continue;
+
+        const pctChange = (b === 0) ? 1 : (a - b) / b; // treat b=0 as +100% baseline
+        rising.push({ skill: entry.skill, family: entry.family, a, b, pctChange });
+      }
+
+      return rising
+        .sort((x,y)=> (y.pctChange - x.pctChange) || (y.a - x.a))
+        .slice(0,8)
+        .map(r => ({
+          skill: r.skill,
+          family: r.family,
+          metric: (r.b === 0 && r.a > 0) ? "+100%+" : `${(r.pctChange*100).toFixed(0)}%`,
+          note: "last 30 vs prior 30"
+        }));
+    }
+
+    function computeCountsBySkill(jobs, startDate, endDate){
+      const m = new Map();
+      for (const entry of LIVE.skillLexicon) m.set(entry.skill, 0);
+
+      for (const j of jobs){
+        const d = safeDate(j.publication_date);
+        if (!d) continue;
+        if (d < startDate || d >= endDate) continue;
+
+        const text = normText(j);
+        for (const entry of LIVE.skillLexicon){
+          if (entry.terms.some(t => text.includes(t))){
+            m.set(entry.skill, (m.get(entry.skill)||0)+1);
+          }
+        }
+      }
+      return m;
+    }
+
+    function computeTrendAiShare(allJobs){
+      // Sparkline trend: last 12 months AI-share among postings in each month (proxy)
+      const now = new Date();
+      const months = [];
+      for (let i=11; i>=0; i--){
+        const d = new Date(now.getFullYear(), now.getMonth()-i, 1);
+        months.push(d);
+      }
+
+      const values = months.map((mStart, idx)=>{
+        const mEnd = new Date(mStart.getFullYear(), mStart.getMonth()+1, 1);
+        const slice = allJobs.filter(j=>{
+          const d = safeDate(j.publication_date);
+          return d && d >= mStart && d < mEnd;
+        });
+        if (slice.length === 0) return 0;
+        const ai = filterAiJobs(slice).length;
+        return Math.round((ai / slice.length) * 1000) / 10; // percent with 1 decimal
+      });
+
+      return values.map(v => Math.max(0, v));
+    }
+
+    function updateDashboardFromLive(allJobs){
+      const aiJobs = filterAiJobs(allJobs);
+
+      // last refresh
+      dashboardData.lastRefresh = new Date().toLocaleString(undefined, { year:"numeric", month:"short", day:"2-digit", hour:"2-digit", minute:"2-digit" });
+
+      // KPI 1: AI share
+      const aiShare = allJobs.length ? (aiJobs.length / allJobs.length) : 0;
+      dashboardData.kpis.all.aiShare.value = pct(aiShare);
+
+      // delta proxy: last 30 vs prior 30 AI share
+      const now = new Date();
+      const start30 = new Date(now.getTime() - 30*24*60*60*1000);
+      const start60 = new Date(now.getTime() - 60*24*60*60*1000);
+
+      const sliceLast30 = allJobs.filter(j=>{
+        const d = safeDate(j.publication_date); return d && d >= start30;
+      });
+      const slicePrior30 = allJobs.filter(j=>{
+        const d = safeDate(j.publication_date); return d && d >= start60 && d < start30;
+      });
+
+      const shareLast30 = sliceLast30.length ? filterAiJobs(sliceLast30).length / sliceLast30.length : 0;
+      const sharePrior30 = slicePrior30.length ? filterAiJobs(slicePrior30).length / slicePrior30.length : 0;
+      const deltaPts = (shareLast30 - sharePrior30) * 100;
+      dashboardData.kpis.all.aiShare.delta = `${deltaPts >= 0 ? "+" : ""}${deltaPts.toFixed(1)} pts`;
+      dashboardData.kpis.all.aiShare.trend = computeTrendAiShare(allJobs).map(v => v); // percent values
+
+      // KPI 2: top category among AI jobs
+      const byCat = groupCount(aiJobs, j => j.category || "Other");
+      const topCat = byCat[0]?.[0] || "—";
+      const topCatCount = byCat[0]?.[1] || 0;
+      const topCatShare = aiJobs.length ? (topCatCount / aiJobs.length) : 0;
+      dashboardData.kpis.all.fastFamily.value = topCat;
+      dashboardData.kpis.all.fastFamily.delta = `${pct(topCatShare)} share`;
+      dashboardData.kpis.all.fastFamily.trend = byCat.slice(0,12).map(([_,c])=>c); // simple count trend-ish
+
+      // KPI 3: non-dev share (proxy)
+      const nonDev = aiJobs.filter(j => !LIVE.devishCategories.has(j.category || ""));
+      const nonDevShare = aiJobs.length ? nonDev.length / aiJobs.length : 0;
+      dashboardData.kpis.all.noncsShare.value = pct(nonDevShare);
+      dashboardData.kpis.all.noncsShare.delta = "proxy";
+      dashboardData.kpis.all.noncsShare.trend = dashboardData.kpis.all.noncsShare.trend; // keep sample spark
+
+      // KPI 4: new postings (14 days)
+      const start14 = new Date(now.getTime() - 14*24*60*60*1000);
+      const new14 = aiJobs.filter(j=>{
+        const d = safeDate(j.publication_date); return d && d >= start14;
+      }).length;
+      dashboardData.kpis.all.wagePremium.value = String(new14);
+      dashboardData.kpis.all.wagePremium.delta = "count";
+      dashboardData.kpis.all.wagePremium.trend = dashboardData.kpis.all.wagePremium.trend; // keep sample spark
+
+      // Segmentation chart (live) for audience=all
+      const topCats = byCat.slice(0,8);
+      dashboardData.segmentation.all = {
+        label: "Job categories",
+        labels: topCats.map(([k])=>k),
+        values: topCats.map(([,v])=>v)
+      };
+
+      // Top skills now (last 90 days)
+      const start90 = new Date(now.getTime() - 90*24*60*60*1000);
+      dashboardData.topNow.all = computeTopSkills(aiJobs, start90, null);
+
+      // Rising skills (last 30 vs prior 30)
+      dashboardData.rising.all = computeRisingSkills(aiJobs);
+
+      // If empty (rare), fallback to a friendly message
+      if (dashboardData.topNow.all.length === 0){
+        dashboardData.topNow.all = [{ skill:"No skills matched lexicon", family:"(adjust LIVE.skillLexicon)", metric:"—", note:"" }];
+      }
+      if (dashboardData.rising.all.length === 0){
+        dashboardData.rising.all = [{ skill:"No rising skills computed", family:"(insufficient dated postings)", metric:"—", note:"" }];
+      }
+    }
+
+    /************************************************************
+     * RENDERERS
+     ************************************************************/
+    function renderHeader(){ setText("#lastRefresh", dashboardData.lastRefresh); }
+
+    function renderKpis(){
+      const k = dashboardData.kpis[currentAudience];
+
+      setText("#kpi-aiShare", k.aiShare.value);
+      setText("#kpi-aiShareDelta", `▲ ${k.aiShare.delta}`);
+      $("#spark-aiShare").setAttribute("points", sparkPoints(k.aiShare.trend));
+
+      setText("#kpi-fastFamily", k.fastFamily.value);
+      setText("#kpi-fastFamilyDelta", `▲ ${k.fastFamily.delta}`);
+      $("#spark-fastFamily").setAttribute("points", sparkPoints(k.fastFamily.trend));
+
+      setText("#kpi-noncsShare", k.noncsShare.value);
+      setText("#kpi-noncsDelta", `▲ ${k.noncsShare.delta}`);
+      $("#spark-noncs").setAttribute("points", sparkPoints(k.noncsShare.trend));
+
+      setText("#kpi-wagePremium", k.wagePremium.value);
+      setText("#kpi-wageDelta", `▲ ${k.wagePremium.delta}`);
+      $("#spark-wage").setAttribute("points", sparkPoints(k.wagePremium.trend));
+    }
+
+    function renderRankLists(){
+      const now = dashboardData.topNow[currentAudience] || [];
+      const rising = dashboardData.rising[currentAudience] || [];
+
+      const liTemplate = (item, idx) => `
+        <li>
+          <div class="left">
+            <div class="num" aria-hidden="true">${idx+1}</div>
+            <div style="min-width:0">
+              <div class="skill" title="${escapeHtml(item.skill)}">${escapeHtml(item.skill)}</div>
+              <div class="fam">${escapeHtml(item.family)}</div>
+            </div>
+          </div>
+          <div class="right">
+            <div class="metric">${escapeHtml(item.metric)}</div>
+            <div class="note">${escapeHtml(item.note)}</div>
+          </div>
+        </li>
+      `;
+
+      $("#listNow").innerHTML = now.map(liTemplate).join("");
+      $("#listRising").innerHTML = rising.map(liTemplate).join("");
+    }
+
+    function renderHeatmap(){
+      const cols = dashboardData.coverage.columns;
+      const rows = dashboardData.coverage.rows;
+
+      const thead = `
+        <thead>
+          <tr>
+            <th>Skill Family</th>
+            ${cols.map(c=>`<th>${escapeHtml(c)}</th>`).join("")}
+            <th>Market Demand Index</th>
+          </tr>
+        </thead>
+      `;
+
+      const tbodyRows = rows.map((r, rIdx) => {
+        const cells = r.cells.map((lvl, cIdx) => {
+          const cls = coverageClass(lvl);
+          const lbl = coverageLabel(lvl);
+          return `
+            <td>
+              <div class="cell ${cls}" role="button" tabindex="0"
+                   data-row="${rIdx}" data-col="${cIdx}"
+                   aria-label="${escapeHtml(r.family)} — ${escapeHtml(cols[cIdx])}: ${lbl}. Click for drilldown.">
+                <span class="lvl">${lbl}</span>
+                <span class="muted" style="font-size:12px">${lvl}</span>
+              </div>
+            </td>
+          `;
+        }).join("");
+
+        return `
+          <tr>
+            <td><span class="chip">${escapeHtml(r.family)}</span></td>
+            ${cells}
+            <td><span class="chip">${r.demandIndex}</span></td>
+          </tr>
+        `;
+      }).join("");
+
+      $("#heatTable").innerHTML = thead + `<tbody>${tbodyRows}</tbody>`;
+
+      $$(".cell", $("#heatTable")).forEach(el=>{
+        el.addEventListener("click", onHeatCellActivate);
+        el.addEventListener("keydown", (e)=>{
+          if(e.key === "Enter" || e.key === " "){
+            e.preventDefault();
+            onHeatCellActivate(e);
+          }
+        });
+      });
+    }
+
+    function renderSegmentation(){
+      const seg = dashboardData.segmentation[currentAudience];
+      setText("#segLabel", seg.label);
+
+      const ctx = $("#segChart");
+      if (!window.Chart) {
+        ctx.replaceWith(Object.assign(document.createElement("div"), {
+          className: "muted",
+          style: "font-size:12px",
+          textContent: "Chart.js not available. Replace this section with your preferred chart library or static image."
+        }));
+        return;
+      }
+
+      if (segChart) segChart.destroy();
+
+      segChart = new Chart(ctx, {
+        type: "bar",
+        data: { labels: seg.labels, datasets: [{ label: seg.label, data: seg.values }] },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: { legend: { display:false }, tooltip: { enabled:true } },
+          scales: { y: { beginAtZero:true, ticks:{ precision:0 } } }
+        }
+      });
+    }
+
+    function renderActions(){
+      const items = dashboardData.actionBoard;
+      $("#actions").innerHTML = items.map(it => `
+        <div class="action">
+          <div class="tag">${escapeHtml(it.tag)}</div>
+          <h4>${escapeHtml(it.title)}</h4>
+          <p>${escapeHtml(it.desc)}</p>
+        </div>
+      `).join("");
+    }
+
+    /************************************************************
+     * DRILLDOWN DRAWER
+     ************************************************************/
+    function openDrawer(payload){
+      const drawer = $("#drawer");
+      $("#drawerTitle").textContent = payload.title;
+      $("#drawerSubtitle").textContent = payload.subtitle;
+
+      const rolesHtml = (payload.roles && payload.roles.length)
+        ? `<ul>${payload.roles.map(r=>`<li>${escapeHtml(r)}</li>`).join("")}</ul>`
+        : `<p class="muted">—</p>`;
+
+      const kwHtml = (payload.keywords && payload.keywords.length)
+        ? `<p>${payload.keywords.map(k=>`<span class="chip" style="margin:3px 6px 0 0">${escapeHtml(k)}</span>`).join("")}</p>`
+        : `<p class="muted">—</p>`;
+
+      const winsHtml = (payload.quickWins && payload.quickWins.length)
+        ? `<ul>${payload.quickWins.map(w=>`<li>${escapeHtml(w)}</li>`).join("")}</ul>`
+        : `<p class="muted">—</p>`;
+
+      $("#drawerBody").innerHTML = `
+        <div class="section">
+          <strong>Target roles seeing this skill</strong>
+          ${rolesHtml}
+        </div>
+
+        <div class="section">
+          <strong>Posting keywords (examples)</strong>
+          ${kwHtml}
+        </div>
+
+        <div class="section">
+          <strong>Curriculum “quick wins”</strong>
+          ${winsHtml}
+        </div>
+
+        <div class="section">
+          <strong>Suggested artifact (exec-ready)</strong>
+          <p>Create a one-page deliverable: <em>problem → approach → evidence → risks → recommendation</em>, plus a short demo.</p>
+        </div>
+      `;
+
+      drawer.classList.add("open");
+    }
+
+    function closeDrawer(){ $("#drawer").classList.remove("open"); }
+
+    function onHeatCellActivate(e){
+      const el = e.currentTarget;
+      const rowIdx = Number(el.getAttribute("data-row"));
+      const colIdx = Number(el.getAttribute("data-col"));
+
+      const row = dashboardData.coverage.rows[rowIdx];
+      const colName = dashboardData.coverage.columns[colIdx];
+      const lvl = row.cells[colIdx];
+
+      openDrawer({
+        title: `${row.family} — ${colName}`,
+        subtitle: `Coverage: ${coverageLabel(lvl)} (${lvl}) · Market Demand Index: ${row.demandIndex}`,
+        roles: row.drill.roles,
+        keywords: row.drill.keywords,
+        quickWins: row.drill.quickWins
+      });
+    }
+
+    $("#openSources").addEventListener("click", () => {
+      openDrawer({
+        title: "Data Sources & Definitions",
+        subtitle: `Last refresh: ${dashboardData.lastRefresh}`,
+        roles: [],
+        keywords: [],
+        quickWins: []
+      });
+
+      $("#drawerBody").innerHTML = `
+        <div class="section">
+          <strong>Primary sources</strong>
+          <ul>
+            ${dashboardData.sources.primary.map(s => `
+              <li>
+                <strong>${escapeHtml(s.name)}</strong> — ${escapeHtml(s.use)}<br/>
+                <span class="muted">${escapeHtml(s.notes || "")}</span>
+              </li>
+            `).join("")}
+          </ul>
+        </div>
+
+        <div class="section">
+          <strong>Definitions used in this dashboard</strong>
+          <ul>
+            ${dashboardData.sources.definitions.map(d => `
+              <li><strong>${escapeHtml(d.term)}:</strong> ${escapeHtml(d.definition)}</li>
+            `).join("")}
+          </ul>
+        </div>
+
+        <div class="section">
+          <strong>Refresh cadence</strong>
+          <p>${escapeHtml(dashboardData.sources.refreshCadence)}</p>
+        </div>
+      `;
+    });
+
+    /************************************************************
+     * AUDIENCE TOGGLE + BOOT
+     ************************************************************/
+    function setAudience(aud){
+      currentAudience = aud;
+      $$("#audienceToggle button").forEach(btn=>{
+        const on = btn.dataset.audience === aud;
+        btn.setAttribute("aria-pressed", on ? "true" : "false");
+      });
+
+      renderKpis();
+      renderRankLists();
+      renderSegmentation();
+    }
+
+    async function init(){
+      // Render static immediately
+      renderHeatmap();
+      renderActions();
+
+      // Load live and update "all" audience
+      try{
+        const { jobs } = await fetchLiveJobs();
+        updateDashboardFromLive(jobs);
+      }catch(err){
+        // If live fails, keep placeholders; still render header so the page isn't empty
+        dashboardData.lastRefresh = "Live fetch failed (showing static demo)";
+        console.warn("Live fetch failed:", err);
+      }
+
+      // Render with whatever data we have now
+      renderHeader();
+      renderKpis();
+      renderRankLists();
+      renderSegmentation();
+
+      // Wire toggles
+      $$("#audienceToggle button").forEach(btn=>{
+        btn.addEventListener("click", ()=> setAudience(btn.dataset.audience));
+      });
+
+      // Drawer close
+      $("#drawerClose").addEventListener("click", closeDrawer);
+      document.addEventListener("keydown", (e)=>{ if(e.key === "Escape") closeDrawer(); });
+    }
+
+    init();
+  </script>
+</body>
+</html>
