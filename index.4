@@ -1,0 +1,285 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>NKU - AI Skillsets for Hiring (Executive Dashboard) — Fixed Fetch</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+
+  <style>
+    body{margin:0;font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;background:#f8fafc;color:#0f172a}
+    .wrap{max-width:1200px;margin:0 auto;padding:16px}
+    .card{background:#fff;border:1px solid #dbe3ef;border-radius:16px;box-shadow:0 12px 30px rgba(15,23,42,.08);overflow:hidden}
+    .hd{padding:12px 14px;border-bottom:1px solid rgba(219,227,239,.65);display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap}
+    .bd{padding:12px 14px}
+    .chip{display:inline-flex;align-items:center;gap:6px;padding:5px 9px;border-radius:999px;border:1px solid rgba(219,227,239,.9);background:rgba(2,6,23,.02);font-weight:700;font-size:12px}
+    .muted{color:#475569;font-size:12px}
+    .grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+    @media(max-width:900px){.grid{grid-template-columns:1fr}}
+    .chart-box{height:280px}
+    pre{white-space:pre-wrap;word-break:break-word;background:#0b1220;color:#e2e8f0;padding:10px;border-radius:12px;font-size:12px;line-height:1.35}
+    a{color:#2563eb;text-decoration:none} a:hover{text-decoration:underline}
+    button{border:1px solid #dbe3ef;background:#fff;border-radius:999px;padding:8px 10px;cursor:pointer;font-weight:800;font-size:12px;color:#475569}
+    .row{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
+    input[type="text"]{
+      width:min(720px, 100%);
+      border:1px solid #dbe3ef;border-radius:999px;padding:8px 10px;
+      font-size:12px;color:#0f172a;outline:none
+    }
+    .pill{display:inline-flex;align-items:center;gap:6px;border:1px solid #dbe3ef;background:#fff;border-radius:999px;padding:6px 10px;font-size:12px}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="card">
+      <div class="hd">
+        <div>
+          <div class="chip">Live jobs feed debug (FIXED)</div>
+          <div class="muted">
+            Your fetch worked (HTTP 200) but returned <strong>0 jobs</strong> because Remotive’s <code>search</code>
+            parameter doesn’t reliably support complex <code>OR</code> queries. Fix: fetch without <code>search</code>, then filter client-side.
+          </div>
+        </div>
+        <div class="chip">Last refresh: <strong id="lastRefresh" style="margin-left:6px">—</strong></div>
+      </div>
+      <div class="bd">
+        <div class="grid">
+          <div>
+            <div class="chip">Fetch status</div>
+            <div class="muted" id="statusLine" style="margin-top:8px">—</div>
+            <div class="muted" style="margin-top:6px">URL: <a id="fetchUrl" href="#" target="_blank" rel="noopener">—</a></div>
+
+            <div class="chip" style="margin-top:12px">Keyword filter (client-side)</div>
+            <div class="row">
+              <input id="kwInput" type="text" value="ai, artificial intelligence, machine learning, ml, llm, genai, chatgpt, copilot, prompt, transformer" />
+              <span class="pill">Tip: comma-separated</span>
+            </div>
+
+            <div class="chip" style="margin-top:12px">Counts</div>
+            <div class="muted" id="countsLine" style="margin-top:8px">—</div>
+
+            <div style="margin-top:12px" class="row">
+              <button id="retryBtn" type="button">Retry fetch</button>
+              <button id="applyFilterBtn" type="button">Apply filter</button>
+              <button id="demoBtn" type="button">Force demo data</button>
+            </div>
+
+            <div class="muted" style="margin-top:10px">
+              If your chart still shows zero: increase <code>limit</code>, or remove keywords that are too specific.
+            </div>
+          </div>
+
+          <div>
+            <div class="chip">Sample job record</div>
+            <pre id="sampleJson" style="margin-top:8px">—</pre>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div style="height:12px"></div>
+
+    <div class="card">
+      <div class="hd">
+        <div>
+          <div class="chip">Segmentation chart</div>
+          <div class="muted">Counts by category (AI-filtered postings).</div>
+        </div>
+        <div class="chip" id="segLabel">Job categories</div>
+      </div>
+      <div class="bd">
+        <div class="chart-box"><canvas id="segChart"></canvas></div>
+        <div class="muted" id="chartNote" style="margin-top:8px">—</div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // ✅ FIX: Do NOT use Remotive ?search= with complex OR strings.
+    // Instead, fetch a larger slice of jobs and filter locally.
+    const PUBLIC_JOBS = {
+      endpoint: "https://remotive.com/api/remote-jobs",
+      limit: 500,                 // increase if you want more coverage
+      cacheKey: "nku_remotive_cache_fixed_v1",
+      cacheMaxAgeMs: 3 * 60 * 60 * 1000 // 3 hours
+    };
+
+    const DEMO_JOBS = [
+      { title:"AI Product Manager", category:"Product", publication_date:new Date().toISOString(), description:"GenAI roadmap + Copilot" },
+      { title:"Machine Learning Engineer", category:"AI / ML", publication_date:new Date().toISOString(), description:"Model training + evaluation" },
+      { title:"Data Analyst (SQL, BI)", category:"Data Analysis", publication_date:new Date().toISOString(), description:"Dashboards + SQL" },
+      { title:"Software Engineer", category:"Software Development", publication_date:new Date().toISOString(), description:"Backend services" },
+      { title:"Marketing Ops (AI tools)", category:"Marketing", publication_date:new Date().toISOString(), description:"ChatGPT workflows" },
+      { title:"DevOps Engineer", category:"Devops / Sysadmin", publication_date:new Date().toISOString(), description:"CI/CD pipelines" },
+    ];
+
+    const $ = (sel, root=document) => root.querySelector(sel);
+
+    function formatShortDate(d){
+      return d.toLocaleDateString(undefined, { year:"numeric", month:"short", day:"2-digit" });
+    }
+    function setText(sel, txt){ const el = $(sel); if(el) el.textContent = txt; }
+
+    function buildUrl(){
+      const url = `${PUBLIC_JOBS.endpoint}?limit=${encodeURIComponent(PUBLIC_JOBS.limit)}`;
+      $("#fetchUrl").textContent = url;
+      $("#fetchUrl").href = url;
+      return url;
+    }
+
+    async function fetchJobs(){
+      const cachedRaw = sessionStorage.getItem(PUBLIC_JOBS.cacheKey);
+      if (cachedRaw){
+        try{
+          const cached = JSON.parse(cachedRaw);
+          if (cached?.ts && (Date.now() - cached.ts) < PUBLIC_JOBS.cacheMaxAgeMs && Array.isArray(cached.jobs)){
+            return { jobs: cached.jobs, fromCache: true, status: 200 };
+          }
+        }catch(_){}
+      }
+
+      const url = buildUrl();
+      const res = await fetch(url, { cache: "no-store" });
+      const status = res.status;
+      const json = await res.json();
+
+      const jobs = Array.isArray(json?.jobs) ? json.jobs : [];
+      sessionStorage.setItem(PUBLIC_JOBS.cacheKey, JSON.stringify({ ts: Date.now(), jobs }));
+      return { jobs, fromCache: false, status };
+    }
+
+    function normText(job){
+      const t = `${job?.title ?? ""} ${job?.category ?? ""} ${job?.description ?? ""} ${(Array.isArray(job?.tags) ? job.tags.join(" ") : "")}`;
+      return t.toLowerCase();
+    }
+
+    function parseKeywords(){
+      const raw = ($("#kwInput").value || "").split(",").map(s => s.trim().toLowerCase()).filter(Boolean);
+      // Remove duplicates
+      return Array.from(new Set(raw));
+    }
+
+    function filterJobsByKeywords(jobs, keywords){
+      if (!keywords.length) return jobs;
+      return jobs.filter(j => {
+        const t = normText(j);
+        return keywords.some(k => t.includes(k));
+      });
+    }
+
+    function countCategories(jobs){
+      const m = new Map();
+      for (const j of jobs){
+        const c = (j.category || "Other").trim() || "Other";
+        m.set(c, (m.get(c)||0) + 1);
+      }
+      return Array.from(m.entries()).sort((a,b)=>b[1]-a[1]).slice(0,8);
+    }
+
+    let segChart = null;
+
+    function renderChart(jobs, note){
+      const top = countCategories(jobs);
+      const labels = top.map(([k])=>k);
+      const values = top.map(([,v])=>v);
+
+      setText("#segLabel", "Job categories");
+      setText("#chartNote", note);
+
+      if (!window.Chart){
+        setText("#chartNote", note + " (Chart.js missing)");
+        return;
+      }
+
+      const ctx = $("#segChart");
+      if (segChart) segChart.destroy();
+
+      segChart = new Chart(ctx, {
+        type: "bar",
+        data: { labels, datasets: [{ label: "Postings", data: values }] },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: { legend: { display:false } },
+          scales: { y: { beginAtZero:true, ticks:{ precision:0 } } }
+        }
+      });
+    }
+
+    function renderDebug({ ok, status, fromCache, allJobs, filteredJobs, keywords, err }){
+      setText("#lastRefresh", `${formatShortDate(new Date())}${fromCache ? " (cached)" : ""}`);
+
+      if (ok){
+        setText("#statusLine", `✅ Fetch OK (HTTP ${status}) ${fromCache ? "· from cache" : ""}`);
+        setText("#countsLine",
+          `All jobs returned: ${allJobs.length} · Filter keywords: ${keywords.length} · AI-matched jobs: ${filteredJobs.length}`
+        );
+        $("#sampleJson").textContent = JSON.stringify((filteredJobs[0] || allJobs[0] || {}), null, 2);
+      } else {
+        setText("#statusLine", `❌ Fetch failed ${status ? `(HTTP ${status})` : ""} — ${String(err)}`);
+        setText("#countsLine", "All jobs returned: 0 · Using demo fallback");
+        $("#sampleJson").textContent = JSON.stringify({ error: String(err) }, null, 2);
+      }
+    }
+
+    // Keep these in memory so Apply Filter can re-run without refetch
+    let LAST_ALL_JOBS = [];
+
+    function applyFilterAndRender(allJobs, fromCache, status){
+      const keywords = parseKeywords();
+      const filtered = filterJobsByKeywords(allJobs, keywords);
+
+      renderDebug({
+        ok: true,
+        status,
+        fromCache,
+        allJobs,
+        filteredJobs: filtered,
+        keywords
+      });
+
+      // If filter is too strict, still show something helpful
+      if (filtered.length === 0){
+        renderChart(allJobs, "No matches for the current keywords — showing ALL jobs by category instead.");
+      } else {
+        renderChart(filtered, "Showing AI-matched jobs by category (client-side keyword filter).");
+      }
+    }
+
+    async function loadLive(){
+      buildUrl();
+
+      try{
+        const { jobs, fromCache, status } = await fetchJobs();
+        LAST_ALL_JOBS = jobs;
+
+        // First render using current keywords
+        applyFilterAndRender(jobs, fromCache, status);
+
+      }catch(err){
+        renderDebug({ ok:false, status:null, fromCache:false, allJobs:[], filteredJobs:[], keywords:[], err });
+        renderChart(DEMO_JOBS, "Rendering DEMO data because live fetch failed.");
+      }
+    }
+
+    $("#retryBtn").addEventListener("click", ()=>{
+      sessionStorage.removeItem(PUBLIC_JOBS.cacheKey);
+      loadLive();
+    });
+
+    $("#applyFilterBtn").addEventListener("click", ()=>{
+      // Re-run filter against cached-in-memory jobs
+      const allJobs = Array.isArray(LAST_ALL_JOBS) ? LAST_ALL_JOBS : [];
+      applyFilterAndRender(allJobs, true, 200);
+    });
+
+    $("#demoBtn").addEventListener("click", ()=>{
+      LAST_ALL_JOBS = DEMO_JOBS;
+      applyFilterAndRender(DEMO_JOBS, false, 200);
+      setText("#chartNote", "Forced DEMO data (client-side filter still applies).");
+    });
+
+    loadLive();
+  </script>
+</body>
+</html>
