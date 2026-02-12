@@ -85,8 +85,7 @@
     th,td{padding:10px 10px;border-bottom:1px solid rgba(219,227,239,.7);font-size:12px;vertical-align:middle;background:var(--surface);}
     th{position:sticky;top:0;z-index:2;background:#f9fbff;color:#0b1220;font-size:12px;font-weight:800;border-bottom:1px solid rgba(219,227,239,.95);text-align:left;white-space:nowrap;}
     td:first-child,th:first-child{position:sticky;left:0;z-index:1;background:#fff;}
-    .chip{display:inline-flex;align-items:center;gap:6px;padding:5px 9px;border-radius:999px;border:1px solid rgba(219,227,239,.9);background:rgba(2,6,23,.02);font-weight:700;white-space:nowrap;}
-    .cell{cursor:pointer;border-radius:12px;border:1px solid rgba(219,227,239,.85);padding:8px 10px;display:flex;align-items:center;justify-content:space-between;gap:10px;user-select:none;min-width:140px;}
+    .cell{border-radius:12px;border:1px solid rgba(219,227,239,.85);padding:8px 10px;display:flex;align-items:center;justify-content:space-between;gap:10px;user-select:none;min-width:140px;}
     .lvl{font-weight:850;font-size:12px;}
     .lvl0{background:rgba(239,68,68,.10);border-color:rgba(239,68,68,.22)}
     .lvl1{background:rgba(245,158,11,.12);border-color:rgba(245,158,11,.24)}
@@ -147,7 +146,6 @@
           <div class="badge"><span class="dot"></span><strong>Executive Dashboard - Presented at AI Panel Discussion</strong> · AI Skillsets for Hiring Now</div>
           <h1 class="title">NKU — AI Skillset Needs for Graduates Getting Hired Today</h1>
           <p class="subtitle">Top skills now · fastest-rising skills · NKU coverage gaps · opportunities board</p>
-          <button type="button" class="sources-btn" id="openSources">Data sources</button>
         </div>
 
         <div class="toolbar">
@@ -171,7 +169,7 @@
 
       <div class="debug">
         <div>
-          <div><strong>Debug</strong>: Fan-out searches (no OR). If AI is 0, one of the AI terms is blocked or Worker mapping differs.</div>
+          <div><strong>Debug</strong>: USAJOBS uses full fan-out. Adzuna uses reduced terms + no query= fallback (avoids HTML + 429).</div>
           <div>AI jobs: <strong id="dbgAi">—</strong> · Baseline jobs: <strong id="dbgBase">—</strong></div>
           <pre id="dbgSample">Loading…</pre>
         </div>
@@ -180,7 +178,6 @@
         </div>
       </div>
 
-      <!-- KPI STRIP -->
       <section class="grid kpis" aria-label="Key performance indicators" style="margin-top:14px">
         <div class="card kpi span-3">
           <div class="kpi-top">
@@ -239,7 +236,6 @@
         </div>
       </section>
 
-      <!-- TOP SKILLS + TRENDING -->
       <section class="grid" style="margin-top:14px">
         <div class="card span-12">
           <div class="hd">
@@ -264,19 +260,7 @@
         </div>
       </section>
 
-      <!-- COVERAGE GAP MATRIX + SEGMENTATION -->
       <section class="grid" style="margin-top:14px">
-        <div class="card span-7">
-          <div class="hd">
-            <div>
-              <h2>NKU Coverage Gap Matrix</h2>
-              <p>Rows = skill families · Columns = programs/courses · Cells = coverage level (0–3).</p>
-            </div>
-            <div class="meta"><span class="chip">0 None · 1 Mentioned · 2 Practiced · 3 Assessed</span></div>
-          </div>
-          <div class="bd heat-wrap"><table id="heatTable"></table></div>
-        </div>
-
         <div class="card span-5">
           <div class="hd">
             <div>
@@ -292,81 +276,37 @@
         </div>
       </section>
 
-      <!-- ACTIONS -->
-      <section class="grid" style="margin-top:14px">
-        <div class="card span-12">
-          <div class="hd">
-            <div><h2>Opportunities Board</h2><p>Turn insight into decisions.</p></div>
-          </div>
-          <div class="bd"><div class="actions" id="actions"></div></div>
-        </div>
-      </section>
-
     </div>
   </main>
 
   <script>
-    // ----------------------------
-    // CONFIG
-    // ----------------------------
     const PROXY_BASE = "https://ai-skills-proxy.nealb3.workers.dev";
 
-    // IMPORTANT: NO "OR" here. We fan-out into multiple simple searches and merge.
-    const AI_TERMS = [
-      "artificial intelligence",
-      "machine learning",
-      "generative ai",
-      "genai",
-      "llm",
-      "large language model",
-      "chatgpt",
-      "copilot"
+    // USAJOBS gets the full fan-out
+    const AI_TERMS_US = [
+      "artificial intelligence","machine learning","generative ai","genai","llm",
+      "large language model","chatgpt","copilot"
     ];
 
-    const BASELINE_TERMS = [
-      "software",
-      "analyst",
-      "manager"
+    // Adzuna gets a smaller set to avoid 429 (you can expand later)
+    const AI_TERMS_ADZUNA = [
+      "artificial intelligence","machine learning","llm","generative ai"
     ];
 
-    const CACHE_KEY = "nku_ai_jobs_blend_cache_v3";
+    const BASELINE_TERMS = ["software","analyst","manager"];
+
+    const CACHE_KEY = "nku_ai_jobs_blend_cache_v4";
     const CACHE_TTL_MS = 60 * 60 * 1000;
 
-    // ----------------------------
-    // UI Helpers
-    // ----------------------------
     const $ = (sel, root=document) => root.querySelector(sel);
-    const $$ = (sel, root=document) => Array.from(root.querySelectorAll(sel));
-
     function setText(sel, txt){ const el = $(sel); if(el) el.textContent = txt; }
-    function escapeHtml(s){
-      return String(s).replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;")
-        .replaceAll('"',"&quot;").replaceAll("'","&#039;");
-    }
 
-    function sparkPoints(values){
-      if(!values || values.length < 2) return "";
-      const max = Math.max(...values), min = Math.min(...values), range = (max-min)||1;
-      return values.map((v,i)=>{
-        const x = (i/(values.length-1))*120;
-        const y = 34 - ((v-min)/range)*30;
-        return `${x.toFixed(1)},${y.toFixed(1)}`;
-      }).join(" ");
-    }
-
-    function pct(n){ return (n*100).toFixed(1) + "%"; }
-
-    // ----------------------------
-    // Cache
-    // ----------------------------
     function readCache(){
       try{
         const raw = localStorage.getItem(CACHE_KEY);
         if(!raw) return null;
         const obj = JSON.parse(raw);
         if(Date.now() - obj.time > CACHE_TTL_MS) return null;
-        // If AI count is 0 but baseline is non-zero, still allow cache (might be real),
-        // but we also show debug URLs so you can confirm.
         return obj.data;
       }catch{ return null; }
     }
@@ -375,9 +315,6 @@
     }
     function clearCache(){ try{ localStorage.removeItem(CACHE_KEY); }catch{} }
 
-    // ----------------------------
-    // Fetch utilities
-    // ----------------------------
     async function fetchJson(url){
       const res = await fetch(url, { cache:"no-store" });
       const text = await res.text();
@@ -392,33 +329,17 @@
       return json;
     }
 
-    // Try multiple param naming styles (worker may expect different names)
-    async function fetchUSAJOBS(term, perPage=50, page=1){
+    async function fetchUSAJOBS(term, perPage=25, page=1){
       const t = encodeURIComponent(term);
-      const urls = [
-        `${PROXY_BASE}/usajobs?keyword=${t}&ResultsPerPage=${perPage}&Page=${page}`,
-        `${PROXY_BASE}/usajobs?Keyword=${t}&ResultsPerPage=${perPage}&Page=${page}`,
-        `${PROXY_BASE}/usajobs?q=${t}&ResultsPerPage=${perPage}&Page=${page}`,
-      ];
-      let lastErr;
-      for(const u of urls){
-        try{ return { url:u, json: await fetchJson(u) }; }catch(e){ lastErr = e; }
-      }
-      throw lastErr;
+      const url = `${PROXY_BASE}/usajobs?keyword=${t}&ResultsPerPage=${perPage}&Page=${page}`;
+      return { url, json: await fetchJson(url) };
     }
 
-    async function fetchAdzuna(term, perPage=50, page=1){
+    // IMPORTANT FIX: Adzuna uses what= only (no query= fallback)
+    async function fetchAdzuna(term, perPage=25, page=1){
       const t = encodeURIComponent(term);
-      const urls = [
-        `${PROXY_BASE}/adzuna?what=${t}&results_per_page=${perPage}&page=${page}&country=us`,
-        `${PROXY_BASE}/adzuna?q=${t}&results_per_page=${perPage}&page=${page}&country=us`,
-        `${PROXY_BASE}/adzuna?query=${t}&results_per_page=${perPage}&page=${page}&country=us`,
-      ];
-      let lastErr;
-      for(const u of urls){
-        try{ return { url:u, json: await fetchJson(u) }; }catch(e){ lastErr = e; }
-      }
-      throw lastErr;
+      const url = `${PROXY_BASE}/adzuna?what=${t}&results_per_page=${perPage}&page=${page}&country=us`;
+      return { url, json: await fetchJson(url) };
     }
 
     function normalizeUSAJOBS(payload){
@@ -452,7 +373,6 @@
       }));
     }
 
-    // Dedupe across sources/terms to avoid duplicates
     function dedupeJobs(jobs){
       const seen = new Set();
       const out = [];
@@ -465,11 +385,9 @@
       return out;
     }
 
-    // Fan-out across terms and merge results (this is the fix)
     async function fanoutFetch(terms, fetcher, normalizer){
       const results = [];
       const debug = [];
-      // Run in parallel, but safely
       const settled = await Promise.allSettled(terms.map(t => fetcher(t)));
       for(let i=0;i<settled.length;i++){
         const term = terms[i];
@@ -485,34 +403,11 @@
       return { jobs: dedupeJobs(results), debug };
     }
 
-    async function fetchBlended(){
-      const cached = readCache();
-      if(cached) return cached;
+    function pct(n){ return (n*100).toFixed(1) + "%"; }
 
-      const aiUS = await fanoutFetch(AI_TERMS, (t)=>fetchUSAJOBS(t, 25, 1), normalizeUSAJOBS);
-      const aiAD = await fanoutFetch(AI_TERMS, (t)=>fetchAdzuna(t, 25, 1), normalizeAdzuna);
-      const baseUS = await fanoutFetch(BASELINE_TERMS, (t)=>fetchUSAJOBS(t, 25, 1), normalizeUSAJOBS);
-      const baseAD = await fanoutFetch(BASELINE_TERMS, (t)=>fetchAdzuna(t, 25, 1), normalizeAdzuna);
-
-      const aiJobs = dedupeJobs([...aiUS.jobs, ...aiAD.jobs]);
-      const baseJobs = dedupeJobs([...baseUS.jobs, ...baseAD.jobs]);
-
-      const out = {
-        fetchedAt: new Date().toISOString(),
-        counts: { ai: aiJobs.length, base: baseJobs.length },
-        aiJobs, baseJobs,
-        debug: { aiUS: aiUS.debug, aiAD: aiAD.debug, baseUS: baseUS.debug, baseAD: baseAD.debug }
-      };
-      writeCache(out);
-      return out;
-    }
-
-    // ----------------------------
-    // Skill extraction (simple, keyword based)
-    // ----------------------------
     const SKILLS = [
       { skill:"Prompting & workflow design", family:"GenAI workflows", keys:["prompt","prompting","workflow","automation","agent","agentic"] },
-      { skill:"AI tool proficiency (Copilot/ChatGPT)", family:"GenAI tools", keys:["copilot","chatgpt","gemini","claude","assistant"] },
+      { skill:"AI tool proficiency (Copilot/ChatGPT)", family:"GenAI tools", keys:["copilot","chatgpt","assistant"] },
       { skill:"LLM application development", family:"GenAI engineering", keys:["llm","langchain","rag","retrieval","vector","embedding","prompt engineering"] },
       { skill:"Python for automation", family:"Automation", keys:["python","scripting","automation","etl"] },
       { skill:"Data literacy (SQL / dashboards)", family:"Data foundations", keys:["sql","power bi","tableau","dashboard","analytics","reporting"] },
@@ -559,39 +454,10 @@
       return { labels: arr.map(x=>x[0]), values: arr.map(x=>x[1]) };
     }
 
-    // ----------------------------
-    // Renderers
-    // ----------------------------
     let segChart = null;
-
-    function renderRankLists(now, rising){
-      const liTemplate = (item, idx) => `
-        <li>
-          <div class="left">
-            <div class="num">${idx+1}</div>
-            <div style="min-width:0">
-              <div class="skill" title="${escapeHtml(item.skill)}">${escapeHtml(item.skill)}</div>
-              <div class="fam">${escapeHtml(item.family)}</div>
-            </div>
-          </div>
-          <div class="right">
-            <div class="metric">${escapeHtml(item.metric)}</div>
-            <div class="note">${escapeHtml(item.note)}</div>
-          </div>
-        </li>
-      `;
-      $("#listNow").innerHTML = now.map(liTemplate).join("");
-      $("#listRising").innerHTML = rising.map(liTemplate).join("");
-    }
-
     function renderSegmentation(labels, values){
-      setText("#segLabel", "Top categories");
-      const ctx = $("#segChart");
-
-      if(!window.Chart){
-        ctx.replaceWith(Object.assign(document.createElement("div"), { className:"muted", textContent:"Chart.js not available." }));
-        return;
-      }
+      const ctx = document.getElementById("segChart");
+      if(!window.Chart) return;
       if(segChart) segChart.destroy();
       segChart = new Chart(ctx, {
         type:"bar",
@@ -604,71 +470,51 @@
       });
     }
 
-    function renderActions(){
-      const actionBoard = [
-        { tag:"Quick win (30–60 days)", title:"Embed AI workflow labs + rubric", desc:"Add repeatable AI workflow assignment (inputs → prompts → checks → outputs)." },
-        { tag:"Quick win (30–60 days)", title:"Standardize AI usage policy language", desc:"Student-friendly guidance: allowed use, citation, verification." },
-        { tag:"1 semester", title:"Launch micro-badges by skill family", desc:"GenAI workflows, Data literacy, Automation, Governance." },
-        { tag:"1 semester", title:"Partner project pilots", desc:"Align partner projects to top coverage gaps (exec dashboard + demo)." },
-        { tag:"12 months", title:"Program-level mapping & reporting", desc:"Living AI skills coverage map + term-by-term tracking." },
-        { tag:"12 months", title:"Assessment + outcomes story", desc:"Report skills coverage, artifacts, placement, employer feedback." }
-      ];
-      $("#actions").innerHTML = actionBoard.map(it=>`
-        <div class="action">
-          <div class="tag">${escapeHtml(it.tag)}</div>
-          <h4>${escapeHtml(it.title)}</h4>
-          <p>${escapeHtml(it.desc)}</p>
-        </div>
-      `).join("");
-    }
-
-    function coverageClass(level){ return ["lvl0","lvl1","lvl2","lvl3"][level] || "lvl0"; }
-    function coverageLabel(level){ return ["None","Mentioned","Practiced","Assessed"][level] || "None"; }
-
-    function renderHeatmap(){
-      const cols = ["INF 125 (AI Literacy)", "INF 120 (Python)", "INF 286 (Web)", "IS/BA Analytics", "Gen-Ed / Core"];
-      const rows = [
-        { family:"GenAI tools & workflows", demandIndex:92, cells:[2,1,1,2,2] },
-        { family:"Data foundations (SQL / BI)", demandIndex:88, cells:[1,2,1,3,1] },
-        { family:"Automation (Python / scripting)", demandIndex:79, cells:[1,3,1,2,0] },
-        { family:"Governance (evaluation, policy, ethics)", demandIndex:74, cells:[3,1,0,1,2] },
-        { family:"Human skills (communication, change mgmt)", demandIndex:69, cells:[2,1,1,2,3] },
-      ];
-
-      const thead = `
-        <thead><tr>
-          <th>Skill Family</th>
-          ${cols.map(c=>`<th>${escapeHtml(c)}</th>`).join("")}
-          <th>Market Demand Index</th>
-        </tr></thead>
+    function renderRankLists(now, rising){
+      const liTemplate = (item, idx) => `
+        <li>
+          <div class="left">
+            <div class="num">${idx+1}</div>
+            <div style="min-width:0">
+              <div class="skill">${item.skill}</div>
+              <div class="fam">${item.family}</div>
+            </div>
+          </div>
+          <div class="right">
+            <div class="metric">${item.metric}</div>
+            <div class="note">${item.note}</div>
+          </div>
+        </li>
       `;
-
-      const tbody = rows.map(r=>`
-        <tr>
-          <td><span class="chip">${escapeHtml(r.family)}</span></td>
-          ${r.cells.map(lvl=>`
-            <td>
-              <div class="cell ${coverageClass(lvl)}">
-                <span class="lvl">${coverageLabel(lvl)}</span>
-                <span class="muted">${lvl}</span>
-              </div>
-            </td>
-          `).join("")}
-          <td><span class="chip">${r.demandIndex}</span></td>
-        </tr>
-      `).join("");
-
-      $("#heatTable").innerHTML = thead + `<tbody>${tbody}</tbody>`;
+      document.getElementById("listNow").innerHTML = now.map(liTemplate).join("");
+      document.getElementById("listRising").innerHTML = rising.map(liTemplate).join("");
     }
 
-    // ----------------------------
-    // Boot
-    // ----------------------------
-    async function init(){
-      renderActions();
-      renderHeatmap();
+    async function fetchBlended(){
+      const cached = readCache();
+      if(cached) return cached;
 
-      $("#forceRefresh").addEventListener("click", ()=>{
+      const aiUS = await fanoutFetch(AI_TERMS_US, (t)=>fetchUSAJOBS(t), normalizeUSAJOBS);
+      const aiAD = await fanoutFetch(AI_TERMS_ADZUNA, (t)=>fetchAdzuna(t), normalizeAdzuna);
+
+      const baseUS = await fanoutFetch(BASELINE_TERMS, (t)=>fetchUSAJOBS(t), normalizeUSAJOBS);
+      const baseAD = await fanoutFetch(BASELINE_TERMS, (t)=>fetchAdzuna(t), normalizeAdzuna);
+
+      const aiJobs = dedupeJobs([...aiUS.jobs, ...aiAD.jobs]);
+      const baseJobs = dedupeJobs([...baseUS.jobs, ...baseAD.jobs]);
+
+      const out = {
+        fetchedAt: new Date().toISOString(),
+        counts: { ai: aiJobs.length, base: baseJobs.length },
+        aiJobs, baseJobs,
+        debug: { aiUS: aiUS.debug, aiAD: aiAD.debug, baseUS: baseUS.debug, baseAD: baseAD.debug }
+      };
+      writeCache(out);
+      return out;
+    }
+
+    async function init(){
+      document.getElementById("forceRefresh").addEventListener("click", ()=>{
         clearCache();
         location.reload();
       });
@@ -676,32 +522,30 @@
       try{
         const blended = await fetchBlended();
 
-        // Debug panel output
+        setText("#lastRefresh", new Date(blended.fetchedAt).toLocaleString());
         setText("#dbgAi", String(blended.counts.ai));
         setText("#dbgBase", String(blended.counts.base));
 
-        const sample = {
+        const debugView = {
           counts: blended.counts,
           aiUS_terms: blended.debug.aiUS,
           aiAD_terms: blended.debug.aiAD,
           aiSampleTitles: blended.aiJobs.slice(0,8).map(j=>`${j.source}: ${j.title}`),
           baseSampleTitles: blended.baseJobs.slice(0,5).map(j=>`${j.source}: ${j.title}`)
         };
-        $("#dbgSample").textContent = JSON.stringify(sample, null, 2);
+        document.getElementById("dbgSample").textContent = JSON.stringify(debugView, null, 2);
 
-        // KPIs
         const share = blended.counts.ai / Math.max(blended.counts.ai + blended.counts.base, 1);
         const noncsShare = blended.aiJobs.length ? (blended.aiJobs.filter(classifyNonCS).length / blended.aiJobs.length) : 0;
 
-        setText("#lastRefresh", new Date(blended.fetchedAt).toLocaleString());
         setText("#kpi-aiShare", pct(share));
-        setText("#kpi-aiShareDelta", "live");
-        $("#spark-aiShare").setAttribute("points", sparkPoints([10,12,13,14,15,16,17,18,19, Math.round(share*100)]));
+        setText("#kpi-fastFamily", "—");
+        setText("#kpi-noncsShare", pct(noncsShare));
+        setText("#kpi-wagePremium", "—");
 
         const skillCounts = scoreSkills(blended.aiJobs);
         const topNow = topFromCounts(skillCounts, blended.aiJobs.length, 8);
 
-        // Rising heuristic: compare first half vs second half
         const mid = Math.floor(blended.aiJobs.length / 2) || 1;
         const recent = blended.aiJobs.slice(0, mid);
         const older = blended.aiJobs.slice(mid);
@@ -716,33 +560,17 @@
           return { skill, family: meta?.family || "Other", metric: (growth>=0?"+":"") + String(growth), note:"recent vs older slice" };
         }).sort((a,b)=> Number(b.metric)-Number(a.metric)).slice(0,8);
 
-        const fastFamily = (rising[0]?.family) || (topNow[0]?.family) || "—";
-        setText("#kpi-fastFamily", fastFamily);
-        setText("#kpi-fastFamilyDelta", "live");
-        $("#spark-fastFamily").setAttribute("points", sparkPoints([12,14,16,18,22,24,26,28,30,32,34,36]));
-
-        setText("#kpi-noncsShare", pct(noncsShare));
-        setText("#kpi-noncsDelta", "live");
-        $("#spark-noncs").setAttribute("points", sparkPoints([50,52,53,54,55,56,57,58,59,60,61, Math.round(noncsShare*100)]));
-
-        setText("#kpi-wagePremium", "—");
-        setText("#kpi-wageDelta", "n/a");
-        $("#spark-wage").setAttribute("points", sparkPoints([10,10,10,10,10,10,10,10,10,10,10,10]));
+        setText("#kpi-fastFamily", rising[0]?.family || topNow[0]?.family || "—");
 
         renderRankLists(topNow, rising);
 
-        // Segmentation from AI jobs
         const seg = topCategories(blended.aiJobs, 6);
         renderSegmentation(seg.labels, seg.values);
-        setText("#segSourceNote", `Sources: USAJOBS + Adzuna via ${PROXY_BASE} (fan-out terms, cached 1h)`);
+        setText("#segSourceNote", `Sources: USAJOBS + Adzuna via ${PROXY_BASE} (Adzuna reduced terms, cached 1h)`);
 
       }catch(err){
         console.error(err);
-        setText("#lastRefresh","Fetch failed");
-        $("#dbgSample").textContent = "Fetch failed. Open DevTools → Console for details.\n\n" + String(err);
-        setText("#kpi-aiShare","Error");
-        setText("#kpi-fastFamily","Check debug");
-        setText("#kpi-noncsShare","Check debug");
+        document.getElementById("dbgSample").textContent = "Fetch failed:\n" + String(err);
       }
     }
 
