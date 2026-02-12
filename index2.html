@@ -1,0 +1,1139 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>NKU — AI Skillsets for Hiring Now (Executive Dashboard)</title>
+
+  <!-- Optional: Chart.js (remove if your environment blocks CDNs) -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+
+  <style>
+    :root{
+      --bg:#f8fafc;
+      --surface:#ffffff;
+      --text:#0f172a;
+      --muted:#475569;
+      --muted-2:#64748b;
+      --border:#dbe3ef;
+      --shadow: 0 12px 30px rgba(15, 23, 42, 0.08);
+      --accent:#2563eb;
+      --accent-2:#1d4ed8;
+
+      --ok:#16a34a;
+      --warn:#f59e0b;
+      --bad:#ef4444;
+
+      --radius:18px;
+      --radius-sm:14px;
+    }
+
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
+      background:var(--bg);
+      color:var(--text);
+      line-height:1.5;
+    }
+    a{color:var(--accent); text-decoration:none}
+    a:hover{text-decoration:underline}
+    .skip-link{
+      position:absolute; left:-999px; top:auto; width:1px; height:1px; overflow:hidden;
+    }
+    .skip-link:focus{
+      left:1rem; top:1rem; width:auto; height:auto;
+      padding:.6rem .9rem; background:var(--surface); border:1px solid var(--border);
+      border-radius:12px; box-shadow:var(--shadow); z-index:9999;
+    }
+
+    header{
+      position:sticky; top:0; z-index:50;
+      background: rgba(248,250,252,.78);
+      backdrop-filter: blur(10px);
+      border-bottom:1px solid rgba(219,227,239,.7);
+    }
+    .wrap{max-width:1200px; margin:0 auto; padding:18px 18px}
+    .topbar{
+      display:flex; gap:12px; align-items:center; justify-content:space-between; flex-wrap:wrap;
+    }
+    .brand{
+      display:flex; gap:10px; align-items:flex-start;
+    }
+    .badge{
+      font-size:12px; color:#0b1220;
+      background: rgba(37,99,235,.10);
+      border:1px solid rgba(37,99,235,.18);
+      padding:6px 10px; border-radius:999px;
+      display:inline-flex; gap:8px; align-items:center;
+    }
+    .badge strong{font-weight:650}
+    .title{
+      margin:0;
+      font-size:18px;
+      letter-spacing:-.02em;
+    }
+    .subtitle{
+      margin:2px 0 0;
+      font-size:13px;
+      color:var(--muted);
+    }
+    .toolbar{
+      display:flex; gap:10px; align-items:center; flex-wrap:wrap;
+    }
+    .pillset{
+      background:var(--surface);
+      border:1px solid var(--border);
+      border-radius:999px;
+      padding:6px;
+      display:flex; gap:6px; align-items:center;
+      box-shadow: 0 6px 18px rgba(15, 23, 42, 0.05);
+    }
+    .pillset button{
+      border:0; background:transparent; cursor:pointer;
+      padding:8px 10px; border-radius:999px;
+      color:var(--muted);
+      font-weight:600;
+      font-size:13px;
+      transition: background .15s ease, color .15s ease;
+    }
+    .pillset button[aria-pressed="true"]{
+      background: rgba(37,99,235,.12);
+      color: var(--accent-2);
+    }
+    .meta{
+      font-size:12px; color:var(--muted-2);
+      display:flex; gap:10px; align-items:center; flex-wrap:wrap;
+    }
+    .dot{width:6px; height:6px; border-radius:999px; background:var(--accent); display:inline-block}
+
+    main{padding:20px 0 34px}
+    .grid{
+      display:grid;
+      gap:14px;
+    }
+    .grid.kpis{grid-template-columns: repeat(12, 1fr)}
+    .card{
+      background:var(--surface);
+      border:1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      overflow:hidden;
+    }
+    .card .hd{
+      padding:14px 16px 10px;
+      display:flex; align-items:flex-start; justify-content:space-between; gap:12px; flex-wrap:wrap;
+      border-bottom:1px solid rgba(219,227,239,.65);
+    }
+    .card .hd h2{
+      margin:0;
+      font-size:14px;
+      letter-spacing:-.01em;
+    }
+    .card .hd p{
+      margin:4px 0 0;
+      font-size:12px;
+      color:var(--muted);
+    }
+    .card .bd{padding:14px 16px}
+
+    /* KPI cards */
+    .kpi{
+      padding:14px 14px 12px;
+      display:flex; flex-direction:column; gap:8px;
+      min-height:120px;
+    }
+    .kpi-top{
+      display:flex; align-items:flex-start; justify-content:space-between; gap:10px;
+    }
+    .kpi-label{
+      font-size:12px; color:var(--muted); font-weight:650;
+    }
+    .kpi-value{
+      font-size:26px; letter-spacing:-.03em; font-weight:750;
+      margin-top:2px;
+    }
+    .kpi-delta{
+      font-size:12px; font-weight:700;
+      display:inline-flex; gap:6px; align-items:center;
+      padding:4px 8px; border-radius:999px;
+      border:1px solid rgba(219,227,239,.9);
+      background: rgba(2,6,23,.02);
+      color:var(--muted);
+      white-space:nowrap;
+    }
+    .kpi-delta.up{color: #0f6b2a; background: rgba(22,163,74,.10); border-color: rgba(22,163,74,.20)}
+    .kpi-delta.down{color:#7c2d12; background: rgba(245,158,11,.12); border-color: rgba(245,158,11,.22)}
+    .spark{
+      width:100%; height:36px;
+      border-radius:12px;
+      background: linear-gradient(180deg, rgba(37,99,235,.10), rgba(37,99,235,.02));
+      border:1px solid rgba(37,99,235,.18);
+      overflow:hidden;
+    }
+    .spark svg{display:block; width:100%; height:100%}
+
+    /* Layout */
+    .kpi.span-3{grid-column: span 3}
+    .span-6{grid-column: span 6}
+    .span-7{grid-column: span 7}
+    .span-5{grid-column: span 5}
+    .span-12{grid-column: span 12}
+
+    @media (max-width: 980px){
+      .kpi.span-3{grid-column: span 6}
+      .span-7, .span-5, .span-6{grid-column: span 12}
+    }
+    @media (max-width: 520px){
+      .kpi.span-3{grid-column: span 12}
+    }
+
+    /* Ranked lists */
+    .lists{
+      display:grid;
+      grid-template-columns: 1fr 1fr;
+      gap:12px;
+    }
+    @media (max-width: 980px){
+      .lists{grid-template-columns:1fr}
+    }
+    .rank{
+      border:1px solid rgba(219,227,239,.75);
+      border-radius: var(--radius-sm);
+      overflow:hidden;
+    }
+    .rank .rh{
+      padding:12px 12px 10px;
+      background: rgba(2,6,23,.02);
+      border-bottom:1px solid rgba(219,227,239,.75);
+    }
+    .rank .rh strong{font-size:13px}
+    .rank .rh div{margin-top:4px; font-size:12px; color:var(--muted)}
+    .rank ul{
+      margin:0; padding:0; list-style:none;
+    }
+    .rank li{
+      display:flex; gap:10px; align-items:flex-start; justify-content:space-between;
+      padding:10px 12px;
+      border-bottom:1px solid rgba(219,227,239,.55);
+    }
+    .rank li:last-child{border-bottom:0}
+    .rank .left{
+      display:flex; gap:10px; align-items:flex-start;
+      min-width:0;
+    }
+    .rank .num{
+      width:24px; height:24px; border-radius:8px;
+      display:grid; place-items:center;
+      background: rgba(37,99,235,.10);
+      border:1px solid rgba(37,99,235,.18);
+      color: var(--accent-2);
+      font-weight:800; font-size:12px;
+      flex: 0 0 auto;
+    }
+    .rank .skill{
+      font-weight:750; font-size:13px;
+      white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+      max-width: 360px;
+    }
+    .rank .fam{font-size:12px; color:var(--muted); margin-top:2px}
+    .rank .right{
+      text-align:right;
+      flex: 0 0 auto;
+    }
+    .rank .metric{
+      font-weight:800; font-size:13px;
+    }
+    .rank .note{font-size:12px; color:var(--muted); margin-top:2px}
+
+    /* Heatmap */
+    .heat-wrap{overflow:auto}
+    table{
+      width:100%;
+      border-collapse:separate;
+      border-spacing:0;
+      min-width: 920px;
+    }
+    th, td{
+      padding:10px 10px;
+      border-bottom:1px solid rgba(219,227,239,.7);
+      font-size:12px;
+      vertical-align:middle;
+      background:var(--surface);
+    }
+    th{
+      position:sticky; top:0;
+      z-index:2;
+      background: #f9fbff;
+      color:#0b1220;
+      font-size:12px;
+      font-weight:800;
+      border-bottom:1px solid rgba(219,227,239,.95);
+      text-align:left;
+      white-space:nowrap;
+    }
+    td:first-child, th:first-child{
+      position:sticky; left:0;
+      z-index:1;
+      background: #ffffff;
+    }
+    .chip{
+      display:inline-flex; align-items:center; gap:6px;
+      padding:5px 9px;
+      border-radius:999px;
+      border:1px solid rgba(219,227,239,.9);
+      background: rgba(2,6,23,.02);
+      font-weight:700;
+      white-space:nowrap;
+    }
+    .cell{
+      cursor:pointer;
+      border-radius:12px;
+      border:1px solid rgba(219,227,239,.85);
+      padding:8px 10px;
+      display:flex; align-items:center; justify-content:space-between; gap:10px;
+      transition: transform .08s ease, border-color .12s ease;
+      user-select:none;
+      min-width: 140px;
+    }
+    .cell:hover{
+      transform: translateY(-1px);
+      border-color: rgba(37,99,235,.35);
+    }
+    .lvl{
+      font-weight:850;
+      font-size:12px;
+    }
+    .lvl0{background: rgba(239,68,68,.10); border-color: rgba(239,68,68,.22)}
+    .lvl1{background: rgba(245,158,11,.12); border-color: rgba(245,158,11,.24)}
+    .lvl2{background: rgba(37,99,235,.10); border-color: rgba(37,99,235,.22)}
+    .lvl3{background: rgba(22,163,74,.12); border-color: rgba(22,163,74,.22)}
+    .muted{color:var(--muted)}
+
+    /* Side panel */
+    .drawer{
+      position:fixed;
+      right:14px;
+      top:82px;
+      width:min(420px, calc(100vw - 28px));
+      max-height: calc(100vh - 96px);
+      overflow:auto;
+      border-radius: 18px;
+      border:1px solid rgba(219,227,239,.95);
+      background: rgba(255,255,255,.92);
+      backdrop-filter: blur(10px);
+      box-shadow: var(--shadow);
+      display:none;
+      z-index: 100;
+    }
+    .drawer.open{display:block}
+    .drawer .dh{
+      padding:14px 14px 10px;
+      border-bottom:1px solid rgba(219,227,239,.75);
+      display:flex; align-items:flex-start; justify-content:space-between; gap:10px;
+    }
+    .drawer h3{
+      margin:0;
+      font-size:14px;
+      letter-spacing:-.01em;
+    }
+    .drawer .close{
+      border:1px solid rgba(219,227,239,.95);
+      background:#fff;
+      border-radius:12px;
+      padding:8px 10px;
+      cursor:pointer;
+      font-weight:800;
+      color:var(--muted);
+    }
+    .drawer .db{padding:12px 14px 14px}
+    .drawer .section{margin:0 0 12px}
+    .drawer .section strong{font-size:12px}
+    .drawer .section p, .drawer .section ul{
+      margin:6px 0 0;
+      font-size:12px;
+      color:var(--muted);
+    }
+    .drawer ul{padding-left:18px}
+
+    /* Action board */
+    .actions{
+      display:grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap:12px;
+    }
+    @media (max-width: 980px){ .actions{grid-template-columns:1fr} }
+    .action{
+      border:1px solid rgba(219,227,239,.75);
+      border-radius: var(--radius-sm);
+      padding:12px;
+      background: rgba(2,6,23,.015);
+    }
+    .action .tag{
+      display:inline-flex; align-items:center; gap:6px;
+      padding:4px 8px; border-radius:999px;
+      border:1px solid rgba(219,227,239,.85);
+      background:#fff;
+      font-size:12px; font-weight:800;
+      color: var(--muted);
+      margin-bottom:8px;
+    }
+    .action h4{margin:0 0 6px; font-size:13px}
+    .action p{margin:0; font-size:12px; color:var(--muted)}
+    .footnote{
+      margin-top:10px;
+      font-size:12px;
+      color:var(--muted);
+      display:flex; gap:10px; align-items:flex-start; flex-wrap:wrap;
+    }
+    .kbd{
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      font-size:11px;
+      border:1px solid rgba(219,227,239,.9);
+      background:#fff;
+      padding:2px 6px;
+      border-radius:8px;
+      color:#0b1220;
+      white-space:nowrap;
+    }
+  </style>
+</head>
+
+<body>
+  <a class="skip-link" href="#main">Skip to dashboard</a>
+
+  <header>
+    <div class="wrap">
+      <div class="topbar">
+        <div class="brand">
+          <div>
+            <div class="badge" title="Executive, one-page view with drilldowns">
+              <span class="dot" aria-hidden="true"></span>
+              <strong>Executive Dashboard</strong> · AI Skillsets for Hiring Now
+            </div>
+            <h1 class="title">NKU — AI Skillset Needs for Graduates Getting Hired Today</h1>
+            <p class="subtitle">Top skills now · fastest-rising skills · NKU coverage gaps · action board</p>
+          </div>
+        </div>
+
+        <div class="toolbar" aria-label="Dashboard filters">
+          <div class="pillset" role="group" aria-label="Audience / Population Toggle" id="audienceToggle">
+            <button type="button" data-audience="all" aria-pressed="true">All NKU Grads</button>
+            <button type="button" data-audience="business" aria-pressed="false">Business</button>
+            <button type="button" data-audience="informatics" aria-pressed="false">Informatics</button>
+            <button type="button" data-audience="health" aria-pressed="false">Health</button>
+          </div>
+
+          <div class="meta">
+            <span><span class="dot" aria-hidden="true"></span> Last refresh: <strong id="lastRefresh">Feb 11, 2026</strong></span>
+            <span title="Example sources: Lightcast / LinkedIn / WEF / NIST / O*NET"><strong>Sources:</strong> LMI + market research</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main id="main">
+    <div class="wrap">
+
+      <!-- KPI STRIP -->
+      <section class="grid kpis" aria-label="Key performance indicators">
+        <div class="card kpi span-3" role="region" aria-label="AI-skill job share">
+          <div class="kpi-top">
+            <div>
+              <div class="kpi-label">AI-skill job share</div>
+              <div class="kpi-value" id="kpi-aiShare">—</div>
+            </div>
+            <div class="kpi-delta up" id="kpi-aiShareDelta">▲ —</div>
+          </div>
+          <div class="muted" style="font-size:12px">Mentions in postings · last 12–24 months</div>
+          <div class="spark" aria-hidden="true">
+            <svg viewBox="0 0 120 36" preserveAspectRatio="none">
+              <polyline id="spark-aiShare" fill="none" stroke="rgba(37,99,235,.8)" stroke-width="2" points=""></polyline>
+            </svg>
+          </div>
+        </div>
+
+        <div class="card kpi span-3" role="region" aria-label="Fastest-growing skill family">
+          <div class="kpi-top">
+            <div>
+              <div class="kpi-label">Fastest-growing skill family</div>
+              <div class="kpi-value" id="kpi-fastFamily">—</div>
+            </div>
+            <div class="kpi-delta up" id="kpi-fastFamilyDelta">▲ —</div>
+          </div>
+          <div class="muted" style="font-size:12px">YoY growth in postings</div>
+          <div class="spark" aria-hidden="true">
+            <svg viewBox="0 0 120 36" preserveAspectRatio="none">
+              <polyline id="spark-fastFamily" fill="none" stroke="rgba(37,99,235,.8)" stroke-width="2" points=""></polyline>
+            </svg>
+          </div>
+        </div>
+
+        <div class="card kpi span-3" role="region" aria-label="Non-CS share of AI demand">
+          <div class="kpi-top">
+            <div>
+              <div class="kpi-label">Non-CS share of AI demand</div>
+              <div class="kpi-value" id="kpi-noncsShare">—</div>
+            </div>
+            <div class="kpi-delta up" id="kpi-noncsDelta">▲ —</div>
+          </div>
+          <div class="muted" style="font-size:12px">AI skills requested outside CS roles</div>
+          <div class="spark" aria-hidden="true">
+            <svg viewBox="0 0 120 36" preserveAspectRatio="none">
+              <polyline id="spark-noncs" fill="none" stroke="rgba(37,99,235,.8)" stroke-width="2" points=""></polyline>
+            </svg>
+          </div>
+        </div>
+
+        <div class="card kpi span-3" role="region" aria-label="Estimated wage premium">
+          <div class="kpi-top">
+            <div>
+              <div class="kpi-label">Estimated wage premium</div>
+              <div class="kpi-value" id="kpi-wagePremium">—</div>
+            </div>
+            <div class="kpi-delta up" id="kpi-wageDelta">▲ —</div>
+          </div>
+          <div class="muted" style="font-size:12px">AI-skill postings vs baseline</div>
+          <div class="spark" aria-hidden="true">
+            <svg viewBox="0 0 120 36" preserveAspectRatio="none">
+              <polyline id="spark-wage" fill="none" stroke="rgba(37,99,235,.8)" stroke-width="2" points=""></polyline>
+            </svg>
+          </div>
+        </div>
+      </section>
+
+      <!-- TOP SKILLS + TRENDING -->
+      <section class="grid" style="margin-top:14px">
+        <div class="card span-12" role="region" aria-label="Top skills now and trending">
+          <div class="hd">
+            <div>
+              <h2>Top Skills Now vs. Fastest Rising</h2>
+              <p>Grouped into skill families for an executive-friendly view (toggle audience above).</p>
+            </div>
+            <div class="meta">
+              <span class="chip" title="Scope of skills shown">Window: <strong id="windowNow">Last 90 days</strong> · Rising: <strong id="windowRising">YoY</strong></span>
+            </div>
+          </div>
+          <div class="bd">
+            <div class="lists">
+              <div class="rank" aria-label="Top skills now">
+                <div class="rh">
+                  <strong>Top AI Skills in Postings</strong>
+                  <div>Ranked by demand index (example)</div>
+                </div>
+                <ul id="listNow"></ul>
+              </div>
+
+              <div class="rank" aria-label="Fastest rising skills">
+                <div class="rh">
+                  <strong>Fastest Rising Skills</strong>
+                  <div>Ranked by growth rate (example)</div>
+                </div>
+                <ul id="listRising"></ul>
+              </div>
+            </div>
+
+            <div class="footnote">
+              <span class="chip">Tip: Click a heatmap cell below to open the drilldown panel.</span>
+              <span class="chip">Keyboard: <span class="kbd">Esc</span> closes drilldown</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- COVERAGE GAP MATRIX + SEGMENTATION -->
+      <section class="grid" style="margin-top:14px">
+        <div class="card span-7" role="region" aria-label="NKU coverage gap matrix">
+          <div class="hd">
+            <div>
+              <h2>NKU Coverage Gap Matrix</h2>
+              <p>Rows = skill families · Columns = programs/courses · Cells = coverage level (0–3).</p>
+            </div>
+            <div class="meta">
+              <span class="chip" title="Coverage scale">0 None · 1 Mentioned · 2 Practiced · 3 Assessed</span>
+              <span class="chip" title="Market demand proxy">Rightmost = Market Demand Index</span>
+            </div>
+          </div>
+
+          <div class="bd heat-wrap">
+            <table aria-label="Coverage heatmap table" id="heatTable">
+              <!-- injected -->
+            </table>
+          </div>
+        </div>
+
+        <div class="card span-5" role="region" aria-label="Where the jobs are">
+          <div class="hd">
+            <div>
+              <h2>Where the Jobs Are</h2>
+              <p>Choose one simple segmentation: industry cluster, occupation group, or region.</p>
+            </div>
+            <div class="meta">
+              <span class="chip" id="segLabel">Industry clusters</span>
+            </div>
+          </div>
+          <div class="bd">
+            <canvas id="segChart" height="240" aria-label="Segmentation chart" role="img"></canvas>
+            <p class="muted" style="margin:10px 0 0; font-size:12px">
+              Keep this visual simple and consistent—executives should grasp it in <strong>&lt; 10 seconds</strong>.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <!-- RESPONSIBLE AI + ACTIONS -->
+      <section class="grid" style="margin-top:14px">
+        <div class="card span-6" role="region" aria-label="Trust and governance skills">
+          <div class="hd">
+            <div>
+              <h2>Trust & Governance Skills (Credibility Boost)</h2>
+              <p>Signals NKU builds employable + trustworthy AI capability (not just tools).</p>
+            </div>
+            <div class="meta">
+              <span class="chip">Responsible AI · Risk · Privacy · Security</span>
+            </div>
+          </div>
+          <div class="bd">
+            <ul class="muted" style="margin:0; padding-left:18px; font-size:12px">
+              <li><strong>Responsible AI</strong>: fairness, transparency, human oversight</li>
+              <li><strong>AI risk management</strong>: evaluation, monitoring, documentation</li>
+              <li><strong>Security & privacy</strong>: data handling, access control, policy</li>
+              <li><strong>Governance</strong>: acceptable use, model selection, vendor risk</li>
+            </ul>
+            <p class="muted" style="margin:10px 0 0; font-size:12px">
+              Quick add: embed a 1–2 week module + rubric into gen-ed / gateway courses.
+            </p>
+          </div>
+        </div>
+
+        <div class="card span-6" role="region" aria-label="Action board">
+          <div class="hd">
+            <div>
+              <h2>Action Board</h2>
+              <p>Turn insight into decisions (owners + timelines).</p>
+            </div>
+            <div class="meta">
+              <span class="chip">Quick wins · 1 semester · 12 months</span>
+            </div>
+          </div>
+          <div class="bd">
+            <div class="actions" id="actions"></div>
+          </div>
+        </div>
+      </section>
+
+    </div>
+  </main>
+
+  <!-- Drilldown Drawer -->
+  <aside class="drawer" id="drawer" aria-label="Skill drilldown panel" role="dialog" aria-modal="false">
+    <div class="dh">
+      <div>
+        <h3 id="drawerTitle">Skill Drilldown</h3>
+        <div class="muted" style="font-size:12px" id="drawerSubtitle">Click a heatmap cell to populate details.</div>
+      </div>
+      <button class="close" type="button" id="drawerClose" aria-label="Close drilldown">Close</button>
+    </div>
+    <div class="db" id="drawerBody"></div>
+  </aside>
+
+  <script>
+    /************************************************************
+     * 1) SAMPLE DATA (replace with your real data pipeline)
+     ************************************************************/
+    const dashboardData = {
+      lastRefresh: "Feb 11, 2026",
+      audiences: ["all","business","informatics","health"],
+      kpis: {
+        all: {
+          aiShare: { value: "18.4%", delta: "+2.1 pts", trend: [10,11,11,12,13,13,14,15,16,17,18,18] },
+          fastFamily: { value: "GenAI / LLM", delta: "+38% YoY", trend: [12,13,14,16,18,21,24,28,31,34,37,40] },
+          noncsShare: { value: "62%", delta: "+6 pts", trend: [50,51,52,53,55,56,57,58,60,61,62,62] },
+          wagePremium: { value: "+12–18%", delta: "+3 pts", trend: [8,9,10,10,11,12,12,13,14,15,16,17] },
+        },
+        business: {
+          aiShare: { value: "14.2%", delta: "+1.6 pts", trend: [8,8,9,9,10,10,11,12,12,13,14,14] },
+          fastFamily: { value: "AI Workflows", delta: "+31% YoY", trend: [10,11,11,12,14,16,18,20,22,25,28,31] },
+          noncsShare: { value: "78%", delta: "+5 pts", trend: [70,71,71,72,73,74,75,76,77,78,78,78] },
+          wagePremium: { value: "+10–15%", delta: "+2 pts", trend: [7,7,8,9,9,10,10,11,12,12,13,14] },
+        },
+        informatics: {
+          aiShare: { value: "24.7%", delta: "+2.8 pts", trend: [15,16,16,17,18,19,20,21,22,23,24,25] },
+          fastFamily: { value: "Model Ops", delta: "+42% YoY", trend: [12,13,15,17,19,22,25,28,32,35,39,42] },
+          noncsShare: { value: "44%", delta: "+4 pts", trend: [36,36,37,38,39,40,41,42,43,44,44,44] },
+          wagePremium: { value: "+15–22%", delta: "+3 pts", trend: [10,11,12,12,13,14,15,16,17,18,19,20] },
+        },
+        health: {
+          aiShare: { value: "12.9%", delta: "+1.2 pts", trend: [7,7,8,8,9,9,10,10,11,12,12,13] },
+          fastFamily: { value: "AI Compliance", delta: "+27% YoY", trend: [8,8,9,9,10,11,12,14,16,18,22,27] },
+          noncsShare: { value: "81%", delta: "+7 pts", trend: [70,71,72,73,74,75,76,77,78,79,80,81] },
+          wagePremium: { value: "+8–12%", delta: "+1 pt", trend: [5,5,6,6,7,7,8,8,9,10,11,12] },
+        }
+      },
+
+      topNow: {
+        all: [
+          { skill:"Prompting & workflow design", family:"GenAI workflows", metric:"92", note:"Demand index" },
+          { skill:"Data literacy (SQL / dashboards)", family:"Data foundations", metric:"88", note:"Demand index" },
+          { skill:"AI tool proficiency (Copilot/ChatGPT)", family:"GenAI tools", metric:"84", note:"Demand index" },
+          { skill:"Python for automation", family:"Automation", metric:"79", note:"Demand index" },
+          { skill:"Model evaluation & testing", family:"Governance", metric:"74", note:"Demand index" },
+          { skill:"AI ethics & responsible use", family:"Governance", metric:"71", note:"Demand index" },
+          { skill:"Stakeholder communication", family:"Human skills", metric:"69", note:"Demand index" },
+          { skill:"Product thinking with AI", family:"Business/PM", metric:"66", note:"Demand index" },
+        ],
+        business: [
+          { skill:"Prompting & workflow design", family:"GenAI workflows", metric:"90", note:"Demand index" },
+          { skill:"AI tool proficiency", family:"GenAI tools", metric:"86", note:"Demand index" },
+          { skill:"Analytics storytelling", family:"Human + data", metric:"80", note:"Demand index" },
+          { skill:"SQL / reporting", family:"Data foundations", metric:"78", note:"Demand index" },
+          { skill:"AI governance basics", family:"Governance", metric:"72", note:"Demand index" },
+          { skill:"Automation mindset", family:"Ops excellence", metric:"68", note:"Demand index" },
+        ],
+        informatics: [
+          { skill:"Python", family:"Automation/ML", metric:"95", note:"Demand index" },
+          { skill:"Model evaluation", family:"Governance", metric:"88", note:"Demand index" },
+          { skill:"Data pipelines", family:"Data engineering", metric:"84", note:"Demand index" },
+          { skill:"LLM app building", family:"GenAI engineering", metric:"82", note:"Demand index" },
+          { skill:"MLOps basics", family:"Model ops", metric:"79", note:"Demand index" },
+          { skill:"Security & privacy", family:"Trust", metric:"75", note:"Demand index" },
+        ],
+        health: [
+          { skill:"AI compliance awareness", family:"Governance", metric:"90", note:"Demand index" },
+          { skill:"Data literacy", family:"Data foundations", metric:"82", note:"Demand index" },
+          { skill:"AI tools for productivity", family:"GenAI tools", metric:"78", note:"Demand index" },
+          { skill:"Privacy & security", family:"Trust", metric:"76", note:"Demand index" },
+          { skill:"Change management", family:"Human skills", metric:"72", note:"Demand index" },
+        ],
+      },
+
+      rising: {
+        all: [
+          { skill:"LLM application development", family:"GenAI engineering", metric:"+61%", note:"YoY" },
+          { skill:"Model evaluation & red-teaming", family:"Governance", metric:"+49%", note:"YoY" },
+          { skill:"AI policy / governance", family:"Governance", metric:"+44%", note:"YoY" },
+          { skill:"Agentic workflow design", family:"GenAI workflows", metric:"+41%", note:"YoY" },
+          { skill:"Data privacy in AI", family:"Trust", metric:"+36%", note:"YoY" },
+          { skill:"Prompt libraries & reuse", family:"GenAI workflows", metric:"+33%", note:"YoY" },
+          { skill:"AI product analytics", family:"Business/PM", metric:"+29%", note:"YoY" },
+          { skill:"Human-centered AI", family:"Design", metric:"+24%", note:"YoY" },
+        ],
+        business: [
+          { skill:"Agentic workflow design", family:"GenAI workflows", metric:"+52%", note:"YoY" },
+          { skill:"AI governance", family:"Governance", metric:"+41%", note:"YoY" },
+          { skill:"AI product analytics", family:"Business/PM", metric:"+33%", note:"YoY" },
+          { skill:"Prompt libraries & reuse", family:"GenAI workflows", metric:"+29%", note:"YoY" },
+        ],
+        informatics: [
+          { skill:"LLM app development", family:"GenAI engineering", metric:"+68%", note:"YoY" },
+          { skill:"MLOps basics", family:"Model ops", metric:"+47%", note:"YoY" },
+          { skill:"Evaluation & red-teaming", family:"Governance", metric:"+45%", note:"YoY" },
+          { skill:"Data privacy", family:"Trust", metric:"+34%", note:"YoY" },
+        ],
+        health: [
+          { skill:"AI compliance", family:"Governance", metric:"+43%", note:"YoY" },
+          { skill:"Privacy in AI", family:"Trust", metric:"+38%", note:"YoY" },
+          { skill:"AI tools proficiency", family:"GenAI tools", metric:"+26%", note:"YoY" },
+        ],
+      },
+
+      // Coverage matrix: rows = families; columns = programs/courses; values 0–3
+      coverage: {
+        columns: ["INF 125 (AI Literacy)", "INF 120 (Python)", "INF 286 (Web)", "IS/BA Analytics", "Gen-Ed / Core"],
+        rows: [
+          {
+            family:"GenAI tools & workflows",
+            demandIndex: 92,
+            cells: [2,1,1,2,2],
+            drill: {
+              roles:["Business Analyst","Marketing Analyst","Operations Specialist","Junior Developer"],
+              keywords:["prompting","workflow automation","copilot","chatgpt","ai assistant"],
+              quickWins:[
+                "Add a 1-week lab: ‘Design a repeatable AI workflow’ (inputs → prompts → checks → outputs).",
+                "Require a citation + verification checklist for AI-assisted work.",
+                "Assess with a rubric (clarity, safety, iteration, documentation)."
+              ]
+            }
+          },
+          {
+            family:"Data foundations (SQL / BI)",
+            demandIndex: 88,
+            cells: [1,2,1,3,1],
+            drill: {
+              roles:["Data Analyst","Operations Analyst","Finance Analyst"],
+              keywords:["sql","dashboard","power bi","tableau","data literacy"],
+              quickWins:[
+                "Embed a ‘data-to-decision’ mini-project in a gateway course.",
+                "Add a ‘dashboard critique’ assignment (executive storytelling)."
+              ]
+            }
+          },
+          {
+            family:"Automation (Python / scripting)",
+            demandIndex: 79,
+            cells: [1,3,1,2,0],
+            drill: {
+              roles:["Junior Developer","Automation Analyst","Systems Analyst"],
+              keywords:["python","automation","scripting","api","etl"],
+              quickWins:[
+                "Add ‘small automation’ labs tied to real business tasks (CSV → cleaned output).",
+                "Introduce ‘build once, reuse’ packaging mindset."
+              ]
+            }
+          },
+          {
+            family:"Governance (evaluation, policy, ethics)",
+            demandIndex: 74,
+            cells: [3,1,0,1,2],
+            drill: {
+              roles:["Compliance Analyst","Risk Analyst","Project Manager"],
+              keywords:["responsible ai","evaluation","risk","policy","governance"],
+              quickWins:[
+                "Add a 30-min ‘AI risk’ module + reflection + rubric.",
+                "Require documentation: model/tool used, data sensitivity, limitations."
+              ]
+            }
+          },
+          {
+            family:"Human skills (communication, change mgmt)",
+            demandIndex: 69,
+            cells: [2,1,1,2,3],
+            drill: {
+              roles:["Project Coordinator","Business Analyst","Customer Success"],
+              keywords:["stakeholder","communication","change management","presentation"],
+              quickWins:[
+                "Require ‘exec-ready 1-pager’ deliverables for projects.",
+                "Add a ‘communicate uncertainty’ micro-lesson."
+              ]
+            }
+          }
+        ]
+      },
+
+      segmentation: {
+        all: {
+          label: "Industry clusters",
+          labels: ["Finance", "Healthcare", "Manufacturing", "Retail", "Tech", "Public Sector"],
+          values: [22, 18, 16, 14, 20, 10]
+        },
+        business: {
+          label: "Occupation groups",
+          labels: ["Analytics", "Marketing", "Operations", "Finance", "Sales"],
+          values: [30, 22, 18, 20, 10]
+        },
+        informatics: {
+          label: "Occupation groups",
+          labels: ["Software", "Data/ML", "Cyber", "IT Ops", "Product"],
+          values: [28, 26, 18, 16, 12]
+        },
+        health: {
+          label: "Industry clusters",
+          labels: ["Hospitals", "Insurance", "Public Health", "Biotech", "Vendors"],
+          values: [30, 22, 18, 12, 18]
+        },
+      },
+
+      actionBoard: [
+        { tag:"Quick win (30–60 days)", title:"Embed AI workflow labs + rubric", desc:"Add a repeatable AI workflow assignment (inputs → prompts → checks → outputs) in 2–3 gateway courses." },
+        { tag:"Quick win (30–60 days)", title:"Standardize AI usage policy language", desc:"Simple, student-friendly guidance: what’s allowed, what must be cited, and what must be verified." },
+        { tag:"1 semester", title:"Launch micro-badges by skill family", desc:"GenAI workflows, Data literacy, Automation, Governance—each with 1 project + assessment." },
+        { tag:"1 semester", title:"Partner project pilots", desc:"Align 3 employer projects to the top 3 coverage gaps (deliverables: exec dashboard + demo)." },
+        { tag:"12 months", title:"Program-level mapping & reporting", desc:"Create a living coverage map of AI skills across programs and measure improvements each term." },
+        { tag:"12 months", title:"Assessment + outcomes story", desc:"Report: skills coverage, student artifacts, placement data, and employer feedback." }
+      ]
+    };
+
+    /************************************************************
+     * 2) STATE + UTILITIES
+     ************************************************************/
+    let currentAudience = "all";
+    let segChart = null;
+
+    const $ = (sel, root=document) => root.querySelector(sel);
+    const $$ = (sel, root=document) => Array.from(root.querySelectorAll(sel));
+
+    function setText(id, txt){ const el = $(id); if(el) el.textContent = txt; }
+
+    function sparkPoints(values){
+      // Normalize into SVG points for viewBox 0..120 x 0..36
+      const max = Math.max(...values);
+      const min = Math.min(...values);
+      const range = (max - min) || 1;
+      return values.map((v,i)=>{
+        const x = (i/(values.length-1)) * 120;
+        const y = 34 - ((v - min)/range)*30; // padding
+        return `${x.toFixed(1)},${y.toFixed(1)}`;
+      }).join(" ");
+    }
+
+    function coverageClass(level){
+      return ["lvl0","lvl1","lvl2","lvl3"][level] || "lvl0";
+    }
+    function coverageLabel(level){
+      return ["None","Mentioned","Practiced","Assessed"][level] || "None";
+    }
+
+    /************************************************************
+     * 3) RENDERERS
+     ************************************************************/
+    function renderHeader(){
+      setText("#lastRefresh", dashboardData.lastRefresh);
+    }
+
+    function renderKpis(){
+      const k = dashboardData.kpis[currentAudience];
+
+      // KPI 1
+      setText("#kpi-aiShare", k.aiShare.value);
+      setText("#kpi-aiShareDelta", `▲ ${k.aiShare.delta}`);
+      $("#spark-aiShare").setAttribute("points", sparkPoints(k.aiShare.trend));
+
+      // KPI 2
+      setText("#kpi-fastFamily", k.fastFamily.value);
+      setText("#kpi-fastFamilyDelta", `▲ ${k.fastFamily.delta}`);
+      $("#spark-fastFamily").setAttribute("points", sparkPoints(k.fastFamily.trend));
+
+      // KPI 3
+      setText("#kpi-noncsShare", k.noncsShare.value);
+      setText("#kpi-noncsDelta", `▲ ${k.noncsShare.delta}`);
+      $("#spark-noncs").setAttribute("points", sparkPoints(k.noncsShare.trend));
+
+      // KPI 4
+      setText("#kpi-wagePremium", k.wagePremium.value);
+      setText("#kpi-wageDelta", `▲ ${k.wagePremium.delta}`);
+      $("#spark-wage").setAttribute("points", sparkPoints(k.wagePremium.trend));
+    }
+
+    function renderRankLists(){
+      const now = dashboardData.topNow[currentAudience] || [];
+      const rising = dashboardData.rising[currentAudience] || [];
+
+      const liTemplate = (item, idx) => `
+        <li>
+          <div class="left">
+            <div class="num" aria-hidden="true">${idx+1}</div>
+            <div style="min-width:0">
+              <div class="skill" title="${escapeHtml(item.skill)}">${escapeHtml(item.skill)}</div>
+              <div class="fam">${escapeHtml(item.family)}</div>
+            </div>
+          </div>
+          <div class="right">
+            <div class="metric">${escapeHtml(item.metric)}</div>
+            <div class="note">${escapeHtml(item.note)}</div>
+          </div>
+        </li>
+      `;
+
+      $("#listNow").innerHTML = now.map(liTemplate).join("");
+      $("#listRising").innerHTML = rising.map(liTemplate).join("");
+    }
+
+    function renderHeatmap(){
+      const cols = dashboardData.coverage.columns;
+      const rows = dashboardData.coverage.rows;
+
+      const thead = `
+        <thead>
+          <tr>
+            <th>Skill Family</th>
+            ${cols.map(c=>`<th>${escapeHtml(c)}</th>`).join("")}
+            <th>Market Demand Index</th>
+          </tr>
+        </thead>
+      `;
+
+      const tbodyRows = rows.map((r, rIdx) => {
+        const cells = r.cells.map((lvl, cIdx) => {
+          const cls = coverageClass(lvl);
+          const lbl = coverageLabel(lvl);
+          return `
+            <td>
+              <div class="cell ${cls}" role="button" tabindex="0"
+                   data-row="${rIdx}" data-col="${cIdx}"
+                   aria-label="${escapeHtml(r.family)} — ${escapeHtml(cols[cIdx])}: ${lbl}. Click for drilldown.">
+                <span class="lvl">${lbl}</span>
+                <span class="muted" style="font-size:12px">${lvl}</span>
+              </div>
+            </td>
+          `;
+        }).join("");
+
+        return `
+          <tr>
+            <td><span class="chip">${escapeHtml(r.family)}</span></td>
+            ${cells}
+            <td><span class="chip">${r.demandIndex}</span></td>
+          </tr>
+        `;
+      }).join("");
+
+      $("#heatTable").innerHTML = thead + `<tbody>${tbodyRows}</tbody>`;
+
+      // Wire up click + keyboard
+      $$(".cell", $("#heatTable")).forEach(el=>{
+        el.addEventListener("click", onHeatCellActivate);
+        el.addEventListener("keydown", (e)=>{
+          if(e.key === "Enter" || e.key === " "){
+            e.preventDefault();
+            onHeatCellActivate(e);
+          }
+        });
+      });
+    }
+
+    function renderSegmentation(){
+      const seg = dashboardData.segmentation[currentAudience];
+      setText("#segLabel", seg.label);
+
+      const ctx = $("#segChart");
+      if (!window.Chart) {
+        // If CDN blocked, fallback to text
+        ctx.replaceWith(Object.assign(document.createElement("div"), {
+          className: "muted",
+          style: "font-size:12px",
+          textContent: "Chart.js not available. Replace this section with your preferred chart library or static image."
+        }));
+        return;
+      }
+
+      if (segChart) segChart.destroy();
+
+      segChart = new Chart(ctx, {
+        type: "bar",
+        data: {
+          labels: seg.labels,
+          datasets: [{ label: seg.label, data: seg.values }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: { display: false },
+            tooltip: { enabled: true }
+          },
+          scales: {
+            y: { beginAtZero: true, ticks: { precision:0 } }
+          }
+        }
+      });
+    }
+
+    function renderActions(){
+      const items = dashboardData.actionBoard;
+      $("#actions").innerHTML = items.map(it => `
+        <div class="action">
+          <div class="tag">${escapeHtml(it.tag)}</div>
+          <h4>${escapeHtml(it.title)}</h4>
+          <p>${escapeHtml(it.desc)}</p>
+        </div>
+      `).join("");
+    }
+
+    /************************************************************
+     * 4) DRILLDOWN DRAWER
+     ************************************************************/
+    function openDrawer(payload){
+      const drawer = $("#drawer");
+      $("#drawerTitle").textContent = payload.title;
+      $("#drawerSubtitle").textContent = payload.subtitle;
+
+      $("#drawerBody").innerHTML = `
+        <div class="section">
+          <strong>Target roles seeing this skill</strong>
+          <ul>${payload.roles.map(r=>`<li>${escapeHtml(r)}</li>`).join("")}</ul>
+        </div>
+
+        <div class="section">
+          <strong>Posting keywords (examples)</strong>
+          <p>${payload.keywords.map(k=>`<span class="chip" style="margin:3px 6px 0 0">${escapeHtml(k)}</span>`).join("")}</p>
+        </div>
+
+        <div class="section">
+          <strong>Curriculum “quick wins”</strong>
+          <ul>${payload.quickWins.map(w=>`<li>${escapeHtml(w)}</li>`).join("")}</ul>
+        </div>
+
+        <div class="section">
+          <strong>Suggested artifact (exec-ready)</strong>
+          <p>Create a one-page deliverable: <em>problem → approach → evidence → risks → recommendation</em>, plus a short demo.</p>
+        </div>
+      `;
+
+      drawer.classList.add("open");
+    }
+
+    function closeDrawer(){
+      $("#drawer").classList.remove("open");
+    }
+
+    function onHeatCellActivate(e){
+      const el = e.currentTarget;
+      const rowIdx = Number(el.getAttribute("data-row"));
+      const colIdx = Number(el.getAttribute("data-col"));
+
+      const row = dashboardData.coverage.rows[rowIdx];
+      const colName = dashboardData.coverage.columns[colIdx];
+      const lvl = row.cells[colIdx];
+
+      openDrawer({
+        title: `${row.family} — ${colName}`,
+        subtitle: `Coverage: ${coverageLabel(lvl)} (${lvl}) · Market Demand Index: ${row.demandIndex}`,
+        roles: row.drill.roles,
+        keywords: row.drill.keywords,
+        quickWins: row.drill.quickWins
+      });
+    }
+
+    /************************************************************
+     * 5) AUDIENCE TOGGLE + BOOT
+     ************************************************************/
+    function setAudience(aud){
+      currentAudience = aud;
+
+      // Toggle buttons
+      $$("#audienceToggle button").forEach(btn=>{
+        const on = btn.dataset.audience === aud;
+        btn.setAttribute("aria-pressed", on ? "true" : "false");
+      });
+
+      renderKpis();
+      renderRankLists();
+      renderSegmentation();
+      // coverage is NKU-centric; keep same unless you want per-audience coverage maps
+      // renderHeatmap();
+    }
+
+    function escapeHtml(s){
+      return String(s)
+        .replaceAll("&","&amp;")
+        .replaceAll("<","&lt;")
+        .replaceAll(">","&gt;")
+        .replaceAll('"',"&quot;")
+        .replaceAll("'","&#039;");
+    }
+
+    function init(){
+      renderHeader();
+      renderKpis();
+      renderRankLists();
+      renderHeatmap();
+      renderSegmentation();
+      renderActions();
+
+      // Toggle wiring
+      $$("#audienceToggle button").forEach(btn=>{
+        btn.addEventListener("click", ()=> setAudience(btn.dataset.audience));
+      });
+
+      // Drawer close
+      $("#drawerClose").addEventListener("click", closeDrawer);
+      document.addEventListener("keydown", (e)=>{
+        if(e.key === "Escape") closeDrawer();
+      });
+    }
+
+    init();
+  </script>
+</body>
+</html>
