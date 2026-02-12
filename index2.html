@@ -46,7 +46,16 @@
       padding:.6rem .9rem; background:var(--surface); border:1px solid var(--border);
       border-radius:12px; box-shadow:var(--shadow); z-index:9999;
     }
-
+    .sources-btn{
+      border:1px solid var(--border);
+      background:var(--surface);
+      border-radius:999px;
+      padding:8px 10px;
+      cursor:pointer;
+      font-weight:700;
+      font-size:13px;
+      color:var(--muted);
+    }
     header{
       position:sticky; top:0; z-index:50;
       background: rgba(248,250,252,.78);
@@ -412,7 +421,8 @@
               <strong>Executive Dashboard</strong> · AI Skillsets for Hiring Now
             </div>
             <h1 class="title">NKU — AI Skillset Needs for Graduates Getting Hired Today</h1>
-            <p class="subtitle">Top skills now · fastest-rising skills · NKU coverage gaps · action board</p>
+            <p class="subtitle">Top skills now · fastest-rising skills · NKU coverage gaps · opportunities board</p>
+            <button type="button" class="sources-btn" id="openSources">Data sources</button>
           </div>
         </div>
 
@@ -1086,6 +1096,45 @@
         quickWins: row.drill.quickWins
       });
     }
+    document.getElementById("openSources").addEventListener("click", () => {
+  openDrawer({
+    title: "Data Sources & Definitions",
+    subtitle: `Last refresh: ${dashboardData.lastRefresh}`,
+    roles: [],
+    keywords: [],
+    quickWins: []
+  });
+
+  // Replace drawer content with sources
+  document.getElementById("drawerBody").innerHTML = `
+    <div class="section">
+      <strong>Primary sources</strong>
+      <ul>
+        ${dashboardData.sources.primary.map(s => `
+          <li>
+            <strong>${escapeHtml(s.name)}</strong> — ${escapeHtml(s.use)}<br/>
+            <span class="muted">${escapeHtml(s.notes || "")}</span>
+          </li>
+        `).join("")}
+      </ul>
+    </div>
+
+    <div class="section">
+      <strong>Definitions used in this dashboard</strong>
+      <ul>
+        ${dashboardData.sources.definitions.map(d => `
+          <li><strong>${escapeHtml(d.term)}:</strong> ${escapeHtml(d.definition)}</li>
+        `).join("")}
+      </ul>
+    </div>
+
+    <div class="section">
+      <strong>Refresh cadence</strong>
+      <p>${escapeHtml(dashboardData.sources.refreshCadence)}</p>
+    </div>
+  `;
+});
+
 
     /************************************************************
      * 5) AUDIENCE TOGGLE + BOOT
