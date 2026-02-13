@@ -929,6 +929,65 @@
       const url = `${PROXY_BASE}/adzuna?what=${t}&results_per_page=${perPage}&page=${page}&country=us`;
       return { url, json: await fetchJson(url), term };
     }
+    async function fetchRemotive(searchTerm=""){
+  const q = encodeURIComponent(searchTerm || "");
+  const url = `${PROXY_BASE}/remotive${q ? `?search=${q}` : ""}`;
+  return { url, json: await fetchJson(url), term: searchTerm };
+}
+
+function normalizeRemotive(payload){
+  const items = payload?.jobs || payload?.data?.jobs || [];
+  return items.map(it => ({
+    source: "Remotive",
+    title: asText(it?.title),
+    description: asText(it?.description),
+    company: asText(it?.company_name || it?.company || "Unknown"),
+    category: asText(it?.category || it?.job_type || "Remote"),
+    location: asText(it?.candidate_required_location || "Remote"),
+    url: asText(it?.url || it?.job_url || ""),
+    date: parseDateSafe(it?.publication_date || it?.created_at || null)
+  }));
+}
+
+async function fetchGreenhouseBoard(board){
+  const url = `${PROXY_BASE}/greenhouse?board=${encodeURIComponent(board)}`;
+  return { url, json: await fetchJson(url), term: board };
+}
+
+function normalizeGreenhouse(payload, boardName="Greenhouse"){
+  const jobs = payload?.jobs || [];
+  return jobs.map(it => ({
+    source: `Greenhouse:${boardName}`,
+    title: asText(it?.title),
+    description: asText(it?.content || it?.internal_content || ""),
+    company: boardName,
+    category: asText(it?.departments?.[0]?.name || it?.department?.name || "Other"),
+    location: asText(it?.location?.name || ""),
+    url: asText(it?.absolute_url || it?.url || ""),
+    date: parseDateSafe(it?.updated_at || it?.created_at || null)
+  }));
+}
+
+async function fetchAshbyOrg(org){
+  const url = `${PROXY_BASE}/ashby?org=${encodeURIComponent(org)}`;
+  return { url, json: await fetchJson(url), term: org };
+}
+
+function normalizeAshby(payload, orgName="Ashby"){
+  // Ashby response structures vary; this covers common "jobPostings" shape
+  const jobs = payload?.jobPostings || payload?.job_postings || payload?.data?.jobPostings || [];
+  return jobs.map(it => ({
+    source: `Ashby:${orgName}`,
+    title: asText(it?.title),
+    description: asText(it?.descriptionHtml || it?.description || ""),
+    company: orgName,
+    category: asText(it?.team || it?.department || "Other"),
+    location: asText(it?.locationName || it?.location || ""),
+    url: asText(it?.jobUrl || it?.url || ""),
+    date: parseDateSafe(it?.publishedAt || it?.updatedAt || null)
+  }));
+}
+
 
     /*****************************************************************
      * NORMALIZERS
@@ -1170,33 +1229,88 @@
     /*****************************************************************
      * DATA PIPELINE
      *****************************************************************/
-    async function fetchBlend(){
-      const cached = readCache();
-      if(cached) return cached;
+async function fetchBlend(){
+  const cached = readCache();
+  if(cached) return cached;
 
-      const aiUS = await fanoutFetch(AI_TERMS_US, (t)=>fetchUSAJOBS(t, 25, 1), normalizeUSAJOBS);
-      const aiAD = await fanoutFetch(AI_TERMS_ADZUNA, (t)=>fetchAdzuna(t, 25, 1), normalizeAdzuna);
+  // 1) Aggregators (search-based)
+  const aiUS = await fanoutFetch(AI_TERMS_US, (t)=>fetchUSAJOBS(t, 25, 1), normalizeUSAJOBS);
+  const aiAD = await fanoutFetch(AI_TERMS_ADZUNA, (t)=>fetchAdzuna(t, 25, 1), normalizeAdzuna);
 
-      const baseUS = await fanoutFetch(BASELINE_TERMS, (t)=>fetchUSAJOBS(t, 25, 1), normalizeUSAJOBS);
-      const baseAD = await fanoutFetch(BASELINE_TERMS, (t)=>fetchAdzuna(t, 25, 1), normalizeAdzuna);
+  // Remotive supports search; use same AI terms (but fewer to reduce load)
+  const aiRM = await fanoutFetch(
+    ["machine learning","generative ai","llm","copilot"],
+    (t)=>fetchRemotive(t),
+    normalizeRemotive
+  );
 
-      const aiJobs = dedupeJobs([...aiUS.jobs, ...aiAD.jobs]);
-      const baseJobs = dedupeJobs([...baseUS.jobs, ...baseAD.jobs]);
+  const baseUS = await fanoutFetch(BASELINE_TERMS, (t)=>fetchUSAJOBS(t, 25, 1), normalizeUSAJOBS);
+  const baseAD = await fanoutFetch(BASELINE_TERMS, (t)=>fetchAdzuna(t, 25, 1), normalizeAdzuna);
+  const baseRM = await fanoutFetch(["engineer","analyst","manager"], (t)=>fetchRemotive(t), normalizeRemotive);
 
-      const out = {
-        fetchedAt: new Date().toISOString(),
-        aiJobs,
-        baseJobs,
-        raw: {
-          aiRaw: aiUS.rawCount + aiAD.rawCount,
-          baseRaw: baseUS.rawCount + baseAD.rawCount
-        },
-        debug: { aiUS: aiUS.debug, aiAD: aiAD.debug, baseUS: baseUS.debug, baseAD: baseAD.debug }
-      };
+  // 2) Partner feeds (non-search): pull all, then classify locally
+  const partnerJobs = [];
+  const partnerDebug = { greenhouse: [], ashby: [] };
 
-      writeCache(out);
-      return out;
+  // Greenhouse boards
+  for(const board of (PARTNER_FEEDS.greenhouseBoards || [])){
+    try{
+      const { url, json } = await fetchGreenhouseBoard(board);
+      partnerDebug.greenhouse.push({ ok:true, board, url });
+      partnerJobs.push(...normalizeGreenhouse(json, board));
+    }catch(e){
+      partnerDebug.greenhouse.push({ ok:false, board, error:String(e).slice(0,180) });
     }
+  }
+
+  // Ashby orgs
+  for(const org of (PARTNER_FEEDS.ashbyOrgs || [])){
+    try{
+      const { url, json } = await fetchAshbyOrg(org);
+      partnerDebug.ashby.push({ ok:true, org, url });
+      partnerJobs.push(...normalizeAshby(json, org));
+    }catch(e){
+      partnerDebug.ashby.push({ ok:false, org, error:String(e).slice(0,180) });
+    }
+  }
+
+  // 3) Split partner jobs into AI vs baseline using your existing term logic
+  const isAiPosting = (job) => {
+    const text = (asText(job.title) + " " + asText(job.description)).toLowerCase();
+    const aiNeedles = [...AI_TERMS_US, ...AI_TERMS_ADZUNA].map(s=>s.toLowerCase());
+    return aiNeedles.some(k => text.includes(k));
+  };
+  const isBaselinePosting = (job) => {
+    const text = (asText(job.title) + " " + asText(job.description)).toLowerCase();
+    const needles = BASELINE_TERMS.map(s=>s.toLowerCase());
+    return needles.some(k => text.includes(k));
+  };
+
+  const partnerAi = partnerJobs.filter(isAiPosting);
+  const partnerBase = partnerJobs.filter(isBaselinePosting);
+
+  // 4) Blend everything
+  const aiJobs = dedupeJobs([...aiUS.jobs, ...aiAD.jobs, ...aiRM.jobs, ...partnerAi]);
+  const baseJobs = dedupeJobs([...baseUS.jobs, ...baseAD.jobs, ...baseRM.jobs, ...partnerBase]);
+
+  const out = {
+    fetchedAt: new Date().toISOString(),
+    aiJobs,
+    baseJobs,
+    raw: {
+      aiRaw: aiUS.rawCount + aiAD.rawCount + aiRM.rawCount + partnerAi.length,
+      baseRaw: baseUS.rawCount + baseAD.rawCount + baseRM.rawCount + partnerBase.length
+    },
+    debug: {
+      aiUS: aiUS.debug, aiAD: aiAD.debug, aiRM: aiRM.debug,
+      baseUS: baseUS.debug, baseAD: baseAD.debug, baseRM: baseRM.debug,
+      partners: partnerDebug
+    }
+  };
+
+  writeCache(out);
+  return out;
+}
 
     /*****************************************************************
      * STATE
