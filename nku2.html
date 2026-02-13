@@ -608,13 +608,6 @@
           <button type="button" data-state="KY" aria-pressed="false">Kentucky</button>
         </div>
 
-        <div class="seg" role="group" aria-label="Academic lens">
-          <button type="button" data-aud="all" aria-pressed="true">All programs</button>
-          <button type="button" data-aud="business" aria-pressed="false">Business</button>
-          <button type="button" data-aud="informatics" aria-pressed="false">Informatics</button>
-          <button type="button" data-aud="health" aria-pressed="false">Health</button>
-        </div>
-
         <span class="chip"><span class="dot" aria-hidden="true"></span> Status: <strong id="status">loading…</strong></span>
         <span class="chip">Last refresh: <strong id="lastRefresh">—</strong></span>
         <button class="btn" id="openMethods" type="button">Methods & Sources</button>
@@ -1122,26 +1115,107 @@ let currentAudience = "all"; // all | business | informatics | health
 let topSkillsChart = null;
 let roleFamiliesChart = null;
 
-function renderTopSkillsChart(labels, values){
-  const ctx = $("#topSkillsChart");
-  if(topSkillsChart) topSkillsChart.destroy();
+function renderSkillsChart(labels, values){
+  const canvas = $("#skillsChart");
+  if(!canvas) return;
 
-  topSkillsChart = new Chart(ctx, {
+  if(skillsChart) skillsChart.destroy();
+
+  // Sort highest → lowest (better story)
+  const pairs = labels.map((l,i)=>[l, values[i] ?? 0]).sort((a,b)=>b[1]-a[1]);
+  const sortedLabels = pairs.map(p=>p[0]);
+  const sortedValues = pairs.map(p=>p[1]);
+
+  // Shorten labels for axis display (full label stays in tooltip)
+  const shortLabel = (s, max=26) => {
+    const t = String(s ?? "");
+    if(t.length <= max) return t;
+    return t.slice(0, max-1) + "…";
+  };
+
+  const total = sortedValues.reduce((s,v)=>s+v,0) || 1;
+
+  skillsChart = new Chart(canvas, {
     type: "bar",
-    data: { labels, datasets: [{ label:"Mentions", data: values, borderWidth: 1, borderRadius: 14 }] },
+    data: {
+      labels: sortedLabels.map(l => shortLabel(l, 30)),
+      datasets: [{
+        label: "Mentions",
+        data: sortedValues,
+
+        // NKU-friendly gold
+        backgroundColor: "rgba(255,199,44,0.85)", // #FFC72C
+        hoverBackgroundColor: "rgba(255,199,44,1)",
+
+        borderColor: "rgba(11,15,20,0.28)",
+        borderWidth: 1,
+
+        borderRadius: 12,
+        barThickness: 16,
+        maxBarThickness: 20,
+        categoryPercentage: 0.78,
+        barPercentage: 0.9
+      }]
+    },
     options: {
       responsive: true,
       maintainAspectRatio: false,
+      indexAxis: "y", // ✅ horizontal bars fix long labels
+
+      layout: { padding: { left: 8, right: 12, top: 6, bottom: 6 } },
+
       plugins: {
         legend: { display: false },
+
         tooltip: {
-          callbacks: { label: (c)=> `${c.parsed.y} mentions` }
+          backgroundColor: "rgba(255,255,255,0.98)",
+          titleColor: "#0b0f14",
+          bodyColor: "#111827",
+          borderColor: "rgba(0,0,0,0.10)",
+          borderWidth: 1,
+          cornerRadius: 12,
+          padding: 12,
+          displayColors: false,
+          callbacks: {
+            // Show full, unshortened label from original array
+            title: (items) => {
+              const i = items?.[0]?.dataIndex ?? 0;
+              return sortedLabels[i] || "Skill";
+            },
+            label: (ctx) => {
+              const v = ctx.parsed.x ?? 0;
+              const pct = v / total;
+              return ` ${v.toLocaleString()} mentions • ${(pct*100).toFixed(1)}% of skill mentions`;
+            }
+          }
         }
       },
+
       scales: {
-        y: { beginAtZero: true, ticks: { precision: 0, color: "rgba(238,242,255,.72)" }, grid: { color:"rgba(255,255,255,.06)" } },
-        x: { ticks: { color: "rgba(238,242,255,.80)", font: { weight: "800" } }, grid: { display:false } }
-      }
+        x: {
+          beginAtZero: true,
+          grid: {
+            color: "rgba(17,24,39,0.08)",
+            drawBorder: false
+          },
+          ticks: {
+            color: "rgba(17,24,39,0.78)",
+            font: { weight: "800" },
+            precision: 0,
+            callback: (v)=> Number(v).toLocaleString()
+          }
+        },
+        y: {
+          grid: { display: false, drawBorder: false },
+          ticks: {
+            color: "rgba(11,15,20,0.92)",   // ✅ darker = readable
+            font: { weight: "900" },
+            padding: 6
+          }
+        }
+      },
+
+      animation: { duration: 550, easing: "easeOutQuart" }
     }
   });
 }
