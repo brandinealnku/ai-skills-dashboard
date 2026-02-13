@@ -244,7 +244,6 @@
     }
     .bd{ padding: 14px 16px 16px; }
 
-    /* Header mini tabs */
     .headerTabs{
       display:flex;
       justify-content:flex-start;
@@ -271,7 +270,6 @@
       box-shadow: 0 14px 30px rgba(15,23,42,0.09);
     }
 
-    /* KPI cards */
     .kpi{ padding: 14px 14px 12px; }
     .kpiTop{
       display:flex;
@@ -348,7 +346,6 @@
     .spark svg{ width:100%; height:100%; display:block; }
     .spark polyline{ stroke-linecap: round; stroke-linejoin: round; }
 
-    /* Chart wrapper */
     .chartWrap{
       border: 1px solid rgba(219,227,239,0.85);
       border-radius: var(--radius);
@@ -365,7 +362,6 @@
       color: var(--muted2);
     }
 
-    /* Executive narrative */
     .callout{
       border: 1px solid rgba(219,227,239,0.9);
       background: rgba(248,250,252,0.75);
@@ -392,7 +388,6 @@
       line-height:1.5;
     }
 
-    /* Drawer */
     .drawer{
       position: fixed;
       top: 14px;
@@ -456,7 +451,6 @@
       font-weight: 850;
     }
 
-    /* shimmer */
     .skel{
       background: linear-gradient(90deg, rgba(148,163,184,.14), rgba(148,163,184,.06), rgba(148,163,184,.14));
       background-size: 200% 100%;
@@ -465,6 +459,29 @@
       display:inline-block;
     }
     @keyframes shimmer{ 0%{background-position:200% 0} 100%{background-position:-200% 0} }
+
+    .list{
+      margin: 10px 0 0;
+      padding: 0;
+      list-style: none;
+    }
+    .list li{
+      display:flex;
+      justify-content:space-between;
+      gap:10px;
+      padding: 10px 10px;
+      border: 1px solid rgba(219,227,239,0.85);
+      background: rgba(255,255,255,0.75);
+      border-radius: 14px;
+      margin-bottom: 8px;
+      font-size: 13px;
+      font-weight: 800;
+      color:#0b1220;
+    }
+    .list li span{
+      color: var(--muted);
+      font-weight: 900;
+    }
 
     @media (max-width: 1020px){
       .topbar{ flex-direction:column; align-items:stretch; }
@@ -492,1520 +509,1404 @@
 </head>
 
 <body>
-  <header>
-    <div class="wrap">
-      <div class="topbar">
-        <div>
-          <div class="badge"><span class="dot"></span> NKU Executive Dashboard · Workforce Signals for AI (Blended Live)</div>
-          <h1>AI Skills Demand — What the Market Is Asking For</h1>
-          <p class="subtitle">
-            Designed for NKU chairs, directors, associate deans, and deans. This dashboard blends a trusted public anchor (USAJOBS),
-            private-sector breadth (Adzuna), and remote-first breadth (Remotive) to provide a current, evidence-based snapshot of AI-related demand.
-          </p>
-
-          <div class="headerTabs" aria-label="Top actions">
-            <button class="tabBtn active" id="tabOverview" type="button">Overview</button>
-            <button class="tabBtn" id="tabMethods" type="button">Methods & Sources</button>
-            <button class="tabBtn primary" id="tabPrint" type="button">Print / PDF</button>
-          </div>
-        </div>
-
-        <div class="toolbar">
-          <div class="pillset" id="audienceToggle" role="group" aria-label="Academic lens">
-            <button type="button" data-aud="all" aria-pressed="true">All programs</button>
-            <button type="button" data-aud="business" aria-pressed="false">Business</button>
-            <button type="button" data-aud="informatics" aria-pressed="false">Informatics</button>
-            <button type="button" data-aud="health" aria-pressed="false">Health</button>
-          </div>
-
-          <div class="meta">
-            <span class="chip">Last refresh: <strong id="lastRefresh">—</strong></span>
-            <span class="chip">Blended sources: <strong>USAJOBS + Adzuna + Remotive</strong> (via Worker)</span>
-            <button class="btn" id="openMethods" type="button">Data details</button>
-          </div>
-
-          <div class="status">
-            <span class="pill">Blend status: <span id="blendStatus" class="live">loading…</span></span>
-            <button class="btn" id="forceRefresh" type="button">Force refresh</button>
-          </div>
-        </div>
-      </div>
-    </div>
-  </header>
-
-  <main>
-    <div class="wrap">
-
-      <!-- Executive narrative -->
-      <section class="grid" aria-label="Executive narrative">
-        <div class="card span-12">
-          <div class="hd">
-            <div>
-              <h2>Academic-ready reading guide</h2>
-              <p>Use this as a quick, confident framing for conversations about curriculum alignment, employer partnerships, and student readiness.</p>
-            </div>
-            <button class="btn" id="openReadingGuide" type="button">How to use</button>
-          </div>
-          <div class="bd" style="display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:10px;">
-            <div class="callout">
-              <div class="t">What this measures</div>
-              <div class="h">Employer language signals</div>
-              <div class="b">We scan posting titles + descriptions for transparent AI keywords and skill phrases. Results are directional signals, not an official labor taxonomy.</div>
-            </div>
-            <div class="callout">
-              <div class="t">Why it’s credible</div>
-              <div class="h">Blended + deduped</div>
-              <div class="b">We combine federal, private-sector, and remote-first sources and remove duplicates. We also report date coverage and sample sizes for interpretability.</div>
-            </div>
-            <div class="callout">
-              <div class="t">How to use it</div>
-              <div class="h">Curriculum + partnerships</div>
-              <div class="b">Use the Top Skills + Category Mix to prioritize modules, micro-credentials, and employer projects. Use KY/OH and Remote signals to guide outreach and internships.</div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <!-- KPI strip -->
-      <section class="grid" style="margin-top:14px" aria-label="Leadership KPIs">
-
-        <div class="card kpi span-3" role="region" aria-label="AI-signal share">
-          <div class="kpiTop">
-            <div class="kpiLabel">
-              AI-signal share
-              <span class="hint" data-hint="aiShare">?</span>
-            </div>
-            <div class="kpiTag good" id="kAiShareDelta">▲ — pts</div>
-          </div>
-          <div class="kpiValue" id="kAiShare">—</div>
-          <div class="kpiSub">Share of postings matching the AI keyword filter (within the selected lens)</div>
-          <div class="spark" aria-hidden="true">
-            <svg viewBox="0 0 120 44" preserveAspectRatio="none">
-              <polyline id="sparkAiShare" fill="none" stroke="rgba(37,99,235,.85)" stroke-width="2" points=""></polyline>
-            </svg>
-          </div>
-        </div>
-
-        <div class="card kpi span-3" role="region" aria-label="AI postings sample size">
-          <div class="kpiTop">
-            <div class="kpiLabel">
-              AI postings (sample)
-              <span class="hint" data-hint="sampleSize">?</span>
-            </div>
-            <div class="kpiTag" id="kSourceMix">—</div>
-          </div>
-          <div class="kpiValue" id="kAiCount">—</div>
-          <div class="kpiSub">Deduped across sources (higher = stronger signal)</div>
-          <div class="spark" aria-hidden="true">
-            <svg viewBox="0 0 120 44" preserveAspectRatio="none">
-              <polyline id="sparkAiCount" fill="none" stroke="rgba(37,99,235,.85)" stroke-width="2" points=""></polyline>
-            </svg>
-          </div>
-        </div>
-
-        <div class="card kpi span-3" role="region" aria-label="Regional relevance">
-          <div class="kpiTop">
-            <div class="kpiLabel">
-              KY/OH relevance
-              <span class="hint" data-hint="region">?</span>
-            </div>
-            <div class="kpiTag good" id="kRegionDelta">▲ — pts</div>
-          </div>
-          <div class="kpiValue" id="kRegionShare">—</div>
-          <div class="kpiSub">Share of AI postings with Kentucky/Ohio signals (from location/title text)</div>
-          <div class="spark" aria-hidden="true">
-            <svg viewBox="0 0 120 44" preserveAspectRatio="none">
-              <polyline id="sparkRegion" fill="none" stroke="rgba(37,99,235,.85)" stroke-width="2" points=""></polyline>
-            </svg>
-          </div>
-        </div>
-
-        <div class="card kpi span-3" role="region" aria-label="Remote opportunity">
-          <div class="kpiTop">
-            <div class="kpiLabel">
-              Remote opportunity
-              <span class="hint" data-hint="remote">?</span>
-            </div>
-            <div class="kpiTag good" id="kRemoteDelta">▲ — pts</div>
-          </div>
-          <div class="kpiValue" id="kRemoteShare">—</div>
-          <div class="kpiSub">Share of AI postings marked remote/telework (useful for pipelines)</div>
-          <div class="spark" aria-hidden="true">
-            <svg viewBox="0 0 120 44" preserveAspectRatio="none">
-              <polyline id="sparkRemote" fill="none" stroke="rgba(37,99,235,.85)" stroke-width="2" points=""></polyline>
-            </svg>
-          </div>
-        </div>
-
-      </section>
-
-      <!-- Second row -->
-      <section class="grid" style="margin-top:14px" aria-label="Curriculum alignment KPIs">
-
-        <div class="card kpi span-3" role="region" aria-label="Top category">
-          <div class="kpiTop">
-            <div class="kpiLabel">
-              Top hiring category
-              <span class="hint" data-hint="topCat">?</span>
-            </div>
-            <div class="kpiTag good" id="kTopCatShare">▲ — share</div>
-          </div>
-          <div class="kpiBig" id="kTopCat">—</div>
-          <div class="kpiSub">Most common category among AI-matched postings</div>
-          <div class="spark" aria-hidden="true">
-            <svg viewBox="0 0 120 44" preserveAspectRatio="none">
-              <polyline id="sparkTopCat" fill="none" stroke="rgba(37,99,235,.85)" stroke-width="2" points=""></polyline>
-            </svg>
-          </div>
-        </div>
-
-        <div class="card kpi span-3" role="region" aria-label="Non-development share">
-          <div class="kpiTop">
-            <div class="kpiLabel">
-              Non-dev share (proxy)
-              <span class="hint" data-hint="nonDev">?</span>
-            </div>
-            <div class="kpiTag good" id="kNonDevDelta">▲ — pts</div>
-          </div>
-          <div class="kpiValue" id="kNonDevShare">—</div>
-          <div class="kpiSub">AI postings not clustered in software/data categories (cross-disciplinary demand)</div>
-          <div class="spark" aria-hidden="true">
-            <svg viewBox="0 0 120 44" preserveAspectRatio="none">
-              <polyline id="sparkNonDev" fill="none" stroke="rgba(37,99,235,.85)" stroke-width="2" points=""></polyline>
-            </svg>
-          </div>
-        </div>
-
-        <div class="card kpi span-3" role="region" aria-label="New postings">
-          <div class="kpiTop">
-            <div class="kpiLabel">
-              New postings (14 days)
-              <span class="hint" data-hint="new14">?</span>
-            </div>
-            <div class="kpiTag good" id="kNewDelta">▲ count</div>
-          </div>
-          <div class="kpiValue" id="kNew14">—</div>
-          <div class="kpiSub">Fresh postings with AI signals (short-term market pulse)</div>
-          <div class="spark" aria-hidden="true">
-            <svg viewBox="0 0 120 44" preserveAspectRatio="none">
-              <polyline id="sparkNew14" fill="none" stroke="rgba(37,99,235,.85)" stroke-width="2" points=""></polyline>
-            </svg>
-          </div>
-        </div>
-
-        <div class="card kpi span-3" role="region" aria-label="Data quality">
-          <div class="kpiTop">
-            <div class="kpiLabel">
-              Data quality
-              <span class="hint" data-hint="quality">?</span>
-            </div>
-            <div class="kpiTag good" id="kQualityTag">high</div>
-          </div>
-          <div class="kpiBig" id="kQuality">—</div>
-          <div class="kpiSub">Combines date coverage + private-sector success + dedup strength</div>
-          <div class="spark" aria-hidden="true">
-            <svg viewBox="0 0 120 44" preserveAspectRatio="none">
-              <polyline id="sparkQuality" fill="none" stroke="rgba(37,99,235,.85)" stroke-width="2" points=""></polyline>
-            </svg>
-          </div>
-        </div>
-
-      </section>
-
-      <!-- Charts row -->
-      <section class="grid" style="margin-top:14px" aria-label="Charts">
-
-        <div class="card span-6">
-          <div class="hd">
-            <div>
-              <h2>Trend over time (last 12 months)</h2>
-              <p>Monthly counts of AI-matched postings (within the selected lens). Helpful for “is demand rising?” conversations.</p>
-            </div>
-            <button class="btn" id="openTrendNotes" type="button">Trend notes</button>
-          </div>
-          <div class="bd">
-            <div class="chartWrap">
-              <div class="chartBoxMid">
-                <canvas id="trendChart" role="img" aria-label="Trend chart"></canvas>
-              </div>
-            </div>
-            <div class="footerNote">Note: Trend uses postings with usable dates; missing dates reduce trend precision (see Data quality).</div>
-          </div>
-        </div>
-
-        <div class="card span-6">
-          <div class="hd">
-            <div>
-              <h2>Top skill signals (from a transparent map)</h2>
-              <p>Counts of skill phrases found in posting titles/descriptions. Great for curriculum alignment and micro-credential design.</p>
-            </div>
-            <button class="btn" id="openSkillNotes" type="button">Skill map</button>
-          </div>
-          <div class="bd">
-            <div class="chartWrap">
-              <div class="chartBoxMid">
-                <canvas id="skillsChart" role="img" aria-label="Top skills chart"></canvas>
-              </div>
-            </div>
-            <div class="footerNote">Skills are measured as mentions (not endorsements). We publish the exact keyword map in Methods & Sources.</div>
-          </div>
-        </div>
-
-      </section>
-
-      <!-- KY/OH spotlight -->
-      <section class="grid" style="margin-top:14px" aria-label="KY/OH spotlight">
-        <div class="card span-6">
-          <div class="hd">
-            <div>
-              <h2>Top KY/OH employers posting for AI skills</h2>
-              <p>Employers (company field) among AI-matched postings that include KY/OH signals. Strong for partnership targeting.</p>
-            </div>
-            <button class="btn" id="openKyohNotes" type="button">KY/OH method</button>
-          </div>
-          <div class="bd">
-            <div class="chartWrap">
-              <div class="chartBoxMid">
-                <canvas id="kyohEmployersChart" role="img" aria-label="KY/OH employers chart"></canvas>
-              </div>
-            </div>
-            <div class="footerNote">Note: KY/OH classification is a transparent text heuristic on location/title strings (see Methods).</div>
-          </div>
-        </div>
-
-        <div class="card span-6">
-          <div class="hd">
-            <div>
-              <h2>Top skills in KY/OH postings</h2>
-              <p>Skill mentions within KY/OH-signaled AI postings. Helpful for “local market alignment” and advisory board conversations.</p>
-            </div>
-            <button class="btn" id="openKyohNotes2" type="button">KY/OH method</button>
-          </div>
-          <div class="bd">
-            <div class="chartWrap">
-              <div class="chartBoxMid">
-                <canvas id="kyohSkillsChart" role="img" aria-label="KY/OH skills chart"></canvas>
-              </div>
-            </div>
-            <div class="footerNote">Interpretation: mentions ≠ requirements; use as “what employers are saying out loud.”</div>
-          </div>
-        </div>
-      </section>
-
-      <!-- Where Jobs Are -->
-      <section class="grid" style="margin-top:14px" aria-label="Where the jobs are">
-        <div class="card span-12">
-          <div class="hd">
-            <div>
-              <h2>Where the Jobs Are</h2>
-              <p>Category distribution for AI-matched postings using a stable NKU-friendly taxonomy (consistent across sources).</p>
-            </div>
-            <button class="btn" id="openJobCats" type="button">Job categories</button>
-          </div>
-          <div class="bd">
-            <div class="chartWrap">
-              <div class="chartBoxTall">
-                <canvas id="whereJobsChart" role="img" aria-label="Where the jobs are chart"></canvas>
-              </div>
-            </div>
-            <div class="footerNote">We categorize ALL blended AI postings into a stable taxonomy to avoid tiny Remotive-only samples.</div>
-          </div>
-        </div>
-      </section>
-
-    </div>
-  </main>
-
-  <!-- Drawer -->
-  <aside class="drawer" id="drawer" role="dialog" aria-modal="false" aria-label="Drawer">
-    <div class="dh">
+<header>
+  <div class="wrap">
+    <div class="topbar">
       <div>
-        <h3 id="drawerTitle">Details</h3>
-        <div class="muted" style="font-size:12px" id="drawerSubtitle">—</div>
+        <div class="badge"><span class="dot"></span> NKU Executive Dashboard · Workforce Signals for AI (Blended Live)</div>
+        <h1>AI Skills Demand — What the Market Is Asking For</h1>
+        <p class="subtitle">
+          Designed for NKU chairs, directors, associate deans, and deans. This dashboard blends public + private-sector signals and adds a regional view
+          for <strong>Ohio</strong> and <strong>Kentucky</strong>. We report <strong>total postings returned</strong> (regional sample) <em>before</em> AI keyword filtering,
+          then show the AI-signal subset for skills + employers.
+        </p>
+
+        <div class="headerTabs" aria-label="Top actions">
+          <button class="tabBtn active" id="tabOverview" type="button">Overview</button>
+          <button class="tabBtn" id="tabMethods" type="button">Methods & Sources</button>
+          <button class="tabBtn primary" id="tabPrint" type="button">Print / PDF</button>
+        </div>
       </div>
-      <button class="close" type="button" id="drawerClose">Close</button>
+
+      <div class="toolbar">
+        <div class="pillset" id="audienceToggle" role="group" aria-label="Academic lens">
+          <button type="button" data-aud="all" aria-pressed="true">All programs</button>
+          <button type="button" data-aud="business" aria-pressed="false">Business</button>
+          <button type="button" data-aud="informatics" aria-pressed="false">Informatics</button>
+          <button type="button" data-aud="health" aria-pressed="false">Health</button>
+        </div>
+
+        <div class="meta">
+          <span class="chip">Last refresh: <strong id="lastRefresh">—</strong></span>
+          <span class="chip">Regional pages: <strong>5 pages/state/source</strong></span>
+          <button class="btn" id="openMethods" type="button">Data details</button>
+        </div>
+
+        <div class="status">
+          <span class="pill">Blend status: <span id="blendStatus" class="live">loading…</span></span>
+          <button class="btn" id="forceRefresh" type="button">Force refresh</button>
+        </div>
+      </div>
     </div>
-    <div class="db" id="drawerBody"></div>
-  </aside>
+  </div>
+</header>
 
-  <script>
-    /*****************************************************************
-     * CONFIG (Worker proxy avoids CORS on GitHub Pages)
-     *****************************************************************/
-    const PROXY_BASE = "https://ai-skills-proxy.nealb3.workers.dev";
-    const CACHE_KEY = "nku_exec_ai_dashboard_v8_paged_kyoh";
-    const CACHE_TTL_MS = 60 * 60 * 1000; // 1 hour
+<main>
+  <div class="wrap">
 
-    // Pagination tuning (bigger sample size; be mindful of rate limits)
-    // USAJOBS supports ResultsPerPage + Page. (ResultsPerPage up to 500). :contentReference[oaicite:2]{index=2}
-    const USAJOBS_RESULTS_PER_PAGE = 100;
-    const USAJOBS_PAGES_PER_TERM = 2;    // bump to 3–5 if your Worker / keys can handle it
+    <!-- Executive narrative -->
+    <section class="grid" aria-label="Executive narrative">
+      <div class="card span-12">
+        <div class="hd">
+          <div>
+            <h2>Academic-ready reading guide</h2>
+            <p>Use this to connect market language → curriculum choices → partnerships → internships.</p>
+          </div>
+          <button class="btn" id="openReadingGuide" type="button">How to use</button>
+        </div>
+        <div class="bd" style="display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:10px;">
+          <div class="callout">
+            <div class="t">What this measures</div>
+            <div class="h">Employer language signals</div>
+            <div class="b">We scan posting titles + descriptions for transparent AI keywords and skill phrases. Results are directional signals, not a full labor taxonomy.</div>
+          </div>
+          <div class="callout">
+            <div class="t">Regional add-on (OH / KY)</div>
+            <div class="h">Pre-filter totals + AI subset</div>
+            <div class="b">For OH and KY, we first report total postings returned in the regional sample (pre AI filter), then show AI-signal employers + skills.</div>
+          </div>
+          <div class="callout">
+            <div class="t">Why it helps NKU</div>
+            <div class="h">Curriculum + partnership prioritization</div>
+            <div class="b">Top Skills support module/micro-credential planning. Top Employers support outreach targets for experiential learning and internship pipelines.</div>
+          </div>
+        </div>
+      </div>
+    </section>
 
-    // Adzuna supports results_per_page + page. :contentReference[oaicite:3]{index=3}
-    const ADZUNA_RESULTS_PER_PAGE = 50;
-    const ADZUNA_PAGES_PER_TERM = 2;     // bump carefully; Adzuna can rate limit
+    <!-- KPI strip -->
+    <section class="grid" style="margin-top:14px" aria-label="Leadership KPIs">
 
-    // Remotive: many queries return large sets already; keep simple to avoid overfetch.
-    const REMOTIVE_QUERIES = ["machine learning","generative ai","llm","copilot"];
+      <div class="card kpi span-3" role="region" aria-label="AI-signal share">
+        <div class="kpiTop">
+          <div class="kpiLabel">
+            AI-signal share
+            <span class="hint" data-hint="aiShare">?</span>
+          </div>
+          <div class="kpiTag good" id="kAiShareDelta">▲ — pts</div>
+        </div>
+        <div class="kpiValue" id="kAiShare">—</div>
+        <div class="kpiSub">Share of postings matching the AI filter (within the selected lens)</div>
+        <div class="spark" aria-hidden="true">
+          <svg viewBox="0 0 120 44" preserveAspectRatio="none">
+            <polyline id="sparkAiShare" fill="none" stroke="rgba(37,99,235,.85)" stroke-width="2" points=""></polyline>
+          </svg>
+        </div>
+      </div>
 
-    // AI keywords (transparent + editable)
-    const AI_TERMS_US = [
-      "artificial intelligence","machine learning","generative ai","genai","llm",
-      "large language model","chatgpt","copilot"
-    ];
-    const AI_TERMS_ADZUNA = [
-      "artificial intelligence","machine learning","llm","generative ai"
-    ];
-    const BASELINE_TERMS = ["software","analyst","manager"];
+      <div class="card kpi span-3" role="region" aria-label="AI postings sample size">
+        <div class="kpiTop">
+          <div class="kpiLabel">
+            AI postings (sample)
+            <span class="hint" data-hint="sampleSize">?</span>
+          </div>
+          <div class="kpiTag" id="kSourceMix">—</div>
+        </div>
+        <div class="kpiValue" id="kAiCount">—</div>
+        <div class="kpiSub">Deduped across sources (higher = stronger signal)</div>
+        <div class="spark" aria-hidden="true">
+          <svg viewBox="0 0 120 44" preserveAspectRatio="none">
+            <polyline id="sparkAiCount" fill="none" stroke="rgba(37,99,235,.85)" stroke-width="2" points=""></polyline>
+          </svg>
+        </div>
+      </div>
 
-    // NKU-friendly academic lenses (simple, explainable)
-    const AUDIENCE_FILTERS = {
-      all: () => true,
-      business: (job) => /(analyst|finance|account|marketing|operations|product|strategy|business|supply|procurement|risk|audit)/i
-        .test(asText(job.title) + " " + asText(job.description)),
-      informatics: (job) => /(engineer|developer|software|data scientist|ml|ai|cloud|devops|security|cyber|architect|platform|systems|network)/i
-        .test(asText(job.title) + " " + asText(job.description)),
-      health: (job) => /(health|clinical|patient|hospital|medical|biostat|epidemi|informatics|care|nursing|pharma|imaging)/i
-        .test(asText(job.title) + " " + asText(job.description)),
-    };
+      <div class="card kpi span-3" role="region" aria-label="Regional relevance">
+        <div class="kpiTop">
+          <div class="kpiLabel">
+            Regional relevance (OH/KY)
+            <span class="hint" data-hint="region">?</span>
+          </div>
+          <div class="kpiTag good" id="kRegionDelta">▲ — pts</div>
+        </div>
+        <div class="kpiValue" id="kRegionShare">—</div>
+        <div class="kpiSub">Share of AI postings with OH/KY signals (Cincy/NKY + statewide)</div>
+        <div class="spark" aria-hidden="true">
+          <svg viewBox="0 0 120 44" preserveAspectRatio="none">
+            <polyline id="sparkRegion" fill="none" stroke="rgba(37,99,235,.85)" stroke-width="2" points=""></polyline>
+          </svg>
+        </div>
+      </div>
 
-    // Transparent skill map (edit freely; aligns well with academic conversations)
-    const SKILLS = [
-      { skill:"AI tools (Copilot/ChatGPT)", family:"GenAI tools", keys:["copilot","chatgpt","assistant"] },
-      { skill:"Prompting & workflow design", family:"GenAI workflows", keys:["prompt","prompting","agent","agentic","workflow","orchestration"] },
-      { skill:"LLM app development (RAG)", family:"GenAI engineering", keys:["llm","rag","retrieval","vector","embedding","langchain","prompt engineering"] },
-      { skill:"Responsible AI / ethics", family:"Governance", keys:["responsible ai","ethics","fairness","bias","governance","policy","compliance"] },
-      { skill:"AI evaluation & testing", family:"Governance", keys:["evaluation","testing","red team","red-team","benchmark","validation","monitoring","model risk"] },
-      { skill:"Privacy", family:"Trust", keys:["privacy","pii","phi","gdpr","hipaa","data protection"] },
-      { skill:"Security", family:"Trust", keys:["security","secure","infosec","soc","zero trust","iam","identity","access","vulnerability","threat"] },
-      { skill:"SQL / BI dashboards", family:"Data foundations", keys:["sql","power bi","tableau","dashboard","analytics","reporting"] },
-      { skill:"Data engineering", family:"Data foundations", keys:["data engineer","pipeline","warehouse","lakehouse","spark","dbt"] },
-      { skill:"Python", family:"Automation", keys:["python","scripting","etl"] },
-      { skill:"Cloud platforms", family:"Engineering", keys:["aws","azure","gcp","cloud","kubernetes","docker"] },
-      { skill:"Process improvement / automation", family:"Automation", keys:["process improvement","automation","workflow","rpa","lean","six sigma","kaizen"] },
-    ];
+      <div class="card kpi span-3" role="region" aria-label="Remote opportunity">
+        <div class="kpiTop">
+          <div class="kpiLabel">
+            Remote opportunity
+            <span class="hint" data-hint="remote">?</span>
+          </div>
+          <div class="kpiTag good" id="kRemoteDelta">▲ — pts</div>
+        </div>
+        <div class="kpiValue" id="kRemoteShare">—</div>
+        <div class="kpiSub">Share of AI postings marked remote/telework</div>
+        <div class="spark" aria-hidden="true">
+          <svg viewBox="0 0 120 44" preserveAspectRatio="none">
+            <polyline id="sparkRemote" fill="none" stroke="rgba(37,99,235,.85)" stroke-width="2" points=""></polyline>
+          </svg>
+        </div>
+      </div>
+    </section>
 
-    /*****************************************************************
-     * DOM UTILS
-     *****************************************************************/
-    const $ = (sel, root=document) => root.querySelector(sel);
-    const $$ = (sel, root=document) => Array.from(root.querySelectorAll(sel));
-    function setText(sel, txt){ const el = $(sel); if(el) el.textContent = txt; }
+    <!-- Charts row -->
+    <section class="grid" style="margin-top:14px" aria-label="Charts">
 
-    function escapeHtml(s){
-      return String(s ?? "")
-        .replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;")
-        .replaceAll('"',"&quot;").replaceAll("'","&#039;");
+      <div class="card span-6">
+        <div class="hd">
+          <div>
+            <h2>Trend over time (last 12 months)</h2>
+            <p>Monthly counts of AI-matched postings (within the selected lens).</p>
+          </div>
+          <button class="btn" id="openTrendNotes" type="button">Trend notes</button>
+        </div>
+        <div class="bd">
+          <div class="chartWrap">
+            <div class="chartBoxMid">
+              <canvas id="trendChart" role="img" aria-label="Trend chart"></canvas>
+            </div>
+          </div>
+          <div class="footerNote">Trend uses postings with usable dates; missing dates reduce trend precision.</div>
+        </div>
+      </div>
+
+      <div class="card span-6">
+        <div class="hd">
+          <div>
+            <h2>Top skill signals (transparent map)</h2>
+            <p>Counts of skill phrases found in posting titles/descriptions.</p>
+          </div>
+          <button class="btn" id="openSkillNotes" type="button">Skill map</button>
+        </div>
+        <div class="bd">
+          <div class="chartWrap">
+            <div class="chartBoxMid">
+              <canvas id="skillsChart" role="img" aria-label="Top skills chart"></canvas>
+            </div>
+          </div>
+          <div class="footerNote">Skills are measured as mentions (not endorsements). NKU can edit the map in Methods.</div>
+        </div>
+      </div>
+
+    </section>
+
+    <!-- Where Jobs Are -->
+    <section class="grid" style="margin-top:14px" aria-label="Where the jobs are">
+      <div class="card span-12">
+        <div class="hd">
+          <div>
+            <h2>Where the Jobs Are</h2>
+            <p>Exec-stable categories for AI-matched postings (blended, deduped). Stronger sample sizes than Remotive-only.</p>
+          </div>
+          <button class="btn" id="openJobCats" type="button">Job categories</button>
+        </div>
+        <div class="bd">
+          <div class="chartWrap">
+            <div class="chartBoxTall">
+              <canvas id="whereJobsChart" role="img" aria-label="Where the jobs are chart"></canvas>
+            </div>
+          </div>
+          <div class="footerNote">Category inference uses NKU-ready mappings (AI/ML, Data/Analytics, Software Dev, etc.).</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- OH/KY Regional Pulse -->
+    <section class="grid" style="margin-top:14px" aria-label="Regional OH/KY pulse">
+      <div class="card span-12">
+        <div class="hd">
+          <div>
+            <h2>Regional Market Pulse — Ohio vs Kentucky</h2>
+            <p>
+              We fetch <strong>5 pages</strong> per source per state (pre-filter sample), then identify the subset that contains AI signals.
+              Use this to inform regional employer outreach and curriculum-to-workforce alignment.
+            </p>
+          </div>
+          <button class="btn" id="openRegionalNotes" type="button">Regional notes</button>
+        </div>
+        <div class="bd">
+          <div class="grid" style="gap:14px;">
+            <div class="card span-6" style="border-radius:16px; box-shadow:none;">
+              <div class="hd" style="border-radius:16px 16px 0 0;">
+                <div>
+                  <h2>Ohio (OH)</h2>
+                  <p>Total regional postings returned (pre AI filter): <strong id="ohTotalPre">—</strong> · AI-signal subset: <strong id="ohAiCount">—</strong></p>
+                </div>
+              </div>
+              <div class="bd">
+                <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
+                  <div>
+                    <div class="kpiLabel" style="margin-bottom:8px;">Top OH employers posting AI-signal roles</div>
+                    <ul class="list" id="ohEmployers"></ul>
+                  </div>
+                  <div>
+                    <div class="kpiLabel" style="margin-bottom:8px;">Top skills in OH AI-signal postings</div>
+                    <ul class="list" id="ohSkills"></ul>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="card span-6" style="border-radius:16px; box-shadow:none;">
+              <div class="hd" style="border-radius:16px 16px 0 0;">
+                <div>
+                  <h2>Kentucky (KY)</h2>
+                  <p>Total regional postings returned (pre AI filter): <strong id="kyTotalPre">—</strong> · AI-signal subset: <strong id="kyAiCount">—</strong></p>
+                </div>
+              </div>
+              <div class="bd">
+                <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
+                  <div>
+                    <div class="kpiLabel" style="margin-bottom:8px;">Top KY employers posting AI-signal roles</div>
+                    <ul class="list" id="kyEmployers"></ul>
+                  </div>
+                  <div>
+                    <div class="kpiLabel" style="margin-bottom:8px;">Top skills in KY AI-signal postings</div>
+                    <ul class="list" id="kySkills"></ul>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+          </div>
+
+          <div class="footerNote">
+            Regional totals are deduped within-state. “AI-signal” uses the same transparent keyword filter as the main dashboard.
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </div>
+</main>
+
+<!-- Drawer -->
+<aside class="drawer" id="drawer" role="dialog" aria-modal="false" aria-label="Drawer">
+  <div class="dh">
+    <div>
+      <h3 id="drawerTitle">Details</h3>
+      <div class="muted" style="font-size:12px" id="drawerSubtitle">—</div>
+    </div>
+    <button class="close" type="button" id="drawerClose">Close</button>
+  </div>
+  <div class="db" id="drawerBody"></div>
+</aside>
+
+<script>
+  /*****************************************************************
+   * CONFIG
+   *****************************************************************/
+  const PROXY_BASE = "https://ai-skills-proxy.nealb3.workers.dev";
+  const CACHE_KEY = "nku_exec_ai_dashboard_v8_region_oh_ky_5pages_prefilter";
+  const CACHE_TTL_MS = 60 * 60 * 1000; // 1 hour
+
+  // ✅ Your request:
+  const REGION_PAGES = 5;          // 5 pages per state per source
+  const ADZUNA_PER_PAGE = 50;      // higher per page = larger sample
+  const USAJOBS_PER_PAGE = 50;
+
+  // Transparent AI keywords (edit anytime)
+  const AI_TERMS = [
+    "artificial intelligence","machine learning","generative ai","genai","llm",
+    "large language model","chatgpt","copilot","prompt","prompting","rag",
+    "embedding","vector database","computer vision","nlp"
+  ];
+
+  // Baseline comparison group (for AI-signal share KPI)
+  const BASELINE_TERMS = ["software","analyst","manager"];
+
+  // Academic lenses
+  const AUDIENCE_FILTERS = {
+    all: () => true,
+    business: (job) => /(analyst|finance|account|marketing|operations|product|strategy|business|supply|procurement|risk|audit)/i
+      .test(asText(job.title) + " " + asText(job.description)),
+    informatics: (job) => /(engineer|developer|software|data scientist|ml|ai|cloud|devops|security|cyber|architect|platform|systems|network)/i
+      .test(asText(job.title) + " " + asText(job.description)),
+    health: (job) => /(health|clinical|patient|hospital|medical|biostat|epidemi|informatics|care|nursing|pharma|imaging)/i
+      .test(asText(job.title) + " " + asText(job.description)),
+  };
+
+  // Skills map (transparent + leadership-friendly)
+  const SKILLS = [
+    { skill:"AI tools (Copilot/ChatGPT)", family:"GenAI tools", keys:["copilot","chatgpt","assistant"] },
+    { skill:"Prompting & workflow design", family:"GenAI workflows", keys:["prompt","prompting","agent","agentic","workflow","orchestration"] },
+    { skill:"LLM app development (RAG)", family:"GenAI engineering", keys:["llm","rag","retrieval","vector","embedding","langchain","prompt engineering"] },
+    { skill:"Responsible AI / ethics", family:"Governance", keys:["responsible ai","ethics","fairness","bias","governance","policy","compliance"] },
+    { skill:"Privacy", family:"Trust", keys:["privacy","pii","phi","gdpr","hipaa","data protection"] },
+    { skill:"Security", family:"Trust", keys:["security","secure","infosec","soc","zero trust","iam","identity","access","vulnerability","threat"] },
+    { skill:"SQL / BI dashboards", family:"Data foundations", keys:["sql","power bi","tableau","dashboard","analytics","reporting"] },
+    { skill:"Data engineering", family:"Data foundations", keys:["data engineer","pipeline","warehouse","lakehouse","spark","dbt"] },
+    { skill:"Python", family:"Automation", keys:["python","scripting","etl"] },
+    { skill:"Cloud platforms", family:"Engineering", keys:["aws","azure","gcp","cloud","kubernetes","docker"] },
+    { skill:"Process improvement / automation", family:"Automation", keys:["process improvement","automation","workflow","rpa","lean","six sigma","kaizen"] },
+  ];
+
+  /*****************************************************************
+   * DOM UTILS
+   *****************************************************************/
+  const $ = (sel, root=document) => root.querySelector(sel);
+  const $$ = (sel, root=document) => Array.from(root.querySelectorAll(sel));
+  function setText(sel, txt){ const el = $(sel); if(el) el.textContent = txt; }
+
+  function escapeHtml(s){
+    return String(s ?? "")
+      .replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;")
+      .replaceAll('"',"&quot;").replaceAll("'","&#039;");
+  }
+
+  function asText(v){
+    if(v == null) return "";
+    if(Array.isArray(v)) return v.filter(Boolean).join(" ");
+    if(typeof v === "string") return v;
+    if(typeof v === "number" || typeof v === "boolean") return String(v);
+    try { return JSON.stringify(v); } catch { return String(v); }
+  }
+
+  function pct(x){ return (x*100).toFixed(1) + "%"; }
+
+  function animatePercent(el, targetPctText){
+    if(!el) return;
+    const m = String(targetPctText).match(/^(\d+(\.\d+)?)%$/);
+    if(!m){ el.textContent = targetPctText; return; }
+    const target = parseFloat(m[1]);
+    const start = 0;
+    const t0 = performance.now();
+    const dur = 650;
+    function tick(t){
+      const p = Math.min(1, (t - t0)/dur);
+      const v = (start + (target-start)*p);
+      el.textContent = v.toFixed(1) + "%";
+      if(p < 1) requestAnimationFrame(tick);
     }
+    requestAnimationFrame(tick);
+  }
 
-    function asText(v){
-      if(v == null) return "";
-      if(Array.isArray(v)) return v.filter(Boolean).join(" ");
-      if(typeof v === "string") return v;
-      if(typeof v === "number" || typeof v === "boolean") return String(v);
-      try { return JSON.stringify(v); } catch { return String(v); }
+  function sparkPoints(values){
+    if(!values || values.length < 2) return "";
+    const max = Math.max(...values), min = Math.min(...values);
+    const range = (max - min) || 1;
+    return values.map((v,i)=>{
+      const x = (i/(values.length-1))*120;
+      const y = 42 - ((v-min)/range)*36;
+      return `${x.toFixed(1)},${y.toFixed(1)}`;
+    }).join(" ");
+  }
+
+  /*****************************************************************
+   * CACHE
+   *****************************************************************/
+  function readCache(){
+    try{
+      const raw = localStorage.getItem(CACHE_KEY);
+      if(!raw) return null;
+      const obj = JSON.parse(raw);
+      if(Date.now() - obj.time > CACHE_TTL_MS) return null;
+      return obj.data;
+    }catch{ return null; }
+  }
+  function writeCache(data){
+    try{ localStorage.setItem(CACHE_KEY, JSON.stringify({ time: Date.now(), data })); }catch{}
+  }
+  function clearCache(){
+    try{ localStorage.removeItem(CACHE_KEY); }catch{}
+  }
+
+  /*****************************************************************
+   * FETCHERS (via Worker)
+   *****************************************************************/
+  async function fetchJson(url){
+    const res = await fetch(url, { cache:"no-store" });
+    const text = await res.text();
+    let json;
+    try{ json = JSON.parse(text); }catch{
+      throw new Error("Non-JSON from " + url + ": " + text.slice(0,200));
     }
-
-    function pct(x){ return (x*100).toFixed(1) + "%"; }
-
-    function animatePercent(el, targetPctText){
-      if(!el) return;
-      const m = String(targetPctText).match(/^(\d+(\.\d+)?)%$/);
-      if(!m){ el.textContent = targetPctText; return; }
-      const target = parseFloat(m[1]);
-      const start = 0;
-      const t0 = performance.now();
-      const dur = 650;
-      function tick(t){
-        const p = Math.min(1, (t - t0)/dur);
-        const v = (start + (target-start)*p);
-        el.textContent = v.toFixed(1) + "%";
-        if(p < 1) requestAnimationFrame(tick);
-      }
-      requestAnimationFrame(tick);
+    if(!res.ok){
+      const msg = json?.error || json?.message || ("HTTP " + res.status);
+      throw new Error(url + " → " + msg);
     }
+    return json;
+  }
 
-    function sparkPoints(values){
-      if(!values || values.length < 2) return "";
-      const max = Math.max(...values), min = Math.min(...values);
-      const range = (max - min) || 1;
-      return values.map((v,i)=>{
-        const x = (i/(values.length-1))*120;
-        const y = 42 - ((v-min)/range)*36;
-        return `${x.toFixed(1)},${y.toFixed(1)}`;
-      }).join(" ");
-    }
+  // National blend (term-based)
+  async function fetchUSAJOBS(term, perPage=25, page=1){
+    const t = encodeURIComponent(term);
+    const url = `${PROXY_BASE}/usajobs?keyword=${t}&ResultsPerPage=${perPage}&Page=${page}`;
+    return { url, json: await fetchJson(url), term };
+  }
+  async function fetchAdzuna(term, perPage=25, page=1){
+    const t = encodeURIComponent(term);
+    const url = `${PROXY_BASE}/adzuna?what=${t}&results_per_page=${perPage}&page=${page}&country=us`;
+    return { url, json: await fetchJson(url), term };
+  }
+  async function fetchRemotive(searchTerm=""){
+    const q = encodeURIComponent(searchTerm || "");
+    const url = `${PROXY_BASE}/remotive${q ? `?search=${q}` : ""}`;
+    return { url, json: await fetchJson(url), term: searchTerm };
+  }
 
-    function tagForDelta(deltaPts){
-      if(deltaPts > 1.5) return { cls: "good" };
-      if(deltaPts < -1.5) return { cls: "warn" };
-      return { cls: "good" };
-    }
+  // ✅ Regional sampling (pre-filter totals)
+  async function fetchUSAJOBSRegion(stateName, perPage=50, page=1){
+    const loc = encodeURIComponent(stateName);
+    const url = `${PROXY_BASE}/usajobs?ResultsPerPage=${perPage}&Page=${page}&LocationName=${loc}`;
+    return { url, json: await fetchJson(url), term: stateName };
+  }
+  async function fetchAdzunaRegion(stateName, perPage=50, page=1){
+    const where = encodeURIComponent(stateName);
+    const url = `${PROXY_BASE}/adzuna?results_per_page=${perPage}&page=${page}&country=us&where=${where}`;
+    return { url, json: await fetchJson(url), term: stateName };
+  }
 
-    /*****************************************************************
-     * CACHE
-     *****************************************************************/
-    function readCache(){
-      try{
-        const raw = localStorage.getItem(CACHE_KEY);
-        if(!raw) return null;
-        const obj = JSON.parse(raw);
-        if(Date.now() - obj.time > CACHE_TTL_MS) return null;
-        return obj.data;
-      }catch{ return null; }
-    }
-    function writeCache(data){
-      try{ localStorage.setItem(CACHE_KEY, JSON.stringify({ time: Date.now(), data })); }catch{}
-    }
-    function clearCache(){
-      try{ localStorage.removeItem(CACHE_KEY); }catch{}
-    }
+  /*****************************************************************
+   * NORMALIZERS
+   *****************************************************************/
+  function parseDateSafe(x){
+    if(!x) return null;
+    const d = new Date(x);
+    if(Number.isNaN(d.getTime())) return null;
+    return d.toISOString();
+  }
 
-    /*****************************************************************
-     * FETCHERS (via Worker)
-     *****************************************************************/
-    async function fetchJson(url){
-      const res = await fetch(url, { cache:"no-store" });
-      const text = await res.text();
-      let json;
-      try{ json = JSON.parse(text); }catch{
-        throw new Error("Non-JSON from " + url + ": " + text.slice(0,200));
-      }
-      if(!res.ok){
-        const msg = json?.error || json?.message || ("HTTP " + res.status);
-        throw new Error(url + " → " + msg);
-      }
-      return json;
-    }
+  function normalizeUSAJOBS(payload){
+    const items = payload?.SearchResult?.SearchResultItems || [];
+    return items.map(it=>{
+      const d = it?.MatchedObjectDescriptor || {};
+      const details = d?.UserArea?.Details || {};
+      const cats = (d?.JobCategory || []).map(c=>c?.Name).filter(Boolean);
+      const dateRaw = d?.PublicationStartDate || d?.PositionStartDate || d?.ApplicationCloseDate || null;
 
-    async function fetchUSAJOBS(term, perPage=25, page=1){
-      const t = encodeURIComponent(term);
-      const url = `${PROXY_BASE}/usajobs?keyword=${t}&ResultsPerPage=${perPage}&Page=${page}`;
-      return { url, json: await fetchJson(url), term, page };
-    }
-    async function fetchAdzuna(term, perPage=25, page=1){
-      const t = encodeURIComponent(term);
-      const url = `${PROXY_BASE}/adzuna?what=${t}&results_per_page=${perPage}&page=${page}&country=us`;
-      return { url, json: await fetchJson(url), term, page };
-    }
-    async function fetchRemotive(searchTerm=""){
-      const q = encodeURIComponent(searchTerm || "");
-      const url = `${PROXY_BASE}/remotive${q ? `?search=${q}` : ""}`;
-      return { url, json: await fetchJson(url), term: searchTerm, page: 1 };
-    }
+      const duties = asText(details?.MajorDuties);
+      const summary = asText(details?.JobSummary);
+      const desc = duties || summary;
 
-    /*****************************************************************
-     * NORMALIZERS
-     *****************************************************************/
-    function parseDateSafe(x){
-      if(!x) return null;
-      const d = new Date(x);
-      if(Number.isNaN(d.getTime())) return null;
-      return d.toISOString();
-    }
-
-    function normalizeUSAJOBS(payload){
-      const items = payload?.SearchResult?.SearchResultItems || [];
-      return items.map(it=>{
-        const d = it?.MatchedObjectDescriptor || {};
-        const details = d?.UserArea?.Details || {};
-        const cats = (d?.JobCategory || []).map(c=>c?.Name).filter(Boolean);
-        const dateRaw = d?.PublicationStartDate || d?.PositionStartDate || d?.ApplicationCloseDate || null;
-
-        const duties = asText(details?.MajorDuties);
-        const summary = asText(details?.JobSummary);
-        const desc = duties || summary;
-
-        return {
-          source: "USAJOBS",
-          title: asText(d?.PositionTitle),
-          description: desc,
-          company: asText(d?.OrganizationName || d?.DepartmentName || "Federal"),
-          category: asText(cats[0] || d?.DepartmentName || "Federal"),
-          location: asText((d?.PositionLocation || [])[0]?.LocationName || ""),
-          url: asText(d?.PositionURI || ""),
-          date: parseDateSafe(dateRaw)
-        };
-      });
-    }
-
-    function normalizeAdzuna(payload){
-      const items = payload?.results || [];
-      return items.map(it=>({
-        source: "Adzuna",
-        title: asText(it?.title),
-        description: asText(it?.description),
-        company: asText(it?.company?.display_name || "Unknown"),
-        category: asText(it?.category?.label || "Other"),
-        location: asText(it?.location?.display_name || ""),
-        url: asText(it?.redirect_url || it?.adref || ""),
-        date: parseDateSafe(it?.created || it?.created_at || it?.publication_date || null)
-      }));
-    }
-
-    function normalizeRemotive(payload){
-      const items = payload?.jobs || payload?.data?.jobs || [];
-      return items.map(it => ({
-        source: "Remotive",
-        title: asText(it?.title),
-        description: asText(it?.description),
-        company: asText(it?.company_name || it?.company || "Unknown"),
-        category: asText(it?.category || it?.job_type || "Remote"),
-        location: asText(it?.candidate_required_location || "Remote"),
-        url: asText(it?.url || it?.job_url || ""),
-        date: parseDateSafe(it?.publication_date || it?.created_at || null)
-      }));
-    }
-
-    function dedupeJobs(jobs){
-      const seen = new Set();
-      const out = [];
-      for(const j of jobs){
-        const key = (asText(j.url) || `${asText(j.source)}|${asText(j.company)}|${asText(j.title)}|${asText(j.location)}`).toLowerCase().trim();
-        if(seen.has(key)) continue;
-        seen.add(key);
-        out.push(j);
-      }
-      return out;
-    }
-
-    async function fanoutFetchPaged(terms, pages, fetcher, normalizer){
-      const all = [];
-      const debug = [];
-
-      const tasks = [];
-      for(const t of terms){
-        for(const p of pages){
-          tasks.push(fetcher(t, p));
-        }
-      }
-
-      const settled = await Promise.allSettled(tasks);
-      for(const r of settled){
-        if(r.status === "fulfilled"){
-          const { url, json, term, page } = r.value;
-          debug.push({ term, page, ok:true, url });
-          const normalized = normalizer(json);
-          all.push(...normalized);
-        } else {
-          debug.push({ ok:false, error:String(r.reason).slice(0,220) });
-        }
-      }
-
-      const deduped = dedupeJobs(all);
-      return { jobs: deduped, rawCount: all.length, debug };
-    }
-
-    /*****************************************************************
-     * BLEND PIPELINE (paged)
-     *****************************************************************/
-    async function fetchBlend(){
-      const cached = readCache();
-      if(cached) return cached;
-
-      const usPages = Array.from({length: USAJOBS_PAGES_PER_TERM}, (_,i)=>i+1);
-      const adPages = Array.from({length: ADZUNA_PAGES_PER_TERM}, (_,i)=>i+1);
-
-      const aiUS = await fanoutFetchPaged(
-        AI_TERMS_US,
-        usPages,
-        (t,p)=>fetchUSAJOBS(t, USAJOBS_RESULTS_PER_PAGE, p),
-        normalizeUSAJOBS
-      );
-
-      const aiAD = await fanoutFetchPaged(
-        AI_TERMS_ADZUNA,
-        adPages,
-        (t,p)=>fetchAdzuna(t, ADZUNA_RESULTS_PER_PAGE, p),
-        normalizeAdzuna
-      );
-
-      const aiRM = await fanoutFetchPaged(
-        REMOTIVE_QUERIES,
-        [1],
-        (t)=>fetchRemotive(t),
-        normalizeRemotive
-      );
-
-      const baseUS = await fanoutFetchPaged(
-        BASELINE_TERMS,
-        usPages,
-        (t,p)=>fetchUSAJOBS(t, USAJOBS_RESULTS_PER_PAGE, p),
-        normalizeUSAJOBS
-      );
-
-      const baseAD = await fanoutFetchPaged(
-        BASELINE_TERMS,
-        adPages,
-        (t,p)=>fetchAdzuna(t, ADZUNA_RESULTS_PER_PAGE, p),
-        normalizeAdzuna
-      );
-
-      const baseRM = await fanoutFetchPaged(
-        ["engineer","analyst","manager"],
-        [1],
-        (t)=>fetchRemotive(t),
-        normalizeRemotive
-      );
-
-      const aiJobs = dedupeJobs([...aiUS.jobs, ...aiAD.jobs, ...aiRM.jobs]);
-      const baseJobs = dedupeJobs([...baseUS.jobs, ...baseAD.jobs, ...baseRM.jobs]);
-
-      const out = {
-        fetchedAt: new Date().toISOString(),
-        aiJobs,
-        baseJobs,
-        raw: {
-          aiRaw: aiUS.rawCount + aiAD.rawCount + aiRM.rawCount,
-          baseRaw: baseUS.rawCount + baseAD.rawCount + baseRM.rawCount
-        },
-        debug: {
-          aiUS: aiUS.debug, aiAD: aiAD.debug, aiRM: aiRM.debug,
-          baseUS: baseUS.debug, baseAD: baseAD.debug, baseRM: baseRM.debug,
-          paging: {
-            USAJOBS_RESULTS_PER_PAGE,
-            USAJOBS_PAGES_PER_TERM,
-            ADZUNA_RESULTS_PER_PAGE,
-            ADZUNA_PAGES_PER_TERM
-          }
-        }
+      return {
+        source: "USAJOBS",
+        title: asText(d?.PositionTitle),
+        description: desc,
+        company: asText(d?.OrganizationName || d?.DepartmentName || "Federal"),
+        category: asText(cats[0] || d?.DepartmentName || "Federal"),
+        location: asText((d?.PositionLocation || [])[0]?.LocationName || ""),
+        url: asText(d?.PositionURI || ""),
+        date: parseDateSafe(dateRaw)
       };
+    });
+  }
 
-      writeCache(out);
-      return out;
+  function normalizeAdzuna(payload){
+    const items = payload?.results || [];
+    return items.map(it=>({
+      source: "Adzuna",
+      title: asText(it?.title),
+      description: asText(it?.description),
+      company: asText(it?.company?.display_name || "Unknown"),
+      category: asText(it?.category?.label || "Other"),
+      location: asText(it?.location?.display_name || ""),
+      url: asText(it?.redirect_url || it?.adref || ""),
+      date: parseDateSafe(it?.created || it?.created_at || it?.publication_date || null)
+    }));
+  }
+
+  function normalizeRemotive(payload){
+    const items = payload?.jobs || payload?.data?.jobs || [];
+    return items.map(it => ({
+      source: "Remotive",
+      title: asText(it?.title),
+      description: asText(it?.description),
+      company: asText(it?.company_name || it?.company || "Unknown"),
+      category: asText(it?.category || it?.job_type || "Remote"),
+      location: asText(it?.candidate_required_location || "Remote"),
+      url: asText(it?.url || it?.job_url || ""),
+      date: parseDateSafe(it?.publication_date || it?.created_at || null)
+    }));
+  }
+
+  function dedupeJobs(jobs){
+    const seen = new Set();
+    const out = [];
+    for(const j of jobs){
+      const key = (asText(j.url) || `${asText(j.source)}|${asText(j.company)}|${asText(j.title)}|${asText(j.location)}`).toLowerCase().trim();
+      if(seen.has(key)) continue;
+      seen.add(key);
+      out.push(j);
+    }
+    return out;
+  }
+
+  async function fanoutFetch(terms, fetcher, normalizer){
+    const all = [];
+    const debug = [];
+    const settled = await Promise.allSettled(terms.map(t => fetcher(t)));
+    for(const r of settled){
+      if(r.status === "fulfilled"){
+        const { url, json, term } = r.value;
+        debug.push({ term, ok:true, url });
+        all.push(...normalizer(json));
+      } else {
+        debug.push({ ok:false, error:String(r.reason).slice(0,200) });
+      }
+    }
+    const deduped = dedupeJobs(all);
+    return { jobs: deduped, rawCount: all.length, debug };
+  }
+
+  // ✅ Fetch multiple pages for a single regional state + source
+  async function fetchPages(pages, perPage, pageFetchFn, normalizer){
+    const all = [];
+    const debug = [];
+    const settled = await Promise.allSettled(
+      Array.from({length: pages}, (_,i)=> pageFetchFn(perPage, i+1))
+    );
+
+    for(const r of settled){
+      if(r.status === "fulfilled"){
+        debug.push({ ok:true, url: r.value.url });
+        all.push(...normalizer(r.value.json));
+      } else {
+        debug.push({ ok:false, error:String(r.reason).slice(0,200) });
+      }
     }
 
-    /*****************************************************************
-     * CATEGORY + REGION NORMALIZATION
-     *****************************************************************/
-    function normalizeCategoryName(raw){
-      const s = (raw ?? "").toString().trim();
-      if(!s) return "Other";
-      return s.replace(/\s+/g, " ").trim();
-    }
+    const deduped = dedupeJobs(all);
+    return { jobs: deduped, rawCount: all.length, debug };
+  }
 
-    function textBlob(job){
-      return `${asText(job.title)} ${asText(job.category)} ${asText(job.company)} ${asText(job.location)} ${asText(job.description)}`.toLowerCase();
-    }
+  /*****************************************************************
+   * FILTERING + COUNTS
+   *****************************************************************/
+  function aiSignalMatch(job){
+    const text = (asText(job.title) + " " + asText(job.description)).toLowerCase();
+    return AI_TERMS.some(t => text.includes(String(t).toLowerCase()));
+  }
 
-    // Stable NKU exec taxonomy (consistent across sources)
-    function nkuExecCategory(job){
-      const blob = textBlob(job);
-      const remCat = (job.source === "Remotive" ? asText(job.category).toLowerCase() : "");
+  function skillCounts(jobs){
+    const counts = new Map();
+    for(const s of SKILLS) counts.set(s.skill, 0);
 
-      if (/\b(ai|artificial intelligence|machine learning|ml|llm|genai|generative ai|nlp|computer vision|rag|embedding|vector)\b/.test(blob)) {
-        return "AI / ML";
-      }
-      if (/\b(data analyst|data analytics|analytics|bi\b|sql\b|power bi|tableau|dashboard|reporting|data warehouse|etl|dbt|spark|lakehouse|data engineer)\b/.test(blob)) {
-        return "Data & Analytics";
-      }
-      if (/\b(devops|sre|site reliability|kubernetes|docker|ci\/cd|terraform|cloud infrastructure)\b/.test(blob)) {
-        return "DevOps / Cloud";
-      }
-      if (/\b(software|developer|engineer|full[- ]stack|frontend|backend|mobile|web developer|api\b|typescript|javascript|java\b|c\+\+|c#|python\b|golang|rust)\b/.test(blob)) {
-        return "Software Development";
-      }
-      if (/\b(cyber|security|infosec|soc\b|zero trust|iam\b|identity|access|vulnerability|penetration|siem|risk|compliance)\b/.test(blob)) {
-        return "Cybersecurity / IT";
-      }
-      if (/\b(product manager|product management|project manager|program manager|scrum|agile|product owner)\b/.test(blob)) {
-        return "Product / Project";
-      }
-      if (/\b(business analyst|operations|strategy|process improvement|continuous improvement|lean\b|six sigma|supply chain|procurement|finance|accounting)\b/.test(blob)) {
-        return "Business / Operations";
-      }
-      if (/\b(marketing|growth|seo\b|content|brand|demand gen|sales|account executive|customer success|support|client)\b/.test(blob)) {
-        return "Marketing / Sales";
-      }
-      if (/\b(health|clinical|patient|hospital|medical|biostat|epidemi|pharma|nursing)\b/.test(blob)) {
-        return "Health / Clinical";
-      }
-      if (/\b(instructor|trainer|curriculum|learning|education|teaching)\b/.test(blob)) {
-        return "Education / Training";
-      }
-
-      if (remCat) {
-        if (remCat.includes("devops") || remCat.includes("sysadmin")) return "DevOps / Cloud";
-        if (remCat.includes("software")) return "Software Development";
-        if (remCat.includes("data")) return "Data & Analytics";
-        if (remCat.includes("ai")) return "AI / ML";
-        if (remCat.includes("marketing") || remCat.includes("sales")) return "Marketing / Sales";
-        if (remCat.includes("product")) return "Product / Project";
-        if (remCat.includes("security")) return "Cybersecurity / IT";
-      }
-
-      return "Other";
-    }
-
-    function isRemote(job){
-      const loc = (asText(job.location) + " " + asText(job.category)).toLowerCase();
-      return /remote|telework|work from home|wfh/.test(loc);
-    }
-
-    // KY/OH heuristic: transparent + explainable
-    function isOHKY(job){
-      const loc = (asText(job.location) + " " + asText(job.title) + " " + asText(job.description)).toLowerCase();
-      const isOH = /\boh\b|ohio|cincinnati|dayton|columbus|cleveland|toledo|akron/.test(loc);
-      const isKY = /\bky\b|kentucky|covington|newport|florence|lexington|louisville|bowling green|frankfort/.test(loc);
-      return isOH || isKY;
-    }
-
-    /*****************************************************************
-     * DATE-BASED SERIES (sparklines + trend)
-     *****************************************************************/
-    function dayKey(isoOrDate){
-      const d = (isoOrDate instanceof Date) ? isoOrDate : new Date(isoOrDate);
-      if(Number.isNaN(d.getTime())) return null;
-      const dd = new Date(d);
-      dd.setHours(0,0,0,0);
-      return dd.toISOString().slice(0,10);
-    }
-
-    function lastNDaysKeys(n=14){
-      const now = new Date();
-      now.setHours(0,0,0,0);
-      const keys = [];
-      for(let i=n-1;i>=0;i--){
-        const d = new Date(now);
-        d.setDate(now.getDate()-i);
-        keys.push(d.toISOString().slice(0,10));
-      }
-      return keys;
-    }
-
-    function buildDailySeries(aiJobs, baseJobs, n=14){
-      const keys = lastNDaysKeys(n);
-
-      const aiByDay = new Map(keys.map(k=>[k, []]));
-      const baseByDay = new Map(keys.map(k=>[k, []]));
-
-      for(const j of aiJobs){
-        const k = j.date ? dayKey(j.date) : null;
-        if(k && aiByDay.has(k)) aiByDay.get(k).push(j);
-      }
-      for(const j of baseJobs){
-        const k = j.date ? dayKey(j.date) : null;
-        if(k && baseByDay.has(k)) baseByDay.get(k).push(j);
-      }
-
-      const aiShare = [];
-      const aiCount = [];
-      const ohkyShare = [];
-      const remoteShare = [];
-      const topCatShare = [];
-      const nonDevShare = [];
-
-      const devCatRx = /(software development|data & analytics|ai \/ ml|devops \/ cloud|cybersecurity \/ it)/i;
-
-      for(const k of keys){
-        const a = aiByDay.get(k) || [];
-        const b = baseByDay.get(k) || [];
-        const aN = a.length;
-        const bN = b.length;
-
-        aiCount.push(aN);
-        aiShare.push(aN / Math.max(aN + bN, 1));
-
-        const ohky = a.filter(isOHKY).length;
-        ohkyShare.push(ohky / Math.max(aN,1));
-
-        const rem = a.filter(isRemote).length;
-        remoteShare.push(rem / Math.max(aN,1));
-
-        const catCounts = new Map();
-        for(const j of a){
-          const cat = normalizeCategoryName(nkuExecCategory(j));
-          catCounts.set(cat, (catCounts.get(cat)||0) + 1);
-        }
-        const top = [...catCounts.entries()].sort((x,y)=>y[1]-x[1])[0];
-        topCatShare.push(top ? (top[1] / Math.max(aN,1)) : 0);
-
-        const devCount = a.filter(j => devCatRx.test(normalizeCategoryName(nkuExecCategory(j)))).length;
-        nonDevShare.push(1 - (devCount / Math.max(aN,1)));
-      }
-
-      return { aiShare, aiCount, ohkyShare, remoteShare, topCatShare, nonDevShare };
-    }
-
-    function sumNewInLastDays(aiJobs, days=14){
-      const keys = new Set(lastNDaysKeys(days));
-      let n = 0;
-      for(const j of aiJobs){
-        const k = j.date ? dayKey(j.date) : null;
-        if(k && keys.has(k)) n++;
-      }
-      return n;
-    }
-
-    function monthKey(iso){
-      const d = new Date(iso);
-      if(Number.isNaN(d.getTime())) return null;
-      return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}`;
-    }
-
-    function trendByMonth(jobs, months=12){
-      const dated = jobs.filter(j=>!!j.date);
-      const keys = dated.map(j=>monthKey(j.date)).filter(Boolean);
-      if(!keys.length){
-        const labels = Array.from({length: Math.min(6, months)}, (_,i)=>`M-${Math.min(6, months)-i}`);
-        const values = labels.map(()=>jobs.length ? Math.max(1, Math.round(jobs.length/labels.length)) : 0);
-        return { labels, values };
-      }
-
-      const max = keys.reduce((a,b)=> a>b ? a : b);
-      const [Y,M] = max.split("-").map(Number);
-      const counts = new Map();
-      for(const k of keys) counts.set(k, (counts.get(k)||0)+1);
-
-      const labels = [];
-      for(let i=months-1;i>=0;i--){
-        const dd = new Date(Date.UTC(Y, M-1 - i, 1));
-        const key = `${dd.getUTCFullYear()}-${String(dd.getUTCMonth()+1).padStart(2,"0")}`;
-        labels.push(key);
-      }
-      const values = labels.map(k => counts.get(k) || 0);
-      return { labels, values };
-    }
-
-    /*****************************************************************
-     * SKILL COUNTS
-     *****************************************************************/
-    function skillCounts(jobs){
-      const counts = new Map();
-      for(const s of SKILLS) counts.set(s.skill, 0);
-
-      for(const j of jobs){
-        const text = (asText(j.title) + " " + asText(j.description)).toLowerCase();
-        for(const s of SKILLS){
-          if(s.keys.some(k => text.includes(String(k).toLowerCase()))) {
-            counts.set(s.skill, (counts.get(s.skill)||0) + 1);
-          }
+    for(const j of jobs){
+      const text = (asText(j.title) + " " + asText(j.description)).toLowerCase();
+      for(const s of SKILLS){
+        if(s.keys.some(k => text.includes(String(k).toLowerCase()))) {
+          counts.set(s.skill, (counts.get(s.skill)||0) + 1);
         }
       }
-      return counts;
+    }
+    return counts;
+  }
+
+  function topNFromMap(m, n=10){
+    return [...m.entries()].sort((a,b)=>b[1]-a[1]).slice(0,n);
+  }
+
+  function companyCounts(jobs){
+    const m = new Map();
+    for(const j of jobs){
+      const c = (asText(j.company) || "Unknown").trim() || "Unknown";
+      m.set(c, (m.get(c)||0) + 1);
+    }
+    return m;
+  }
+
+  /*****************************************************************
+   * CATEGORY NORMALIZATION (exec-friendly)
+   *****************************************************************/
+  function textBlob(job){
+    return `${asText(job.title)} ${asText(job.category)} ${asText(job.company)} ${asText(job.location)} ${asText(job.description)}`.toLowerCase();
+  }
+
+  function nkuExecCategory(job){
+    const blob = textBlob(job);
+
+    if (/\b(ai|artificial intelligence|machine learning|ml|llm|genai|generative ai|nlp|computer vision|rag|embedding|vector)\b/.test(blob)) {
+      return "AI / ML";
+    }
+    if (/\b(data analyst|data analytics|analytics|bi\b|sql\b|power bi|tableau|dashboard|reporting|data warehouse|etl|dbt|spark|lakehouse|data engineer)\b/.test(blob)) {
+      return "Data & Analytics";
+    }
+    if (/\b(devops|sre|site reliability|kubernetes|docker|ci\/cd|terraform|cloud infrastructure)\b/.test(blob)) {
+      return "DevOps / Cloud";
+    }
+    if (/\b(software|developer|engineer|full[- ]stack|frontend|backend|mobile|web developer|api\b|typescript|javascript|java\b|c\+\+|c#|python\b|golang|rust)\b/.test(blob)) {
+      return "Software Development";
+    }
+    if (/\b(cyber|security|infosec|soc\b|zero trust|iam\b|identity|access|vulnerability|penetration|siem|risk|compliance)\b/.test(blob)) {
+      return "Cybersecurity / IT";
+    }
+    if (/\b(product manager|product management|project manager|program manager|scrum|agile|product owner|pm\b)\b/.test(blob)) {
+      return "Product / Project";
+    }
+    if (/\b(business analyst|operations|strategy|process improvement|continuous improvement|lean\b|six sigma|supply chain|procurement|finance|accounting)\b/.test(blob)) {
+      return "Business / Operations";
+    }
+    if (/\b(marketing|growth|seo\b|content|brand|demand gen|sales|account executive|customer success|support|client)\b/.test(blob)) {
+      return "Marketing / Sales";
+    }
+    if (/\b(health|clinical|patient|hospital|medical|biostat|epidemi|pharma|nursing)\b/.test(blob)) {
+      return "Health / Clinical";
+    }
+    if (/\b(instructor|trainer|curriculum|learning|education|teaching)\b/.test(blob)) {
+      return "Education / Training";
     }
 
-    /*****************************************************************
-     * QUALITY / CONFIDENCE
-     *****************************************************************/
-    function computeQuality(blended, aiJobsLens){
-      const adOk = blended.debug?.aiAD?.some(x => x.ok);
-      const rmOk = blended.debug?.aiRM?.some(x => x.ok);
-      const anyPrivateOk = !!(adOk || rmOk);
+    return "Other";
+  }
 
-      const dateCoverage = aiJobsLens.length ? (aiJobsLens.filter(j=>!!j.date).length / aiJobsLens.length) : 0;
-      const dedupRate = blended.raw?.aiRaw ? (1 - (blended.aiJobs.length / Math.max(blended.raw.aiRaw, 1))) : 0;
+  function normalizeCategoryName(raw){
+    const s = (raw ?? "").toString().trim();
+    if(!s) return "Other";
+    return s.replace(/\s+/g, " ").trim();
+  }
 
-      let label = "Medium";
-      let tag = { text: "medium", cls: "warn" };
+  function isRemote(job){
+    const loc = (asText(job.location) + " " + asText(job.category)).toLowerCase();
+    return /remote|telework|work from home|wfh/.test(loc);
+  }
 
-      if(anyPrivateOk && dateCoverage >= 0.6) {
-        label = "High";
-        tag = { text: "high", cls: "good" };
-      }
-      if(!anyPrivateOk && dateCoverage < 0.4) {
-        label = "Low";
-        tag = { text: "low", cls: "bad" };
-      }
+  function isOHKY(job){
+    const loc = (asText(job.location) + " " + asText(job.title)).toLowerCase();
+    const isOH = /\boh\b|ohio|cincinnati|dayton|columbus|cleveland|toledo/.test(loc);
+    const isKY = /\bky\b|kentucky|covington|newport|florence|lexington|louisville/.test(loc);
+    return isOH || isKY;
+  }
 
-      const series = [
-        anyPrivateOk ? 1 : 0.35,
-        dateCoverage,
-        dedupRate
-      ].map(v=>Math.max(0, Math.min(1, v)));
+  /*****************************************************************
+   * SERIES (sparklines + trend)
+   *****************************************************************/
+  function dayKey(isoOrDate){
+    const d = (isoOrDate instanceof Date) ? isoOrDate : new Date(isoOrDate);
+    if(Number.isNaN(d.getTime())) return null;
+    const dd = new Date(d);
+    dd.setHours(0,0,0,0);
+    return dd.toISOString().slice(0,10);
+  }
 
-      return { label, tag, dateCoverage, dedupRate, anyPrivateOk, series };
+  function lastNDaysKeys(n=14){
+    const now = new Date();
+    now.setHours(0,0,0,0);
+    const keys = [];
+    for(let i=n-1;i>=0;i--){
+      const d = new Date(now);
+      d.setDate(now.getDate()-i);
+      keys.push(d.toISOString().slice(0,10));
+    }
+    return keys;
+  }
+
+  function buildDailySeries(aiJobs, baseJobs, n=14){
+    const keys = lastNDaysKeys(n);
+
+    const aiByDay = new Map(keys.map(k=>[k, []]));
+    const baseByDay = new Map(keys.map(k=>[k, []]));
+
+    for(const j of aiJobs){
+      const k = j.date ? dayKey(j.date) : null;
+      if(k && aiByDay.has(k)) aiByDay.get(k).push(j);
+    }
+    for(const j of baseJobs){
+      const k = j.date ? dayKey(j.date) : null;
+      if(k && baseByDay.has(k)) baseByDay.get(k).push(j);
     }
 
-    /*****************************************************************
-     * STATE
-     *****************************************************************/
-    let blended = null;
-    let currentAudience = "all";
+    const aiShare = [];
+    const aiCount = [];
+    const ohkyShare = [];
+    const remoteShare = [];
+    const topCatShare = [];
+    const nonDevShare = [];
 
-    /*****************************************************************
-     * CHARTS
-     *****************************************************************/
-    let whereChart = null;
-    let trendChart = null;
-    let skillsChart = null;
-    let kyohEmployersChart = null;
-    let kyohSkillsChart = null;
+    const devCatRx = /(software development|data & analytics|ai \/ ml|devops \/ cloud|cybersecurity|it)/i;
 
-    function renderWhereJobsChart(labels, values){
-      const ctx = $("#whereJobsChart");
-      if(whereChart) whereChart.destroy();
+    for(const k of keys){
+      const a = aiByDay.get(k) || [];
+      const b = baseByDay.get(k) || [];
+      const aN = a.length;
+      const bN = b.length;
 
-      whereChart = new Chart(ctx, {
-        type: "bar",
-        data: { labels, datasets: [{ label: "Postings", data: values, borderWidth: 1, borderRadius: 10 }] },
-        options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          plugins: { legend: { display: false } },
-          scales: {
-            y: { beginAtZero: true, ticks: { precision: 0 } },
-            x: { ticks: { maxRotation: 30, minRotation: 30 } }
-          }
-        }
-      });
-    }
+      aiCount.push(aN);
+      aiShare.push(aN / Math.max(aN + bN, 1));
 
-    function renderTrendChart(labels, values){
-      const ctx = $("#trendChart");
-      if(trendChart) trendChart.destroy();
+      const ohky = a.filter(isOHKY).length;
+      ohkyShare.push(ohky / Math.max(aN,1));
 
-      trendChart = new Chart(ctx, {
-        type: "line",
-        data: { labels, datasets: [{ label: "AI postings (monthly)", data: values, borderWidth: 2, pointRadius: 2, tension: 0.25 }] },
-        options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          plugins: { legend: { display: false }, tooltip: { callbacks: { label: (c)=> `${c.parsed.y} postings` } } },
-          scales: { y: { beginAtZero: true, ticks: { precision: 0 } } }
-        }
-      });
-    }
+      const rem = a.filter(isRemote).length;
+      remoteShare.push(rem / Math.max(aN,1));
 
-    function renderSkillsChart(labels, values){
-      const ctx = $("#skillsChart");
-      if(skillsChart) skillsChart.destroy();
-
-      skillsChart = new Chart(ctx, {
-        type: "bar",
-        data: { labels, datasets: [{ label: "Mentions", data: values, borderWidth: 1, borderRadius: 10 }] },
-        options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          indexAxis: "y",
-          plugins: { legend: { display: false }, tooltip: { callbacks: { label: (c)=> `${c.parsed.x} mentions` } } },
-          scales: {
-            x: { beginAtZero: true, ticks: { precision: 0 } },
-            y: { ticks: { font: { weight: "800" } } }
-          }
-        }
-      });
-    }
-
-    function renderKyohEmployers(labels, values){
-      const ctx = $("#kyohEmployersChart");
-      if(kyohEmployersChart) kyohEmployersChart.destroy();
-
-      kyohEmployersChart = new Chart(ctx, {
-        type: "bar",
-        data: { labels, datasets: [{ label: "Postings", data: values, borderWidth: 1, borderRadius: 10 }] },
-        options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          plugins: { legend: { display: false } },
-          scales: {
-            y: { beginAtZero: true, ticks: { precision: 0 } },
-            x: { ticks: { maxRotation: 30, minRotation: 30 } }
-          }
-        }
-      });
-    }
-
-    function renderKyohSkills(labels, values){
-      const ctx = $("#kyohSkillsChart");
-      if(kyohSkillsChart) kyohSkillsChart.destroy();
-
-      kyohSkillsChart = new Chart(ctx, {
-        type: "bar",
-        data: { labels, datasets: [{ label: "Mentions", data: values, borderWidth: 1, borderRadius: 10 }] },
-        options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          indexAxis: "y",
-          plugins: { legend: { display: false } },
-          scales: {
-            x: { beginAtZero: true, ticks: { precision: 0 } },
-            y: { ticks: { font: { weight: "800" } } }
-          }
-        }
-      });
-    }
-
-    /*****************************************************************
-     * KPI COMPUTATION (leadership-aligned)
-     *****************************************************************/
-    function topNFromCounts(map, n=10){
-      const entries = [...map.entries()].sort((a,b)=>b[1]-a[1]).slice(0,n);
-      return { labels: entries.map(x=>x[0]), values: entries.map(x=>x[1]) };
-    }
-
-    function computeLens(blended, aud){
-      const audFn = AUDIENCE_FILTERS[aud] || AUDIENCE_FILTERS.all;
-      const ai = blended.aiJobs.filter(audFn);
-      const base = blended.baseJobs.filter(audFn);
-
-      const share = ai.length / Math.max(ai.length + base.length, 1);
-      const new14 = sumNewInLastDays(ai, 14);
-
-      const ohky = ai.filter(isOHKY).length / Math.max(ai.length, 1);
-      const remote = ai.filter(isRemote).length / Math.max(ai.length, 1);
-
-      // Stable categories for exec conversations
       const catCounts = new Map();
-      for(const j of ai){
+      for(const j of a){
         const cat = normalizeCategoryName(nkuExecCategory(j));
         catCounts.set(cat, (catCounts.get(cat)||0) + 1);
       }
-      const sortedCats = [...catCounts.entries()].sort((a,b)=>b[1]-a[1]);
-      const topCat = sortedCats[0]?.[0] || "Other";
-      const topCatShare = ai.length ? (sortedCats[0]?.[1] || 0) / ai.length : 0;
+      const top = [...catCounts.entries()].sort((x,y)=>y[1]-x[1])[0];
+      topCatShare.push(top ? (top[1] / Math.max(aN,1)) : 0);
 
-      const devCatRx = /(software development|data & analytics|ai \/ ml|devops \/ cloud|cybersecurity \/ it)/i;
-      const devCount = ai.filter(j => devCatRx.test(normalizeCategoryName(nkuExecCategory(j)))).length;
-      const nonDev = ai.length ? 1 - (devCount / ai.length) : 0;
+      const devCount = a.filter(j => devCatRx.test(normalizeCategoryName(nkuExecCategory(j)))).length;
+      nonDevShare.push(1 - (devCount / Math.max(aN,1)));
+    }
 
-      const series14 = buildDailySeries(ai, base, 14);
+    return { aiShare, aiCount, ohkyShare, remoteShare, topCatShare, nonDevShare };
+  }
 
-      const deltaPts = (arr) => (arr && arr.length>=2) ? (arr[arr.length-1] - arr[0]) * 100 : 0;
-      const deltaCount = (arr) => (arr && arr.length>=2) ? (arr[arr.length-1] - arr[0]) : 0;
+  function sumNewInLastDays(aiJobs, days=14){
+    const keys = new Set(lastNDaysKeys(days));
+    let n = 0;
+    for(const j of aiJobs){
+      const k = j.date ? dayKey(j.date) : null;
+      if(k && keys.has(k)) n++;
+    }
+    return n;
+  }
 
-      const deltas = {
-        sharePts: deltaPts(series14.aiShare),
-        ohkyPts: deltaPts(series14.ohkyShare),
-        remotePts: deltaPts(series14.remoteShare),
-        topCatPts: deltaPts(series14.topCatShare),
-        nonDevPts: deltaPts(series14.nonDevShare),
-        newDelta: deltaCount(series14.aiCount)
-      };
+  function monthKey(iso){
+    const d = new Date(iso);
+    if(Number.isNaN(d.getTime())) return null;
+    return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}`;
+  }
 
-      const quality = computeQuality(blended, ai);
+  function trendByMonth(jobs, months=12){
+    const dated = jobs.filter(j=>!!j.date);
+    const keys = dated.map(j=>monthKey(j.date)).filter(Boolean);
+    if(!keys.length){
+      const labels = Array.from({length: Math.min(6, months)}, (_,i)=>`M-${Math.min(6, months)-i}`);
+      const values = labels.map(()=>jobs.length ? Math.max(1, Math.round(jobs.length/labels.length)) : 0);
+      return { labels, values };
+    }
 
-      // Where Jobs Are: ALL blended AI postings, stable taxonomy
-      const whereCounts = new Map();
-      for (const j of ai) {
-        const cat = normalizeCategoryName(nkuExecCategory(j));
-        whereCounts.set(cat, (whereCounts.get(cat) || 0) + 1);
-      }
-      let whereEntries = [...whereCounts.entries()].sort((a, b) => b[1] - a[1]);
-      const top = whereEntries.slice(0, 8);
-      const rest = whereEntries.slice(8);
-      const restSum = rest.reduce((s, [, v]) => s + v, 0);
-      if (restSum > 0) top.push(["All others", restSum]);
+    const max = keys.reduce((a,b)=> a>b ? a : b);
+    const [Y,M] = max.split("-").map(Number);
+    const counts = new Map();
+    for(const k of keys) counts.set(k, (counts.get(k)||0)+1);
 
-      // Skills (overall)
-      const sc = skillCounts(ai);
-      const skillEntries = [...sc.entries()].sort((a,b)=>b[1]-a[1]).slice(0, 10);
+    const labels = [];
+    for(let i=months-1;i>=0;i--){
+      const dd = new Date(Date.UTC(Y, M-1 - i, 1));
+      const key = `${dd.getUTCFullYear()}-${String(dd.getUTCMonth()+1).padStart(2,"0")}`;
+      labels.push(key);
+    }
+    const values = labels.map(k => counts.get(k) || 0);
+    return { labels, values };
+  }
 
-      // Trend
-      const t = trendByMonth(ai, 12);
+  /*****************************************************************
+   * QUALITY (simple, explainable)
+   *****************************************************************/
+  function computeQuality(blended, aiJobsLens){
+    const adOk = blended.debug?.aiAD?.some(x => x.ok);
+    const rmOk = blended.debug?.aiRM?.some(x => x.ok);
+    const anyPrivateOk = !!(adOk || rmOk);
 
-      // Source mix
-      const mixUS = ai.filter(j => j.source === "USAJOBS").length;
-      const mixAD = ai.filter(j => j.source === "Adzuna").length;
-      const mixRM = ai.filter(j => j.source === "Remotive").length;
+    const dateCoverage = aiJobsLens.length ? (aiJobsLens.filter(j=>!!j.date).length / aiJobsLens.length) : 0;
+    const dedupRate = blended.raw?.aiRaw ? (1 - (blended.aiJobs.length / Math.max(blended.raw.aiRaw, 1))) : 0;
 
-      // KY/OH modules
-      const kyohJobs = ai.filter(isOHKY);
-      const empCounts = new Map();
-      for(const j of kyohJobs){
-        const c = normalizeCategoryName(asText(j.company)).trim();
-        if(!c || c.toLowerCase() === "unknown") continue;
-        empCounts.set(c, (empCounts.get(c)||0) + 1);
-      }
-      const topEmployers = topNFromCounts(empCounts, 10);
+    let label = "Medium";
+    let tag = { text: "medium", cls: "warn" };
 
-      const kyohSkillCounts = skillCounts(kyohJobs);
-      const kyohSkillEntries = [...kyohSkillCounts.entries()].sort((a,b)=>b[1]-a[1]).slice(0, 10);
+    if(anyPrivateOk && dateCoverage >= 0.6) {
+      label = "High";
+      tag = { text: "high", cls: "good" };
+    }
+    if(!anyPrivateOk && dateCoverage < 0.4) {
+      label = "Low";
+      tag = { text: "low", cls: "bad" };
+    }
 
-      return {
-        ai, base,
-        share, new14,
-        ohky, remote,
-        topCat, topCatShare,
-        nonDev,
-        series14, deltas,
-        quality,
-        where: { labels: top.map(x=>x[0]), values: top.map(x=>x[1]), poolSize: ai.length },
-        trend: t,
-        skillsTop: { labels: skillEntries.map(x=>x[0]), values: skillEntries.map(x=>x[1]) },
-        mix: { mixUS, mixAD, mixRM },
-        kyoh: {
-          count: kyohJobs.length,
-          employers: { labels: topEmployers.labels, values: topEmployers.values },
-          skillsTop: { labels: kyohSkillEntries.map(x=>x[0]), values: kyohSkillEntries.map(x=>x[1]) }
+    const series = [
+      anyPrivateOk ? 1 : 0.35,
+      dateCoverage,
+      dedupRate
+    ].map(v=>Math.max(0, Math.min(1, v)));
+
+    return { label, tag, dateCoverage, dedupRate, anyPrivateOk, series };
+  }
+
+  function tagForDelta(deltaPts){
+    if(deltaPts > 1.5) return { cls: "good" };
+    if(deltaPts < -1.5) return { cls: "warn" };
+    return { cls: "good" };
+  }
+
+  /*****************************************************************
+   * STATE
+   *****************************************************************/
+  let blended = null;
+  let currentAudience = "all";
+  let region = null;
+
+  /*****************************************************************
+   * CHARTS
+   *****************************************************************/
+  let whereChart = null;
+  let trendChart = null;
+  let skillsChart = null;
+
+  function renderWhereJobsChart(labels, values){
+    const ctx = $("#whereJobsChart");
+    if(whereChart) whereChart.destroy();
+
+    whereChart = new Chart(ctx, {
+      type: "bar",
+      data: { labels, datasets: [{ label: "Postings", data: values, borderWidth: 1, borderRadius: 10 }] },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: { legend: { display: false } },
+        scales: {
+          y: { beginAtZero: true, ticks: { precision: 0 } },
+          x: { ticks: { maxRotation: 30, minRotation: 30 } }
         }
-      };
-    }
-
-    /*****************************************************************
-     * RENDER
-     *****************************************************************/
-    function renderHeaderStatus(data){
-      const adOk = data.debug?.aiAD?.some(x => x.ok);
-      const rmOk = data.debug?.aiRM?.some(x => x.ok);
-
-      const statusEl = $("#blendStatus");
-      if(adOk || rmOk){
-        statusEl.textContent = "live (blended)";
-        statusEl.className = "live";
-      } else {
-        statusEl.textContent = "partial (USAJOBS-only fallback)";
-        statusEl.className = "warn";
       }
+    });
+  }
 
-      setText("#lastRefresh", new Date(data.fetchedAt).toLocaleString());
-    }
+  function renderTrendChart(labels, values){
+    const ctx = $("#trendChart");
+    if(trendChart) trendChart.destroy();
 
-    function renderAll(){
-      if(!blended) return;
-      renderHeaderStatus(blended);
+    trendChart = new Chart(ctx, {
+      type: "line",
+      data: { labels, datasets: [{ label: "AI postings (monthly)", data: values, borderWidth: 2, pointRadius: 2, tension: 0.25 }] },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: { legend: { display: false }, tooltip: { callbacks: { label: (c)=> `${c.parsed.y} postings` } } },
+        scales: { y: { beginAtZero: true, ticks: { precision: 0 } } }
+      }
+    });
+  }
 
-      const lens = computeLens(blended, currentAudience);
+  function renderSkillsChart(labels, values){
+    const ctx = $("#skillsChart");
+    if(skillsChart) skillsChart.destroy();
 
-      // KPI values
-      animatePercent($("#kAiShare"), pct(lens.share));
-      setText("#kAiCount", lens.ai.length.toLocaleString());
-      animatePercent($("#kRegionShare"), pct(lens.ohky));
-      animatePercent($("#kRemoteShare"), pct(lens.remote));
-      setText("#kTopCat", lens.topCat);
-      animatePercent($("#kNonDevShare"), pct(lens.nonDev));
-      setText("#kNew14", String(lens.new14));
+    skillsChart = new Chart(ctx, {
+      type: "bar",
+      data: { labels, datasets: [{ label: "Mentions", data: values, borderWidth: 1, borderRadius: 10 }] },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        indexAxis: "y",
+        plugins: { legend: { display: false }, tooltip: { callbacks: { label: (c)=> `${c.parsed.x} mentions` } } },
+        scales: {
+          x: { beginAtZero: true, ticks: { precision: 0 } },
+          y: { ticks: { font: { weight: "800" } } }
+        }
+      }
+    });
+  }
 
-      // source mix tag
-      setText("#kSourceMix", `${lens.mix.mixUS} US · ${lens.mix.mixAD} Adzuna · ${lens.mix.mixRM} remote`);
+  /*****************************************************************
+   * NATIONAL BLEND PIPELINE (term-based, like your original)
+   *****************************************************************/
+  async function fetchBlend(){
+    const cached = readCache();
+    if(cached) return cached;
 
-      // KPI delta tags
-      const dShare = lens.deltas.sharePts;
-      const dOHKY = lens.deltas.ohkyPts;
-      const dRemote = lens.deltas.remotePts;
-      const dNonDev = lens.deltas.nonDevPts;
+    const aiUS = await fanoutFetch(AI_TERMS, (t)=>fetchUSAJOBS(t, 25, 1), normalizeUSAJOBS);
+    const aiAD = await fanoutFetch(AI_TERMS, (t)=>fetchAdzuna(t, 25, 1), normalizeAdzuna);
+    const aiRM = await fanoutFetch(["machine learning","generative ai","llm","copilot"], (t)=>fetchRemotive(t), normalizeRemotive);
 
-      const t1 = $("#kAiShareDelta");
-      t1.textContent = `▲ ${dShare.toFixed(1)} pts`;
-      t1.className = "kpiTag " + tagForDelta(dShare).cls;
+    const baseUS = await fanoutFetch(BASELINE_TERMS, (t)=>fetchUSAJOBS(t, 25, 1), normalizeUSAJOBS);
+    const baseAD = await fanoutFetch(BASELINE_TERMS, (t)=>fetchAdzuna(t, 25, 1), normalizeAdzuna);
+    const baseRM = await fanoutFetch(["engineer","analyst","manager"], (t)=>fetchRemotive(t), normalizeRemotive);
 
-      const t2 = $("#kRegionDelta");
-      t2.textContent = `▲ ${dOHKY.toFixed(1)} pts`;
-      t2.className = "kpiTag " + tagForDelta(dOHKY).cls;
+    const aiJobs = dedupeJobs([...aiUS.jobs, ...aiAD.jobs, ...aiRM.jobs]);
+    const baseJobs = dedupeJobs([...baseUS.jobs, ...baseAD.jobs, ...baseRM.jobs]);
 
-      const t3 = $("#kRemoteDelta");
-      t3.textContent = `▲ ${dRemote.toFixed(1)} pts`;
-      t3.className = "kpiTag " + tagForDelta(dRemote).cls;
+    const out = {
+      fetchedAt: new Date().toISOString(),
+      aiJobs,
+      baseJobs,
+      raw: {
+        aiRaw: aiUS.rawCount + aiAD.rawCount + aiRM.rawCount,
+        baseRaw: baseUS.rawCount + baseAD.rawCount + baseRM.rawCount
+      },
+      debug: {
+        aiUS: aiUS.debug, aiAD: aiAD.debug, aiRM: aiRM.debug,
+        baseUS: baseUS.debug, baseAD: baseAD.debug, baseRM: baseRM.debug
+      }
+    };
 
-      const t4 = $("#kNonDevDelta");
-      t4.textContent = `▲ ${dNonDev.toFixed(1)} pts`;
-      t4.className = "kpiTag " + tagForDelta(dNonDev).cls;
+    // Regional OH/KY pulse (pre-filter totals + AI subset)
+    out.region = await fetchRegionOHKY();
 
-      // top category share tag
-      const tc = $("#kTopCatShare");
-      tc.textContent = `▲ ${(lens.topCatShare*100).toFixed(1)}% share`;
-      tc.className = "kpiTag good";
+    writeCache(out);
+    return out;
+  }
 
-      // new delta
-      const nd = $("#kNewDelta");
-      nd.textContent = `▲ ${lens.deltas.newDelta >= 0 ? "+" : ""}${lens.deltas.newDelta}`;
-      nd.className = "kpiTag good";
+  /*****************************************************************
+   * ✅ REGIONAL OH/KY PULSE
+   * - fetch 5 pages for OH and KY, per source
+   * - compute totals returned BEFORE AI filtering (deduped)
+   * - AI subset → top employers + top skills
+   *****************************************************************/
+  async function fetchRegionOHKY(){
+    const states = [
+      { key:"OH", name:"Ohio" },
+      { key:"KY", name:"Kentucky" }
+    ];
 
-      // Quality
-      setText("#kQuality", lens.quality.label);
-      const qTag = $("#kQualityTag");
-      qTag.textContent = lens.quality.tag.text;
-      qTag.className = "kpiTag " + lens.quality.tag.cls;
+    const result = { byState:{} };
 
-      // Sparklines
-      $("#sparkAiShare").setAttribute("points", sparkPoints(lens.series14.aiShare));
-      $("#sparkAiCount").setAttribute("points", sparkPoints(lens.series14.aiCount));
-      $("#sparkRegion").setAttribute("points", sparkPoints(lens.series14.ohkyShare));
-      $("#sparkRemote").setAttribute("points", sparkPoints(lens.series14.remoteShare));
-      $("#sparkTopCat").setAttribute("points", sparkPoints(lens.series14.topCatShare));
-      $("#sparkNonDev").setAttribute("points", sparkPoints(lens.series14.nonDevShare));
-      $("#sparkNew14").setAttribute("points", sparkPoints(lens.series14.aiCount));
-      $("#sparkQuality").setAttribute("points", sparkPoints(lens.quality.series));
+    for(const st of states){
+      const adz = await fetchPages(
+        REGION_PAGES,
+        ADZUNA_PER_PAGE,
+        (perPage, page)=>fetchAdzunaRegion(st.name, perPage, page),
+        normalizeAdzuna
+      );
 
-      // Charts
-      renderWhereJobsChart(lens.where.labels, lens.where.values);
-      renderTrendChart(lens.trend.labels, lens.trend.values);
-      renderSkillsChart(lens.skillsTop.labels, lens.skillsTop.values);
+      const usa = await fetchPages(
+        REGION_PAGES,
+        USAJOBS_PER_PAGE,
+        (perPage, page)=>fetchUSAJOBSRegion(st.name, perPage, page),
+        normalizeUSAJOBS
+      );
 
-      renderKyohEmployers(lens.kyoh.employers.labels, lens.kyoh.employers.values);
-      renderKyohSkills(lens.kyoh.skillsTop.labels, lens.kyoh.skillsTop.values);
-    }
+      const preFilter = dedupeJobs([...adz.jobs, ...usa.jobs]);
+      const aiSubset = preFilter.filter(aiSignalMatch);
 
-    /*****************************************************************
-     * DRAWER
-     *****************************************************************/
-    function openDrawer(payload){
-      $("#drawerTitle").textContent = payload.title;
-      $("#drawerSubtitle").textContent = payload.subtitle;
-      $("#drawerBody").innerHTML = payload.html;
-      $("#drawer").classList.add("open");
-    }
-    function closeDrawer(){ $("#drawer").classList.remove("open"); }
+      const empTop = topNFromMap(companyCounts(aiSubset), 10);
+      const skillTop = topNFromMap(skillCounts(aiSubset), 10);
 
-    function showMethods(){
-      const dbg = blended?.debug || {};
-      const audLabel = ({
-        all:"All programs",
-        business:"Business",
-        informatics:"Informatics",
-        health:"Health"
-      }[currentAudience] || "All programs");
-
-      const lens = blended ? computeLens(blended, currentAudience) : null;
-
-      const dateCoverage = lens ? (lens.quality.dateCoverage*100).toFixed(1) + "%" : "—";
-      const dedupRate = lens ? (lens.quality.dedupRate*100).toFixed(1) + "%" : "—";
-      const privateOk = lens ? (lens.quality.anyPrivateOk ? "Yes" : "No") : "—";
-
-      openDrawer({
-        title: "Methods & Sources (Academic Detail)",
-        subtitle: `Lens: ${audLabel} · Worker: ${PROXY_BASE} · Cache: 1 hour`,
-        html: `
-          <div class="section">
-            <strong>What “blended live” means</strong>
-            <p>
-              This dashboard blends three perspectives:
-              <ul>
-                <li><strong>USAJOBS</strong>: trusted public anchor and consistent metadata</li>
-                <li><strong>Adzuna</strong>: private-sector breadth (higher volume; can rate limit)</li>
-                <li><strong>Remotive</strong>: remote-first postings and categories</li>
-              </ul>
-              Results are <strong>deduplicated</strong> by URL (or a stable fallback key).
-            </p>
-          </div>
-
-          <div class="section">
-            <strong>Pagination (larger sample sizes)</strong>
-            <ul>
-              <li><strong>USAJOBS</strong>: ${dbg?.paging?.USAJOBS_PAGES_PER_TERM || "—"} pages/term × ${dbg?.paging?.USAJOBS_RESULTS_PER_PAGE || "—"} results/page</li>
-              <li><strong>Adzuna</strong>: ${dbg?.paging?.ADZUNA_PAGES_PER_TERM || "—"} pages/term × ${dbg?.paging?.ADZUNA_RESULTS_PER_PAGE || "—"} results/page</li>
-            </ul>
-            <p class="muted">If you increase pages, you may hit rate limits. Use cache + smaller term lists for reliability during leadership demos.</p>
-          </div>
-
-          <div class="section">
-            <strong>How the KPIs are computed</strong>
-            <ul>
-              <li><strong>AI-signal share</strong>: <code>AI postings ÷ (AI postings + baseline postings)</code> within the selected lens.</li>
-              <li><strong>KY/OH relevance</strong>: transparent text heuristic on location/title/description strings (state codes + major cities).</li>
-              <li><strong>Remote opportunity</strong>: remote/telework signals in location/category text.</li>
-              <li><strong>Non-dev share (proxy)</strong>: 1 − share of postings in common software/data/AI categories.</li>
-              <li><strong>Trend</strong>: monthly counts using postings with usable dates.</li>
-            </ul>
-          </div>
-
-          <div class="section">
-            <strong>Data quality diagnostics</strong>
-            <ul>
-              <li><strong>Private-sector sources available</strong>: ${escapeHtml(privateOk)}</li>
-              <li><strong>Date coverage in lens</strong>: ${escapeHtml(dateCoverage)}</li>
-              <li><strong>Dedup strength (AI)</strong>: ${escapeHtml(dedupRate)}</li>
-            </ul>
-          </div>
-
-          <div class="section">
-            <strong>Skill map (transparent)</strong>
-            <pre>${escapeHtml(JSON.stringify(SKILLS, null, 2))}</pre>
-          </div>
-
-          <div class="section">
-            <strong>Debug (last fetch)</strong>
-            <pre>${escapeHtml(JSON.stringify(dbg, null, 2))}</pre>
-          </div>
-        `
-      });
-    }
-
-    function showReadingGuide(){
-      openDrawer({
-        title: "How to use this in a dean/chair/director conversation",
-        subtitle: "A quick, upbeat script + interpretation tips",
-        html: `
-          <div class="section">
-            <strong>Suggested 60-second walkthrough</strong>
-            <ul>
-              <li><strong>Start with AI-signal share</strong>: “AI language is showing up meaningfully in postings in this lens.”</li>
-              <li><strong>Confirm sample size</strong>: “This view is deduped and blended across federal + private sector + remote.”</li>
-              <li><strong>Go local</strong>: “KY/OH relevance plus Top KY/OH employers helps prioritize partner outreach.”</li>
-              <li><strong>Connect to curriculum</strong>: “Top skills are actionable for modules, micro-credentials, and applied projects.”</li>
-              <li><strong>Close with action</strong>: “This gives us a data-backed shortlist for where to invest time this semester.”</li>
-            </ul>
-          </div>
-
-          <div class="section">
-            <strong>Interpretation rules (healthy academic caution)</strong>
-            <ul>
-              <li>This is a <strong>signal dashboard</strong>, not a definitive labor market taxonomy.</li>
-              <li>Counts reflect <strong>posting language</strong>. A mention does not equal a strict requirement.</li>
-              <li>Use <strong>Data quality</strong> before making strong claims about trends.</li>
-            </ul>
-          </div>
-        `
-      });
-    }
-
-    function showTrendNotes(){
-      openDrawer({
-        title: "Trend notes",
-        subtitle: "How the trend chart is built (and how to interpret it)",
-        html: `
-          <div class="section">
-            <strong>What you’re seeing</strong>
-            <p>Monthly counts of AI-matched postings within the selected lens, using postings with usable dates.</p>
-          </div>
-          <div class="section">
-            <strong>How to interpret it for leadership</strong>
-            <ul>
-              <li>Use it to discuss direction (rising/flat/noisy) rather than exact forecasting.</li>
-              <li>If it’s flat, check <strong>Data quality</strong> and sample size.</li>
-            </ul>
-          </div>
-        `
-      });
-    }
-
-    function showSkillNotes(){
-      openDrawer({
-        title: "Skill map notes",
-        subtitle: "Why the skill view is academically useful",
-        html: `
-          <div class="section">
-            <strong>Why a keyword map (instead of a black box)</strong>
-            <p>
-              Academic conversations value transparency. This skill view is explainable and editable:
-              NKU can expand it to include accreditation terms, program outcomes, or partner language.
-            </p>
-          </div>
-        `
-      });
-    }
-
-    function showKyohNotes(){
-      openDrawer({
-        title: "KY/OH method",
-        subtitle: "How we identify Kentucky/Ohio postings",
-        html: `
-          <div class="section">
-            <strong>What this is (and what it isn’t)</strong>
-            <p>
-              We flag KY/OH relevance using a transparent text heuristic on the job’s <strong>location</strong>, plus helpful context from title/description.
-              It will not be perfect for every posting (some sources omit location details), but it is explainable and consistent.
-            </p>
-            <ul>
-              <li><strong>Good for:</strong> partner targeting conversations and “local alignment” storytelling</li>
-              <li><strong>Not for:</strong> official state-by-state compliance reporting</li>
-            </ul>
-          </div>
-        `
-      });
-    }
-
-    function showJobCategoriesHelp(){
-      openDrawer({
-        title: "Job categories",
-        subtitle: "How the 'Where the Jobs Are' chart is built",
-        html: `
-          <div class="section">
-            <strong>What this chart shows</strong>
-            <p>
-              We categorize <strong>all blended AI postings</strong> into a stable NKU-friendly taxonomy (AI/ML, Data & Analytics, Software Dev, etc.).
-              This prevents tiny category samples and keeps the story consistent across data sources.
-            </p>
-          </div>
-        `
-      });
-    }
-
-    function showHint(which){
-      const hints = {
-        aiShare: { title: "AI-signal share", body: `<p><strong>Definition:</strong> AI postings ÷ (AI postings + baseline postings).</p><p class="muted">Leadership-friendly: avoids overreacting to raw counts.</p>` },
-        sampleSize: { title: "AI postings (sample)", body: `<p>Count of deduped AI postings in this lens. Larger sample → stronger signal.</p>` },
-        region: { title: "KY/OH relevance", body: `<p>Transparent heuristic on location/title/description for KY/OH tokens (e.g., Cincinnati, Covington, OH, KY).</p>` },
-        remote: { title: "Remote opportunity", body: `<p>Flags remote/telework signals in location/category text.</p>` },
-        topCat: { title: "Top hiring category", body: `<p>Most common category (stable taxonomy) among AI postings in this lens.</p>` },
-        nonDev: { title: "Non-dev share (proxy)", body: `<p>1 minus the share in common software/data/AI categories. Helps quantify cross-disciplinary demand.</p>` },
-        new14: { title: "New postings (14 days)", body: `<p>AI postings with publish dates within the last 14 days.</p>` },
-        quality: { title: "Data quality", body: `<p>Combines private-source success + date coverage + dedup strength into a plain-language label.</p>` }
+      result.byState[st.key] = {
+        stateName: st.name,
+        sources: {
+          adzuna: { deduped: adz.jobs.length, raw: adz.rawCount, debug: adz.debug },
+          usajobs: { deduped: usa.jobs.length, raw: usa.rawCount, debug: usa.debug }
+        },
+        preFilterTotalDeduped: preFilter.length,   // ✅ what you asked for
+        aiSubsetDeduped: aiSubset.length,
+        topEmployers: empTop,
+        topSkills: skillTop
       };
-      const h = hints[which];
-      if(!h) return;
-      openDrawer({ title: h.title, subtitle: "KPI definition and interpretation", html: `<div class="section">${h.body}</div>` });
     }
 
-    /*****************************************************************
-     * BOOT
-     *****************************************************************/
-    async function init(){
-      $("#drawerClose").addEventListener("click", closeDrawer);
-      document.addEventListener("keydown", (e)=>{ if(e.key === "Escape") closeDrawer(); });
+    return result;
+  }
 
-      $("#openMethods").addEventListener("click", showMethods);
-      $("#tabMethods").addEventListener("click", showMethods);
-      $("#tabOverview").addEventListener("click", ()=>{
-        $("#tabOverview").classList.add("active");
-        $("#tabMethods").classList.remove("active");
-        closeDrawer();
-      });
-      $("#tabPrint").addEventListener("click", ()=> window.print());
+  /*****************************************************************
+   * KPI COMPUTATION (national blended KPIs)
+   *****************************************************************/
+  function computeLens(blended, aud){
+    const audFn = AUDIENCE_FILTERS[aud] || AUDIENCE_FILTERS.all;
+    const ai = blended.aiJobs.filter(audFn);
+    const base = blended.baseJobs.filter(audFn);
 
-      $("#openReadingGuide").addEventListener("click", showReadingGuide);
-      $("#openTrendNotes").addEventListener("click", showTrendNotes);
-      $("#openSkillNotes").addEventListener("click", showSkillNotes);
-      $("#openJobCats").addEventListener("click", showJobCategoriesHelp);
+    const share = ai.length / Math.max(ai.length + base.length, 1);
+    const new14 = sumNewInLastDays(ai, 14);
 
-      $("#openKyohNotes").addEventListener("click", showKyohNotes);
-      $("#openKyohNotes2").addEventListener("click", showKyohNotes);
+    const ohky = ai.filter(isOHKY).length / Math.max(ai.length, 1);
+    const remote = ai.filter(isRemote).length / Math.max(ai.length, 1);
 
-      // KPI hint buttons
-      $$(".hint").forEach(h=> h.addEventListener("click", ()=> showHint(h.dataset.hint)));
+    const catCounts = new Map();
+    for(const j of ai){
+      const cat = normalizeCategoryName(nkuExecCategory(j));
+      catCounts.set(cat, (catCounts.get(cat)||0) + 1);
+    }
+    const sortedCats = [...catCounts.entries()].sort((a,b)=>b[1]-a[1]);
+    const topCat = sortedCats[0]?.[0] || "Other";
+    const topCatShare = ai.length ? (sortedCats[0]?.[1] || 0) / ai.length : 0;
 
-      $("#forceRefresh").addEventListener("click", ()=>{
-        clearCache();
-        location.reload();
-      });
+    const devCatRx = /(software development|data & analytics|ai \/ ml|devops \/ cloud|cybersecurity|it)/i;
+    const devCount = ai.filter(j => devCatRx.test(normalizeCategoryName(nkuExecCategory(j)))).length;
+    const nonDev = ai.length ? 1 - (devCount / ai.length) : 0;
 
-      $$("#audienceToggle button").forEach(btn=>{
-        btn.addEventListener("click", ()=>{
-          currentAudience = btn.dataset.aud || "all";
-          $$("#audienceToggle button").forEach(b=> b.setAttribute("aria-pressed", b.dataset.aud === currentAudience ? "true" : "false"));
-          renderAll();
-        });
-      });
+    const series14 = buildDailySeries(ai, base, 14);
+    const deltaPts = (arr) => (arr && arr.length>=2) ? (arr[arr.length-1] - arr[0]) * 100 : 0;
+    const deltaCount = (arr) => (arr && arr.length>=2) ? (arr[arr.length-1] - arr[0]) : 0;
 
-      // Shimmer placeholders
-      const shimmer = (w,h)=>`<span class="skel" style="width:${w}px;height:${h}px;"></span>`;
-      $("#kAiShare").innerHTML = shimmer(90,28);
-      $("#kAiCount").innerHTML = shimmer(70,28);
-      $("#kRegionShare").innerHTML = shimmer(90,28);
-      $("#kRemoteShare").innerHTML = shimmer(90,28);
-      $("#kTopCat").innerHTML = shimmer(180,24);
-      $("#kNonDevShare").innerHTML = shimmer(90,28);
-      $("#kNew14").innerHTML = shimmer(60,28);
-      $("#kQuality").innerHTML = shimmer(70,22);
+    const deltas = {
+      sharePts: deltaPts(series14.aiShare),
+      ohkyPts: deltaPts(series14.ohkyShare),
+      remotePts: deltaPts(series14.remoteShare),
+      nonDevPts: deltaPts(series14.nonDevShare),
+      newDelta: deltaCount(series14.aiCount)
+    };
 
-      try{
-        blended = await fetchBlend();
+    const quality = computeQuality(blended, ai);
+
+    // Where jobs are: categorize all blended AI postings consistently
+    const whereCounts = new Map();
+    for (const j of ai) {
+      const cat = normalizeCategoryName(nkuExecCategory(j));
+      whereCounts.set(cat, (whereCounts.get(cat) || 0) + 1);
+    }
+    let whereEntries = [...whereCounts.entries()].sort((a,b)=>b[1]-a[1]);
+    const top = whereEntries.slice(0, 8);
+    const rest = whereEntries.slice(8);
+    const restSum = rest.reduce((s, [,v])=>s+v, 0);
+    if(restSum > 0) top.push(["All others", restSum]);
+
+    const t = trendByMonth(ai, 12);
+
+    const sc = skillCounts(ai);
+    const skillEntries = [...sc.entries()].sort((a,b)=>b[1]-a[1]).slice(0, 10);
+
+    const mixUS = ai.filter(j => j.source === "USAJOBS").length;
+    const mixAD = ai.filter(j => j.source === "Adzuna").length;
+    const mixRM = ai.filter(j => j.source === "Remotive").length;
+
+    return {
+      ai, base,
+      share, new14,
+      ohky, remote,
+      topCat, topCatShare,
+      nonDev,
+      series14, deltas,
+      quality,
+      where: { labels: top.map(x=>x[0]), values: top.map(x=>x[1]) },
+      trend: t,
+      skillsTop: { labels: skillEntries.map(x=>x[0]), values: skillEntries.map(x=>x[1]) },
+      mix: { mixUS, mixAD, mixRM }
+    };
+  }
+
+  /*****************************************************************
+   * RENDER
+   *****************************************************************/
+  function renderHeaderStatus(data){
+    const adOk = data.debug?.aiAD?.some(x => x.ok);
+    const rmOk = data.debug?.aiRM?.some(x => x.ok);
+
+    const statusEl = $("#blendStatus");
+    if(adOk || rmOk){
+      statusEl.textContent = "live (blended)";
+      statusEl.className = "live";
+    } else {
+      statusEl.textContent = "partial (limited private-source)";
+      statusEl.className = "warn";
+    }
+
+    setText("#lastRefresh", new Date(data.fetchedAt).toLocaleString());
+  }
+
+  function renderList(el, pairs){
+    const root = $(el);
+    if(!root) return;
+    if(!pairs || !pairs.length){
+      root.innerHTML = `<li><div>No results yet</div><span>—</span></li>`;
+      return;
+    }
+    root.innerHTML = pairs.map(([label, value]) => `
+      <li><div>${escapeHtml(label)}</div><span>${escapeHtml(String(value))}</span></li>
+    `).join("");
+  }
+
+  function renderRegion(region){
+    if(!region?.byState) return;
+
+    const oh = region.byState.OH;
+    const ky = region.byState.KY;
+
+    setText("#ohTotalPre", oh?.preFilterTotalDeduped?.toLocaleString?.() ?? "—");
+    setText("#ohAiCount", oh?.aiSubsetDeduped?.toLocaleString?.() ?? "—");
+    renderList("#ohEmployers", (oh?.topEmployers || []).map(([k,v])=>[k, v]));
+    renderList("#ohSkills", (oh?.topSkills || []).map(([k,v])=>[k, v]));
+
+    setText("#kyTotalPre", ky?.preFilterTotalDeduped?.toLocaleString?.() ?? "—");
+    setText("#kyAiCount", ky?.aiSubsetDeduped?.toLocaleString?.() ?? "—");
+    renderList("#kyEmployers", (ky?.topEmployers || []).map(([k,v])=>[k, v]));
+    renderList("#kySkills", (ky?.topSkills || []).map(([k,v])=>[k, v]));
+  }
+
+  function renderAll(){
+    if(!blended) return;
+    renderHeaderStatus(blended);
+
+    const lens = computeLens(blended, currentAudience);
+
+    // KPI values
+    animatePercent($("#kAiShare"), pct(lens.share));
+    setText("#kAiCount", lens.ai.length.toLocaleString());
+    animatePercent($("#kRegionShare"), pct(lens.ohky));
+    animatePercent($("#kRemoteShare"), pct(lens.remote));
+
+    setText("#kSourceMix", `${lens.mix.mixUS} US · ${lens.mix.mixAD} Adzuna · ${lens.mix.mixRM} remote`);
+
+    // KPI delta tags
+    const t1 = $("#kAiShareDelta");
+    t1.textContent = `▲ ${lens.deltas.sharePts.toFixed(1)} pts`;
+    t1.className = "kpiTag " + tagForDelta(lens.deltas.sharePts).cls;
+
+    const t2 = $("#kRegionDelta");
+    t2.textContent = `▲ ${lens.deltas.ohkyPts.toFixed(1)} pts`;
+    t2.className = "kpiTag " + tagForDelta(lens.deltas.ohkyPts).cls;
+
+    const t3 = $("#kRemoteDelta");
+    t3.textContent = `▲ ${lens.deltas.remotePts.toFixed(1)} pts`;
+    t3.className = "kpiTag " + tagForDelta(lens.deltas.remotePts).cls;
+
+    // Sparklines
+    $("#sparkAiShare").setAttribute("points", sparkPoints(lens.series14.aiShare));
+    $("#sparkAiCount").setAttribute("points", sparkPoints(lens.series14.aiCount));
+    $("#sparkRegion").setAttribute("points", sparkPoints(lens.series14.ohkyShare));
+    $("#sparkRemote").setAttribute("points", sparkPoints(lens.series14.remoteShare));
+
+    // Charts
+    renderWhereJobsChart(lens.where.labels, lens.where.values);
+    renderTrendChart(lens.trend.labels, lens.trend.values);
+    renderSkillsChart(lens.skillsTop.labels, lens.skillsTop.values);
+
+    // Regional pulse
+    renderRegion(blended.region);
+  }
+
+  /*****************************************************************
+   * DRAWER
+   *****************************************************************/
+  function openDrawer(payload){
+    $("#drawerTitle").textContent = payload.title;
+    $("#drawerSubtitle").textContent = payload.subtitle;
+    $("#drawerBody").innerHTML = payload.html;
+    $("#drawer").classList.add("open");
+  }
+  function closeDrawer(){ $("#drawer").classList.remove("open"); }
+
+  function showMethods(){
+    const dbg = blended?.debug || {};
+    const reg = blended?.region || {};
+    openDrawer({
+      title: "Methods & Sources (Academic Detail)",
+      subtitle: `Worker: ${PROXY_BASE} · Cache: 1 hour · Regional: 5 pages/state/source`,
+      html: `
+        <div class="section">
+          <strong>National view (blended)</strong>
+          <p>Uses keyword-based queries across USAJOBS + Adzuna + Remotive, then deduplicates results.</p>
+        </div>
+
+        <div class="section">
+          <strong>Regional OH/KY view (what you requested)</strong>
+          <ul>
+            <li><strong>Step 1:</strong> fetch a <strong>regional sample</strong> (OH and KY separately) using <strong>5 pages</strong> from USAJOBS + Adzuna.</li>
+            <li><strong>Step 2:</strong> report <strong>Total postings returned (pre AI filter)</strong> after deduping within-state.</li>
+            <li><strong>Step 3:</strong> apply the AI keyword filter locally to find the AI-signal subset.</li>
+            <li><strong>Step 4:</strong> compute Top Employers + Top Skills from the AI-signal subset.</li>
+          </ul>
+          <p class="muted">Interpretation: this is a high-clarity approach for leadership: show the base regional market sample first, then the AI-signal layer.</p>
+        </div>
+
+        <div class="section">
+          <strong>AI keyword filter (transparent)</strong>
+          <pre>${escapeHtml(JSON.stringify(AI_TERMS, null, 2))}</pre>
+        </div>
+
+        <div class="section">
+          <strong>Skill map (transparent)</strong>
+          <pre>${escapeHtml(JSON.stringify(SKILLS, null, 2))}</pre>
+        </div>
+
+        <div class="section">
+          <strong>Debug (national)</strong>
+          <pre>${escapeHtml(JSON.stringify(dbg, null, 2))}</pre>
+        </div>
+
+        <div class="section">
+          <strong>Debug (regional)</strong>
+          <pre>${escapeHtml(JSON.stringify(reg, null, 2))}</pre>
+        </div>
+      `
+    });
+  }
+
+  function showReadingGuide(){
+    openDrawer({
+      title: "How to use this in a dean/chair/director conversation",
+      subtitle: "A quick, upbeat script + interpretation tips",
+      html: `
+        <div class="section">
+          <strong>Suggested 60-second walkthrough</strong>
+          <ul>
+            <li><strong>Start national:</strong> “AI language is showing up consistently across postings — here’s the overall signal and trend.”</li>
+            <li><strong>Then go regional:</strong> “For OH and KY, we first show the total market sample we pulled, then the AI-signal subset.”</li>
+            <li><strong>Move to action:</strong> “These top employers and skills help us prioritize outreach + micro-credentials + applied projects.”</li>
+          </ul>
+        </div>
+
+        <div class="section">
+          <strong>Healthy academic caution</strong>
+          <ul>
+            <li>This is a <strong>signal dashboard</strong>, not a full labor taxonomy.</li>
+            <li>A “mention” is not a guarantee of a hard requirement.</li>
+            <li>Use it to guide questions and prioritization, then validate with employer conversations.</li>
+          </ul>
+        </div>
+      `
+    });
+  }
+
+  function showTrendNotes(){
+    openDrawer({
+      title: "Trend notes",
+      subtitle: "How the trend chart is built and interpreted",
+      html: `
+        <div class="section">
+          <strong>What you’re seeing</strong>
+          <p>Monthly counts of AI-matched postings within the selected lens, using postings with usable dates.</p>
+        </div>
+        <div class="section">
+          <strong>Leadership interpretation</strong>
+          <ul>
+            <li>Use multi-month movement to discuss acceleration/softening.</li>
+            <li>Use regional employers/skills as concrete action targets.</li>
+          </ul>
+        </div>
+      `
+    });
+  }
+
+  function showSkillNotes(){
+    openDrawer({
+      title: "Skill map notes",
+      subtitle: "Why a transparent skill map works well for NKU",
+      html: `
+        <div class="section">
+          <strong>Why explainable beats “black box” for academic leadership</strong>
+          <p>This map is editable and auditable. NKU can align it to program outcomes, accreditation language, or partner vocabulary.</p>
+        </div>
+      `
+    });
+  }
+
+  function showJobCategoriesHelp(){
+    openDrawer({
+      title: "Job categories",
+      subtitle: "How the 'Where the Jobs Are' chart is built",
+      html: `
+        <div class="section">
+          <strong>Executive categories</strong>
+          <p>We map postings into stable, leadership-friendly categories (AI/ML, Data & Analytics, Software Development, etc.).</p>
+        </div>
+      `
+    });
+  }
+
+  function showRegionalNotes(){
+    openDrawer({
+      title: "Regional notes (OH vs KY)",
+      subtitle: "How to interpret totals vs AI-signal subsets",
+      html: `
+        <div class="section">
+          <strong>What “Total postings returned (pre AI filter)” means</strong>
+          <p>
+            For each state, we pull a deduped sample of postings from USAJOBS + Adzuna (5 pages each). This is the base regional market snapshot.
+          </p>
+        </div>
+        <div class="section">
+          <strong>What “AI-signal subset” means</strong>
+          <p>
+            From that regional sample, we filter by transparent AI keywords. We then compute Top Employers and Top Skills from that subset.
+          </p>
+        </div>
+        <div class="section">
+          <strong>Why this is dean-ready</strong>
+          <ul>
+            <li>It separates “overall market activity” from “AI-specific signals.”</li>
+            <li>It provides concrete outreach targets (employers) and curriculum targets (skills).</li>
+          </ul>
+        </div>
+      `
+    });
+  }
+
+  function showHint(which){
+    const hints = {
+      aiShare: {
+        title: "AI-signal share",
+        body: `<p>AI postings ÷ (AI postings + baseline postings) within the selected lens.</p>`
+      },
+      sampleSize: {
+        title: "AI postings (sample)",
+        body: `<p>Deduped AI postings across sources within the selected lens.</p>`
+      },
+      region: {
+        title: "Regional relevance (OH/KY)",
+        body: `<p>Heuristic match to OH/KY tokens in title/location strings.</p>`
+      },
+      remote: {
+        title: "Remote opportunity",
+        body: `<p>Remote/telework signals in location/category strings.</p>`
+      }
+    };
+    const h = hints[which];
+    if(!h) return;
+    openDrawer({ title: h.title, subtitle: "KPI definition", html: `<div class="section">${h.body}</div>` });
+  }
+
+  /*****************************************************************
+   * BOOT
+   *****************************************************************/
+  async function init(){
+    $("#drawerClose").addEventListener("click", closeDrawer);
+    document.addEventListener("keydown", (e)=>{ if(e.key === "Escape") closeDrawer(); });
+
+    $("#openMethods").addEventListener("click", showMethods);
+    $("#tabMethods").addEventListener("click", showMethods);
+    $("#tabOverview").addEventListener("click", ()=>{ $("#tabOverview").classList.add("active"); $("#tabMethods").classList.remove("active"); closeDrawer(); });
+    $("#tabPrint").addEventListener("click", ()=> window.print());
+
+    $("#openReadingGuide").addEventListener("click", showReadingGuide);
+    $("#openTrendNotes").addEventListener("click", showTrendNotes);
+    $("#openSkillNotes").addEventListener("click", showSkillNotes);
+    $("#openJobCats").addEventListener("click", showJobCategoriesHelp);
+    $("#openRegionalNotes").addEventListener("click", showRegionalNotes);
+
+    $$(".hint").forEach(h=> h.addEventListener("click", ()=> showHint(h.dataset.hint)));
+
+    $("#forceRefresh").addEventListener("click", ()=>{ clearCache(); location.reload(); });
+
+    $$("#audienceToggle button").forEach(btn=>{
+      btn.addEventListener("click", ()=>{
+        currentAudience = btn.dataset.aud || "all";
+        $$("#audienceToggle button").forEach(b=> b.setAttribute("aria-pressed", b.dataset.aud === currentAudience ? "true" : "false"));
         renderAll();
-      }catch(err){
-        console.error(err);
-        const statusEl = $("#blendStatus");
-        statusEl.textContent = "error";
-        statusEl.className = "bad";
-        openDrawer({
-          title: "Data fetch error",
-          subtitle: "The dashboard could not load market data.",
-          html: `
-            <div class="section">
-              <strong>What to try</strong>
-              <ul>
-                <li>Open the Worker to verify it loads: <code>${escapeHtml(PROXY_BASE)}</code></li>
-                <li>Click <strong>Force refresh</strong> to clear cache.</li>
-                <li>If Adzuna rate limits (429), reduce pages/terms or add throttling in the Worker.</li>
-                <li>If Remotive route is not implemented in the Worker, you’ll need to add it (or remove Remotive from the blend).</li>
-              </ul>
-              <pre>${escapeHtml(String(err))}</pre>
-            </div>
-          `
-        });
-      }
-    }
+      });
+    });
 
-    init();
-  </script>
+    // Shimmer placeholders
+    const shimmer = (w,h)=>`<span class="skel" style="width:${w}px;height:${h}px;"></span>`;
+    $("#kAiShare").innerHTML = shimmer(90,28);
+    $("#kAiCount").innerHTML = shimmer(70,28);
+    $("#kRegionShare").innerHTML = shimmer(90,28);
+    $("#kRemoteShare").innerHTML = shimmer(90,28);
+
+    setText("#ohTotalPre", "loading…");
+    setText("#ohAiCount", "loading…");
+    setText("#kyTotalPre", "loading…");
+    setText("#kyAiCount", "loading…");
+
+    try{
+      blended = await fetchBlend();
+      renderAll();
+    }catch(err){
+      console.error(err);
+      const statusEl = $("#blendStatus");
+      statusEl.textContent = "error";
+      statusEl.className = "bad";
+      openDrawer({
+        title: "Data fetch error",
+        subtitle: "The dashboard could not load market data.",
+        html: `
+          <div class="section">
+            <strong>What to try</strong>
+            <ul>
+              <li>Open your Worker root to confirm routes: <code>${escapeHtml(PROXY_BASE)}</code></li>
+              <li>Click <strong>Force refresh</strong> to clear cache.</li>
+              <li>If Adzuna rate limits (429), reduce pages or add throttling.</li>
+            </ul>
+            <pre>${escapeHtml(String(err))}</pre>
+          </div>
+        `
+      });
+    }
+  }
+
+  init();
+</script>
+
 </body>
 </html>
