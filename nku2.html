@@ -31,23 +31,24 @@
     *{ box-sizing:border-box; }
     html,body{ height:100%; }
     body{
-    margin:0;
-    font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
-    background: var(--bg); /* ✅ solid, consistent */
-    color:var(--text);
-    line-height:1.45;
+      margin:0;
+      font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
+      background: var(--bg); /* ✅ solid */
+      color:var(--text);
+      line-height:1.45;
     }
 
     a{ color:var(--accent2); text-decoration:none; }
     a:hover{ text-decoration:underline; }
 
     .wrap{ max-width: 1240px; margin:0 auto; padding: 18px 18px 40px; }
+
     header{
       position: sticky;
       top:0;
       z-index: 10;
-      background: rgba(246,248,252,0.78);
-      backdrop-filter: blur(12px);
+      background: var(--bg);       /* ✅ removed “glassy” look */
+      backdrop-filter: none;       /* ✅ consistent */
       border-bottom: 1px solid rgba(219,227,239,0.75);
     }
 
@@ -535,7 +536,7 @@
         <div>
           <div class="badge"><span class="dot"></span> NKU Executive Dashboard · AI Skills Demand (Live Blend)</div>
           <h1>What Employers Are Asking For Now</h1>
-          <p class="subtitle">Built for NKU AI Panel Discussion · Uses USAJOBS (trusted anchor) + Adzuna (private-sector breadth)</p>
+          <p class="subtitle">Built for NKU AI Panel Discussion · Uses USAJOBS (trusted anchor) + Adzuna (private-sector breadth) + Remotive (remote breadth)</p>
         </div>
 
         <div class="toolbar">
@@ -548,7 +549,7 @@
 
           <div class="meta">
             <span class="chip">Last refresh: <strong id="lastRefresh">—</strong></span>
-            <span class="chip">Sources: <strong>USAJOBS + Adzuna</strong> (via Worker)</span>
+            <span class="chip">Sources: <strong>USAJOBS + Adzuna + Remotive</strong> (via Worker)</span>
             <button class="btn" id="openSources" type="button">Data sources</button>
           </div>
 
@@ -678,7 +679,7 @@
 
       </section>
 
-      <!-- Executive Insights (auto-generated "so what") -->
+      <!-- Executive Insights -->
       <section class="grid" style="margin-top:12px" aria-label="Executive insights">
         <div class="card span-12" style="padding:12px 14px">
           <div style="display:flex; align-items:flex-start; justify-content:space-between; gap:10px; flex-wrap:wrap;">
@@ -781,23 +782,12 @@
 
   <script>
     /*****************************************************************
-     * KEY FIX (why it broke for some GitHub testers)
-     * ---------------------------------------------------------------
-     * USAJOBS sometimes returns MajorDuties as an ARRAY (bullet list),
-     * not a string. If code assumes description is always a string,
-     * `.replace(...)` crashes.
-     *
-     * This build fixes that by coercing ANY value into a safe string
-     * using `asText()` everywhere (normalize + rendering).
-     *****************************************************************/
-
-    /*****************************************************************
      * CONFIG
      *****************************************************************/
     const PROXY_BASE = "https://ai-skills-proxy.nealb3.workers.dev";
 
     // bump cache key so "bad-shaped" cached data won't keep crashing
-    const CACHE_KEY = "nku_exec_ai_dashboard_cache_v4"; // ✅ bumped
+    const CACHE_KEY = "nku_exec_ai_dashboard_cache_v5"; // ✅ bumped
     const CACHE_TTL_MS = 60 * 60 * 1000; // 1 hour
 
     const AI_TERMS_US = [
@@ -808,6 +798,18 @@
       "artificial intelligence","machine learning","llm","generative ai"
     ];
     const BASELINE_TERMS = ["software","analyst","manager"];
+
+    // Optional: add partner feeds if you implement Worker routes
+    // - Greenhouse: https://boards-api.greenhouse.io/v1/boards/{board}/jobs?content=true
+    // - Ashby: https://jobs.ashbyhq.com/api/non-user-facing/organization/{org}/job-postings
+    const PARTNER_FEEDS = {
+      greenhouseBoards: [
+        // "asana", "stripe", "airbnb"
+      ],
+      ashbyOrgs: [
+        // "openai", "anthropic"
+      ]
+    };
 
     const AUDIENCE_FILTERS = {
       all: () => true,
@@ -929,65 +931,23 @@
       const url = `${PROXY_BASE}/adzuna?what=${t}&results_per_page=${perPage}&page=${page}&country=us`;
       return { url, json: await fetchJson(url), term };
     }
+
+    // Remotive via Worker route: /remotive?search=
     async function fetchRemotive(searchTerm=""){
-  const q = encodeURIComponent(searchTerm || "");
-  const url = `${PROXY_BASE}/remotive${q ? `?search=${q}` : ""}`;
-  return { url, json: await fetchJson(url), term: searchTerm };
-}
+      const q = encodeURIComponent(searchTerm || "");
+      const url = `${PROXY_BASE}/remotive${q ? `?search=${q}` : ""}`;
+      return { url, json: await fetchJson(url), term: searchTerm };
+    }
 
-function normalizeRemotive(payload){
-  const items = payload?.jobs || payload?.data?.jobs || [];
-  return items.map(it => ({
-    source: "Remotive",
-    title: asText(it?.title),
-    description: asText(it?.description),
-    company: asText(it?.company_name || it?.company || "Unknown"),
-    category: asText(it?.category || it?.job_type || "Remote"),
-    location: asText(it?.candidate_required_location || "Remote"),
-    url: asText(it?.url || it?.job_url || ""),
-    date: parseDateSafe(it?.publication_date || it?.created_at || null)
-  }));
-}
-
-async function fetchGreenhouseBoard(board){
-  const url = `${PROXY_BASE}/greenhouse?board=${encodeURIComponent(board)}`;
-  return { url, json: await fetchJson(url), term: board };
-}
-
-function normalizeGreenhouse(payload, boardName="Greenhouse"){
-  const jobs = payload?.jobs || [];
-  return jobs.map(it => ({
-    source: `Greenhouse:${boardName}`,
-    title: asText(it?.title),
-    description: asText(it?.content || it?.internal_content || ""),
-    company: boardName,
-    category: asText(it?.departments?.[0]?.name || it?.department?.name || "Other"),
-    location: asText(it?.location?.name || ""),
-    url: asText(it?.absolute_url || it?.url || ""),
-    date: parseDateSafe(it?.updated_at || it?.created_at || null)
-  }));
-}
-
-async function fetchAshbyOrg(org){
-  const url = `${PROXY_BASE}/ashby?org=${encodeURIComponent(org)}`;
-  return { url, json: await fetchJson(url), term: org };
-}
-
-function normalizeAshby(payload, orgName="Ashby"){
-  // Ashby response structures vary; this covers common "jobPostings" shape
-  const jobs = payload?.jobPostings || payload?.job_postings || payload?.data?.jobPostings || [];
-  return jobs.map(it => ({
-    source: `Ashby:${orgName}`,
-    title: asText(it?.title),
-    description: asText(it?.descriptionHtml || it?.description || ""),
-    company: orgName,
-    category: asText(it?.team || it?.department || "Other"),
-    location: asText(it?.locationName || it?.location || ""),
-    url: asText(it?.jobUrl || it?.url || ""),
-    date: parseDateSafe(it?.publishedAt || it?.updatedAt || null)
-  }));
-}
-
+    // Partner feeds (require Worker routes /greenhouse and /ashby)
+    async function fetchGreenhouseBoard(board){
+      const url = `${PROXY_BASE}/greenhouse?board=${encodeURIComponent(board)}`;
+      return { url, json: await fetchJson(url), term: board };
+    }
+    async function fetchAshbyOrg(org){
+      const url = `${PROXY_BASE}/ashby?org=${encodeURIComponent(org)}`;
+      return { url, json: await fetchJson(url), term: org };
+    }
 
     /*****************************************************************
      * NORMALIZERS
@@ -1035,6 +995,48 @@ function normalizeAshby(payload, orgName="Ashby"){
         location: asText(it?.location?.display_name || ""),
         url: asText(it?.redirect_url || it?.adref || ""),
         date: parseDateSafe(it?.created || it?.created_at || it?.publication_date || null)
+      }));
+    }
+
+    function normalizeRemotive(payload){
+      const items = payload?.jobs || payload?.data?.jobs || [];
+      return items.map(it => ({
+        source: "Remotive",
+        title: asText(it?.title),
+        description: asText(it?.description),
+        company: asText(it?.company_name || it?.company || "Unknown"),
+        category: asText(it?.category || it?.job_type || "Remote"),
+        location: asText(it?.candidate_required_location || "Remote"),
+        url: asText(it?.url || it?.job_url || ""),
+        date: parseDateSafe(it?.publication_date || it?.created_at || null)
+      }));
+    }
+
+    function normalizeGreenhouse(payload, boardName="Greenhouse"){
+      const jobs = payload?.jobs || [];
+      return jobs.map(it => ({
+        source: `Greenhouse:${boardName}`,
+        title: asText(it?.title),
+        description: asText(it?.content || it?.internal_content || ""),
+        company: boardName,
+        category: asText(it?.departments?.[0]?.name || it?.department?.name || "Other"),
+        location: asText(it?.location?.name || ""),
+        url: asText(it?.absolute_url || it?.url || ""),
+        date: parseDateSafe(it?.updated_at || it?.created_at || null)
+      }));
+    }
+
+    function normalizeAshby(payload, orgName="Ashby"){
+      const jobs = payload?.jobPostings || payload?.job_postings || payload?.data?.jobPostings || [];
+      return jobs.map(it => ({
+        source: `Ashby:${orgName}`,
+        title: asText(it?.title),
+        description: asText(it?.descriptionHtml || it?.description || ""),
+        company: orgName,
+        category: asText(it?.team || it?.department || "Other"),
+        location: asText(it?.locationName || it?.location || ""),
+        url: asText(it?.jobUrl || it?.url || ""),
+        date: parseDateSafe(it?.publishedAt || it?.updatedAt || null)
       }));
     }
 
@@ -1227,90 +1229,88 @@ function normalizeAshby(payload, orgName="Ashby"){
     function closeDrawer(){ $("#drawer").classList.remove("open"); }
 
     /*****************************************************************
-     * DATA PIPELINE
+     * DATA PIPELINE (USAJOBS + Adzuna + Remotive + optional partner feeds)
      *****************************************************************/
-async function fetchBlend(){
-  const cached = readCache();
-  if(cached) return cached;
+    async function fetchBlend(){
+      const cached = readCache();
+      if(cached) return cached;
 
-  // 1) Aggregators (search-based)
-  const aiUS = await fanoutFetch(AI_TERMS_US, (t)=>fetchUSAJOBS(t, 25, 1), normalizeUSAJOBS);
-  const aiAD = await fanoutFetch(AI_TERMS_ADZUNA, (t)=>fetchAdzuna(t, 25, 1), normalizeAdzuna);
+      // 1) Aggregators (search-based)
+      const aiUS = await fanoutFetch(AI_TERMS_US, (t)=>fetchUSAJOBS(t, 25, 1), normalizeUSAJOBS);
+      const aiAD = await fanoutFetch(AI_TERMS_ADZUNA, (t)=>fetchAdzuna(t, 25, 1), normalizeAdzuna);
 
-  // Remotive supports search; use same AI terms (but fewer to reduce load)
-  const aiRM = await fanoutFetch(
-    ["machine learning","generative ai","llm","copilot"],
-    (t)=>fetchRemotive(t),
-    normalizeRemotive
-  );
+      // Remotive supports search; use a smaller AI term set to reduce load
+      const aiRM = await fanoutFetch(
+        ["machine learning","generative ai","llm","copilot"],
+        (t)=>fetchRemotive(t),
+        normalizeRemotive
+      );
 
-  const baseUS = await fanoutFetch(BASELINE_TERMS, (t)=>fetchUSAJOBS(t, 25, 1), normalizeUSAJOBS);
-  const baseAD = await fanoutFetch(BASELINE_TERMS, (t)=>fetchAdzuna(t, 25, 1), normalizeAdzuna);
-  const baseRM = await fanoutFetch(["engineer","analyst","manager"], (t)=>fetchRemotive(t), normalizeRemotive);
+      const baseUS = await fanoutFetch(BASELINE_TERMS, (t)=>fetchUSAJOBS(t, 25, 1), normalizeUSAJOBS);
+      const baseAD = await fanoutFetch(BASELINE_TERMS, (t)=>fetchAdzuna(t, 25, 1), normalizeAdzuna);
+      const baseRM = await fanoutFetch(["engineer","analyst","manager"], (t)=>fetchRemotive(t), normalizeRemotive);
 
-  // 2) Partner feeds (non-search): pull all, then classify locally
-  const partnerJobs = [];
-  const partnerDebug = { greenhouse: [], ashby: [] };
+      // 2) Optional partner feeds (non-search): pull all, then classify locally
+      const partnerJobs = [];
+      const partnerDebug = { greenhouse: [], ashby: [] };
 
-  // Greenhouse boards
-  for(const board of (PARTNER_FEEDS.greenhouseBoards || [])){
-    try{
-      const { url, json } = await fetchGreenhouseBoard(board);
-      partnerDebug.greenhouse.push({ ok:true, board, url });
-      partnerJobs.push(...normalizeGreenhouse(json, board));
-    }catch(e){
-      partnerDebug.greenhouse.push({ ok:false, board, error:String(e).slice(0,180) });
+      for(const board of (PARTNER_FEEDS.greenhouseBoards || [])){
+        try{
+          const { url, json } = await fetchGreenhouseBoard(board);
+          partnerDebug.greenhouse.push({ ok:true, board, url });
+          partnerJobs.push(...normalizeGreenhouse(json, board));
+        }catch(e){
+          partnerDebug.greenhouse.push({ ok:false, board, error:String(e).slice(0,180) });
+        }
+      }
+
+      for(const org of (PARTNER_FEEDS.ashbyOrgs || [])){
+        try{
+          const { url, json } = await fetchAshbyOrg(org);
+          partnerDebug.ashby.push({ ok:true, org, url });
+          partnerJobs.push(...normalizeAshby(json, org));
+        }catch(e){
+          partnerDebug.ashby.push({ ok:false, org, error:String(e).slice(0,180) });
+        }
+      }
+
+      // Split partner jobs into AI vs baseline using simple term logic
+      const isAiPosting = (job) => {
+        const text = (asText(job.title) + " " + asText(job.description)).toLowerCase();
+        const aiNeedles = [...AI_TERMS_US, ...AI_TERMS_ADZUNA].map(s=>s.toLowerCase());
+        return aiNeedles.some(k => text.includes(k));
+      };
+      const isBaselinePosting = (job) => {
+        const text = (asText(job.title) + " " + asText(job.description)).toLowerCase();
+        const needles = BASELINE_TERMS.map(s=>s.toLowerCase());
+        return needles.some(k => text.includes(k));
+      };
+
+      const partnerAi = partnerJobs.filter(isAiPosting);
+      const partnerBase = partnerJobs.filter(isBaselinePosting);
+
+      // 3) Blend everything
+      const aiJobs = dedupeJobs([...aiUS.jobs, ...aiAD.jobs, ...aiRM.jobs, ...partnerAi]);
+      const baseJobs = dedupeJobs([...baseUS.jobs, ...baseAD.jobs, ...baseRM.jobs, ...partnerBase]);
+
+      const out = {
+        fetchedAt: new Date().toISOString(),
+        aiJobs,
+        baseJobs,
+        raw: {
+          aiRaw: aiUS.rawCount + aiAD.rawCount + aiRM.rawCount + partnerAi.length,
+          baseRaw: baseUS.rawCount + baseAD.rawCount + baseRM.rawCount + partnerBase.length
+        },
+        debug: {
+          aiUS: aiUS.debug, aiAD: aiAD.debug, aiRM: aiRM.debug,
+          baseUS: baseUS.debug, baseAD: baseAD.debug, baseRM: baseRM.debug,
+          partners: partnerDebug
+        }
+      };
+
+      writeCache(out);
+      return out;
     }
-  }
-
-  // Ashby orgs
-  for(const org of (PARTNER_FEEDS.ashbyOrgs || [])){
-    try{
-      const { url, json } = await fetchAshbyOrg(org);
-      partnerDebug.ashby.push({ ok:true, org, url });
-      partnerJobs.push(...normalizeAshby(json, org));
-    }catch(e){
-      partnerDebug.ashby.push({ ok:false, org, error:String(e).slice(0,180) });
-    }
-  }
-
-  // 3) Split partner jobs into AI vs baseline using your existing term logic
-  const isAiPosting = (job) => {
-    const text = (asText(job.title) + " " + asText(job.description)).toLowerCase();
-    const aiNeedles = [...AI_TERMS_US, ...AI_TERMS_ADZUNA].map(s=>s.toLowerCase());
-    return aiNeedles.some(k => text.includes(k));
-  };
-  const isBaselinePosting = (job) => {
-    const text = (asText(job.title) + " " + asText(job.description)).toLowerCase();
-    const needles = BASELINE_TERMS.map(s=>s.toLowerCase());
-    return needles.some(k => text.includes(k));
-  };
-
-  const partnerAi = partnerJobs.filter(isAiPosting);
-  const partnerBase = partnerJobs.filter(isBaselinePosting);
-
-  // 4) Blend everything
-  const aiJobs = dedupeJobs([...aiUS.jobs, ...aiAD.jobs, ...aiRM.jobs, ...partnerAi]);
-  const baseJobs = dedupeJobs([...baseUS.jobs, ...baseAD.jobs, ...baseRM.jobs, ...partnerBase]);
-
-  const out = {
-    fetchedAt: new Date().toISOString(),
-    aiJobs,
-    baseJobs,
-    raw: {
-      aiRaw: aiUS.rawCount + aiAD.rawCount + aiRM.rawCount + partnerAi.length,
-      baseRaw: baseUS.rawCount + baseAD.rawCount + baseRM.rawCount + partnerBase.length
-    },
-    debug: {
-      aiUS: aiUS.debug, aiAD: aiAD.debug, aiRM: aiRM.debug,
-      baseUS: baseUS.debug, baseAD: baseAD.debug, baseRM: baseRM.debug,
-      partners: partnerDebug
-    }
-  };
-
-  writeCache(out);
-  return out;
-}
 
     /*****************************************************************
      * STATE
@@ -1325,7 +1325,7 @@ async function fetchBlend(){
       search: ""
     };
 
-    // ✅ family filter for “guided” drilling
+    // family filter for “guided” drilling
     let familyFilter = "all";
 
     function applyAudience(aud){
@@ -1374,29 +1374,33 @@ async function fetchBlend(){
      * KPI + EXPLORER RENDER
      *****************************************************************/
     function computeConfidence(data, aiJobs){
+      // “live blended” means at least one private-sector source succeeded
       const adOk = data.debug?.aiAD?.some(x => x.ok);
+      const rmOk = data.debug?.aiRM?.some(x => x.ok);
+      const anyPrivateOk = !!(adOk || rmOk);
+
       const dateCoverage = aiJobs.length ? (aiJobs.filter(j=>!!j.date).length / aiJobs.length) : 0;
       const dedupRate = data.raw?.aiRaw ? (1 - (aiJobs.length / Math.max(data.raw.aiRaw, 1))) : 0;
 
       let label = "Medium";
       let tag = { text: "medium confidence", cls: "warn" };
 
-      if(adOk && dateCoverage >= 0.6) {
+      if(anyPrivateOk && dateCoverage >= 0.6) {
         label = "High";
         tag = { text: "high confidence", cls: "good" };
       }
-      if(!adOk && dateCoverage < 0.4) {
+      if(!anyPrivateOk && dateCoverage < 0.4) {
         label = "Low";
         tag = { text: "low confidence", cls: "bad" };
       }
 
       const series = [
-        Math.max(0, Math.min(1, adOk ? 1 : 0.35)),
+        Math.max(0, Math.min(1, anyPrivateOk ? 1 : 0.35)),
         Math.max(0, Math.min(1, dateCoverage)),
         Math.max(0, Math.min(1, dedupRate))
       ];
 
-      return { label, tag, dateCoverage, dedupRate, adOk, series };
+      return { label, tag, dateCoverage, dedupRate, anyPrivateOk, series };
     }
 
     function filteredAiJobs(data){
@@ -1424,7 +1428,6 @@ async function fetchBlend(){
         return { skill, family: meta?.family || "Other", count, total, share: count/total };
       });
 
-      // ✅ family filter
       if(familyFilter !== "all"){
         rows = rows.filter(r => r.family === familyFilter);
       }
@@ -1580,14 +1583,14 @@ async function fetchBlend(){
       const share = aiJobsAud.length / Math.max(aiJobsAud.length + baseJobsAud.length, 1);
       const noncsShare = aiJobsAud.length ? (aiJobsAud.filter(classifyNonCS).length / aiJobsAud.length) : 0;
 
-      // animated percents
       animateNumber($("#kpiShare"), pct(share));
       setText("#kpiAiCount", aiJobsAud.length.toLocaleString());
       animateNumber($("#kpiNonCs"), pct(noncsShare));
 
       const mixUS = aiJobsAud.filter(j => j.source === "USAJOBS").length;
       const mixAD = aiJobsAud.filter(j => j.source === "Adzuna").length;
-      setText("#kpiAiMix", `${mixUS} US · ${mixAD} private`);
+      const mixRM = aiJobsAud.filter(j => j.source === "Remotive").length;
+      setText("#kpiAiMix", `${mixUS} US · ${mixAD} Adzuna · ${mixRM} remote`);
 
       // confidence
       const conf = computeConfidence(data, aiJobsAud);
@@ -1597,7 +1600,7 @@ async function fetchBlend(){
       confTag.className = "kpiTag " + conf.tag.cls;
       $("#sparkConfidence").setAttribute("points", sparkPoints(conf.series.length>1 ? conf.series : [0,0]));
 
-      // trend spark for row-2 KPIs
+      // trend spark
       const t = trendByMonth(aiJobsAud, 12);
       $("#sparkShare").setAttribute("points", sparkPoints(t.values));
       $("#sparkAiCount").setAttribute("points", sparkPoints(t.values));
@@ -1624,10 +1627,11 @@ async function fetchBlend(){
       setText("#kpiFastFam", fastFam);
       $("#sparkFastFam").setAttribute("points", sparkPoints(deltaSeries.length>1 ? deltaSeries : [0,0]));
 
-      // status
+      // status: "live" if any private-sector source succeeded
       const adOk = data.debug?.aiAD?.some(x => x.ok);
+      const rmOk = data.debug?.aiRM?.some(x => x.ok);
       const statusEl = $("#blendStatus");
-      if(adOk){
+      if(adOk || rmOk){
         statusEl.textContent = "live (blended)";
         statusEl.className = "live";
       } else {
@@ -1655,6 +1659,8 @@ async function fetchBlend(){
             <ul>
               <li><strong>USAJOBS</strong> (trusted public anchor): federal postings and related roles.</li>
               <li><strong>Adzuna</strong> (private-sector breadth): higher volume, subject to rate limiting.</li>
+              <li><strong>Remotive</strong> (remote breadth): remote-first postings across sectors.</li>
+              <li><strong>Optional partner feeds</strong>: Greenhouse/Ashby boards you explicitly list (if enabled).</li>
             </ul>
           </div>
 
@@ -1823,6 +1829,7 @@ async function fetchBlend(){
                 <li>Open the Worker in a new tab to verify it loads: <code>${escapeHtml(PROXY_BASE)}</code></li>
                 <li>Click <strong>Force refresh</strong> to clear cache.</li>
                 <li>If Adzuna rate limits (429), reduce terms or add throttling in the Worker.</li>
+                <li>If Remotive route is not implemented in the Worker yet, remove Remotive from the UI and fetchBlend().</li>
               </ul>
               <pre>${escapeHtml(String(err))}</pre>
             </div>
