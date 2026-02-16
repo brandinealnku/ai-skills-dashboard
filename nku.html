@@ -1074,6 +1074,7 @@ async function fetchJson(url){
   }
   return json;
 }
+/* Dead code since I'm using /blend... 
 
 async function fetchUSAJOBS(term, perPage=25, page=1){
   const t = encodeURIComponent(term);
@@ -1102,7 +1103,7 @@ async function fetchLinkedIn(term, perPage=25, page0=0){
     `&limit=${encodeURIComponent(String(perPage))}`;
   return { url, json: await fetchJson(url), term, page: page0 };
 }
-
+*/
 /*****************************************************************
  * NORMALIZERS
  *****************************************************************/
@@ -1253,48 +1254,46 @@ async function fetchBlend(){
   const cached = readCache();
   if(cached) return cached;
 
-  const aiUS = await fanoutFetchPages(AI_TERMS_US, fetchUSAJOBS, normalizeUSAJOBS, PAGES_PER_TERM, RESULTS_PER_PAGE);
-  const aiAD = await fanoutFetchPages(AI_TERMS_ADZUNA, fetchAdzuna, normalizeAdzuna, PAGES_PER_TERM, RESULTS_PER_PAGE);
-  const aiRM = await fanoutFetchPages(["machine learning","generative ai","llm","copilot"], (t)=>fetchRemotive(t), normalizeRemotive, 1, 50);
+  // ✅ Open keyword search (whatever you want to search for)
+  const keyword = (window.currentKeyword || "artificial intelligence").trim();
 
-  const aiLI = await fanoutFetchPagesZeroBased(
-    AI_TERMS_LINKEDIN,
-    fetchLinkedIn,
-    normalizeLinkedIn,
-    LINKEDIN_PAGES_PER_TERM,
-    LINKEDIN_RESULTS_PER_PAGE
-  );
+  // ✅ Restrict to KY/OH only (or remove region to allow nationwide)
+  const region = "kyoh"; // "kyoh" | "" (blank means all)
 
-  const baseUS = await fanoutFetchPages(BASELINE_TERMS, fetchUSAJOBS, normalizeUSAJOBS, PAGES_PER_TERM, RESULTS_PER_PAGE);
-  const baseAD = await fanoutFetchPages(BASELINE_TERMS, fetchAdzuna, normalizeAdzuna, PAGES_PER_TERM, RESULTS_PER_PAGE);
-  const baseRM = await fanoutFetchPages(["engineer","analyst","manager"], (t)=>fetchRemotive(t), normalizeRemotive, 1, 50);
+  // ✅ Keep your existing knobs
+  const pages = PAGES_PER_TERM;
+  const perPage = RESULTS_PER_PAGE;
+  const linkedinPages = LINKEDIN_PAGES_PER_TERM;
+  const linkedinPerPage = LINKEDIN_RESULTS_PER_PAGE;
 
-  const baseLI = await fanoutFetchPagesZeroBased(
-    BASELINE_LINKEDIN,
-    fetchLinkedIn,
-    normalizeLinkedIn,
-    LINKEDIN_PAGES_PER_TERM,
-    LINKEDIN_RESULTS_PER_PAGE
-  );
+  const url =
+    `${PROXY_BASE}/blend` +
+    `?keyword=${encodeURIComponent(keyword)}` +
+    (region ? `&region=${encodeURIComponent(region)}` : "") +
+    `&pages=${encodeURIComponent(String(pages))}` +
+    `&perPage=${encodeURIComponent(String(perPage))}` +
+    `&linkedinPages=${encodeURIComponent(String(linkedinPages))}` +
+    `&linkedinPerPage=${encodeURIComponent(String(linkedinPerPage))}` +
+    `&dateSincePosted=${encodeURIComponent("past week")}` +
+    `&sortBy=${encodeURIComponent("recent")}`;
 
-  const aiJobs = dedupeJobs([...aiUS.jobs, ...aiAD.jobs, ...aiRM.jobs, ...aiLI.jobs]);
-  const baseJobs = dedupeJobs([...baseUS.jobs, ...baseAD.jobs, ...baseRM.jobs, ...baseLI.jobs]);
+  const res = await fetch(url, { cache: "no-store" });
+  const data = await res.json();
+  if(!res.ok || !data.ok) throw new Error(data?.error || `Failed /blend (${res.status})`);
 
+  // ✅ Worker already returns normalized, deduped jobs with dates + urls
   const out = {
-    fetchedAt: new Date().toISOString(),
-    aiJobs,
-    baseJobs,
+    fetchedAt: data.fetchedAt,
+    aiJobs: data.jobs,          // treat as your “AI postings”
+    baseJobs: [],               // optional: set empty, or keep your baseline strategy separately
     raw: {
-      aiRaw: aiUS.rawCount + aiAD.rawCount + aiRM.rawCount + aiLI.rawCount,
-      baseRaw: baseUS.rawCount + baseAD.rawCount + baseRM.rawCount + baseLI.rawCount
+      aiRaw: data.counts?.rawTotal || 0,
+      baseRaw: 0
     },
-    debug: {
-      aiUS: aiUS.debug, aiAD: aiAD.debug, aiRM: aiRM.debug, aiLI: aiLI.debug,
-      baseUS: baseUS.debug, baseAD: baseAD.debug, baseRM: baseRM.debug, baseLI: baseLI.debug
-    },
-    pagesUsed: PAGES_PER_TERM,
-    perPage: RESULTS_PER_PAGE,
-    linkedin: { pagesUsed: LINKEDIN_PAGES_PER_TERM, perPage: LINKEDIN_RESULTS_PER_PAGE }
+    debug: data.debug,
+    pagesUsed: pages,
+    perPage: perPage,
+    linkedin: { pagesUsed: linkedinPages, perPage: linkedinPerPage }
   };
 
   writeCache(out);
@@ -1473,7 +1472,7 @@ function computeQuality(blended, aiJobsLens){
   const adOk = blended.debug?.aiAD?.some(x => x.ok);
   const rmOk = blended.debug?.aiRM?.some(x => x.ok);
   const liOk = blended.debug?.aiLI?.some(x => x.ok);
-  const anyPrivateOk = !!(adOk || rmOk || liOk);
+  const anyPrivateOk = privateSourcesOk(blended.debug);
 
   const dateCoverage = aiJobsLens.length ? (aiJobsLens.filter(j=>!!j.date).length / aiJobsLens.length) : 0;
   const dedupRate = blended.raw?.aiRaw ? (1 - (blended.aiJobs.length / Math.max(blended.raw.aiRaw, 1))) : 0;
@@ -1599,9 +1598,9 @@ function computeLens(blended, aud){
   const aiSafe = ai.length ? ai : blended.aiJobs;
   const baseSafe = base.length ? base : blended.baseJobs;
 
-  const share = aiSafe.length / Math.max(aiSafe.length + baseSafe.length, 1);
+  const share = aiSafe.length ? (aiSafe.filter(j => !!j.date).length / aiSafe.length) : 0;
 
-  const series14 = buildDailySeries(aiSafe, baseSafe, 14);
+  const series14 = buildDailySeries(aiSafe, [], 14);
   const deltaPts = (arr) => (arr && arr.length>=2) ? (arr[arr.length-1] - arr[0]) * 100 : 0;
   const deltas = { sharePts: deltaPts(series14.aiShare) };
 
@@ -1674,20 +1673,32 @@ function computeLens(blended, aud){
   };
 }
 
+function anyOk(val){
+  if(!val) return false;
+  if(Array.isArray(val)) return val.some(x => x && x.ok);
+  if(typeof val === "object") return !!val.ok || Object.values(val).some(anyOk);
+  return false;
+}
+function privateSourcesOk(debug){
+  if(!debug) return false;
+  // supports aiAD/aiRM/aiLI arrays, or nested objects
+  return anyOk(debug.aiAD) || anyOk(debug.aiRM) || anyOk(debug.aiLI)
+      || anyOk(debug.adzuna) || anyOk(debug.remotive) || anyOk(debug.linkedin)
+      || anyOk(debug.sources); // generic
+}
+  
 /*****************************************************************
  * RENDER
  *****************************************************************/
 function renderHeaderStatus(data){
-  const adOk = data.debug?.aiAD?.some(x => x.ok);
-  const rmOk = data.debug?.aiRM?.some(x => x.ok);
-  const liOk = data.debug?.aiLI?.some(x => x.ok);
-
   const statusEl = $("#blendStatus");
-  if(adOk || rmOk || liOk){
+  const ok = privateSourcesOk(data.debug);
+
+  if(ok){
     statusEl.textContent = "live (blended)";
     statusEl.className = "live";
   } else {
-    statusEl.textContent = "partial (USAJOBS-only fallback)";
+    statusEl.textContent = "partial (public fallback)";
     statusEl.className = "warn";
   }
 
@@ -2047,8 +2058,8 @@ function showExplorerHelp(){
 function showHint(which){
   const hints = {
     aiShare: {
-      title:"AI-signal share",
-      body:`<p><strong>Definition:</strong> AI postings ÷ (AI + baseline) within the selected lens.</p>`
+      title:"AI postings with usable dates",
+      body:`<p>Dated AI postings ÷ AI postings (lens)</p>`
     },
     sampleSize: {
       title:"AI postings (sample)",
