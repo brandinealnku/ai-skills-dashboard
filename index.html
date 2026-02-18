@@ -7,50 +7,123 @@
   <title>AI Skills for Job-Market Readiness</title>
   <link rel="stylesheet" href="styles.css" />
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
 </head>
 <body>
   <a class="skip-link" href="#main-content">Skip to main content</a>
 
-  <header class="hero section">
+  <nav class="top-nav" aria-label="Primary">
+    <div class="container top-nav__inner">
+      <a href="#overview">Overview</a>
+      <a href="#core-skills">Core Skills</a>
+      <a href="#evidence">Evidence</a>
+      <a href="#discipline-view">Discipline View</a>
+      <a href="#job-explorer">Job Explorer</a>
+      <a href="#sources">Sources</a>
+    </div>
+  </nav>
+
+  <header id="overview" class="hero section">
     <div class="container">
       <h1 id="hero-title"></h1>
       <p id="hero-takeaway-1" class="takeaway"></p>
       <p id="hero-takeaway-2" class="takeaway"></p>
       <p class="meta">Last updated: <time id="last-updated" datetime=""></time></p>
-      <p>
+      <div class="actions-row">
         <a class="download-button" href="data.json" download aria-label="Download source data JSON file">Download data.json</a>
-      </p>
+        <button id="copy-link-button" class="action-button" type="button" aria-label="Copy shareable dashboard link">Copy link</button>
+      </div>
+      <div id="app-alert" class="app-alert" hidden role="alert" aria-live="assertive"></div>
     </div>
   </header>
 
   <main id="main-content" class="container">
-    <section class="section" aria-labelledby="core-skills-heading">
+    <section id="core-skills" class="section" aria-labelledby="core-skills-heading">
       <h2 id="core-skills-heading">Core Skills for All Students</h2>
       <div id="core-skills-grid" class="skills-grid" role="list"></div>
     </section>
 
-    <section class="section" aria-labelledby="chart-1-heading">
-      <h2 id="chart-1-heading">AI mentions in job postings are rising</h2>
-      <div class="chart-wrap">
-        <canvas id="aiMentionsTrendChart" aria-label="Line chart showing AI mentions in job postings over time" role="img"></canvas>
+    <section id="evidence" class="section" aria-labelledby="evidence-heading">
+      <div class="section-heading-row">
+        <h2 id="evidence-heading">Evidence</h2>
+        <button id="download-snapshot-button" class="action-button" type="button" aria-label="Download evidence snapshot as PNG">Download snapshot</button>
+      </div>
+
+      <div id="evidence-snapshot-area" class="evidence-layout">
+        <div class="evidence-charts">
+          <article class="chart-card" aria-labelledby="chart-1-heading">
+            <div class="chart-card__title-row">
+              <h3 id="chart-1-heading"></h3>
+              <div id="chart-1-meta" class="source-chip-row"></div>
+            </div>
+            <div class="chart-wrap">
+              <canvas id="aiMentionsTrendChart" aria-label="Line chart showing AI mentions in job postings over time" role="img"></canvas>
+            </div>
+          </article>
+
+          <article class="chart-card" aria-labelledby="chart-2-heading">
+            <div class="chart-card__title-row">
+              <h3 id="chart-2-heading"></h3>
+              <div id="chart-2-meta" class="source-chip-row"></div>
+            </div>
+            <div class="chart-wrap">
+              <canvas id="aiMentionsByFamilyChart" aria-label="Bar chart showing AI mentions by job family" role="img"></canvas>
+            </div>
+          </article>
+
+          <article class="chart-card" aria-labelledby="chart-3-heading">
+            <div class="chart-card__title-row">
+              <h3 id="chart-3-heading"></h3>
+              <div id="chart-3-meta" class="source-chip-row"></div>
+            </div>
+            <div class="chart-wrap chart-wrap--small">
+              <canvas id="aiOutsideITShareChart" aria-label="Donut chart showing share of AI demand outside IT and CS" role="img"></canvas>
+            </div>
+          </article>
+        </div>
+
+        <aside class="insight-drawer" aria-labelledby="insight-heading">
+          <div class="insight-drawer__header">
+            <h3 id="insight-heading">Insight Drawer</h3>
+            <button id="clear-selection-button" class="action-button action-button--quiet" type="button">Clear selection</button>
+          </div>
+          <p id="insight-headline" class="insight-headline">Select a chart point, bar, or slice to view a focused insight.</p>
+          <p id="insight-interpretation"></p>
+          <h4>Why it matters</h4>
+          <p id="insight-why"></p>
+          <h4>Implications</h4>
+          <ul id="insight-implications"></ul>
+          <h4>Recommended teaching focus</h4>
+          <p id="insight-teaching"></p>
+          <div id="insight-source" class="insight-source"></div>
+        </aside>
       </div>
     </section>
 
-    <section class="section" aria-labelledby="chart-2-heading">
-      <h2 id="chart-2-heading">AI mentions by job family</h2>
-      <div class="chart-wrap">
-        <canvas id="aiMentionsByFamilyChart" aria-label="Bar chart showing AI mentions by job family" role="img"></canvas>
+    <section id="discipline-view" class="section" aria-labelledby="discipline-heading">
+      <h2 id="discipline-heading">Discipline View</h2>
+      <div id="discipline-buttons" class="button-group" role="tablist" aria-label="Choose a discipline"></div>
+      <div class="discipline-panel" aria-live="polite" aria-atomic="true">
+        <h3 id="discipline-title"></h3>
+
+        <h4>Top AI skills emphasis</h4>
+        <ul id="discipline-skills"></ul>
+
+        <h4>Learning outcomes</h4>
+        <ul id="discipline-outcomes"></ul>
+
+        <h4>Sample assignments</h4>
+        <ul id="discipline-assignments"></ul>
+
+        <h4>Responsible AI watch-outs</h4>
+        <ul id="discipline-watchouts"></ul>
+
+        <h4>Sources used</h4>
+        <ul id="discipline-sources"></ul>
       </div>
     </section>
 
-    <section class="section" aria-labelledby="chart-3-heading">
-      <h2 id="chart-3-heading">AI demand extends beyond IT/CS</h2>
-      <div class="chart-wrap chart-wrap--small">
-        <canvas id="aiOutsideITShareChart" aria-label="Donut chart showing share of AI demand outside IT and CS" role="img"></canvas>
-      </div>
-    </section>
-
-    <section class="section" aria-labelledby="explorer-heading">
+    <section id="job-explorer" class="section" aria-labelledby="explorer-heading">
       <h2 id="explorer-heading">Job Family Explorer</h2>
       <div id="job-family-buttons" class="button-group" role="tablist" aria-label="Choose a job family"></div>
       <div class="explorer-panel" aria-live="polite" aria-atomic="true">
@@ -59,8 +132,17 @@
       </div>
     </section>
 
-    <section class="section" aria-labelledby="sources-heading">
-      <h2 id="sources-heading">Sources</h2>
+    <section id="sources" class="section" aria-labelledby="sources-heading">
+      <div class="section-heading-row">
+        <h2 id="sources-heading">Sources</h2>
+        <label class="sources-filter">
+          <span>View:</span>
+          <select id="sources-filter-select" aria-label="Filter sources list">
+            <option value="selection">Show sources for current selection</option>
+            <option value="all">Show all</option>
+          </select>
+        </label>
+      </div>
       <ul id="sources-list" class="sources-list"></ul>
     </section>
   </main>

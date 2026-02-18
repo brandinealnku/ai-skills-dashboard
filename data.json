@@ -2,33 +2,212 @@
   "lastUpdated": "2026-02-11",
   "takeaway": {
     "headline": "Teach baseline AI literacy for all students, then add role-based depth.",
-    "subhead": "Job postings show AI skills spreading beyond tech roles, and the most valuable skills differ by job family (power-user vs builder vs high-stakes governance)."
+    "subhead": "Job postings show AI skills spreading beyond tech roles, and the most valuable skills differ by job family, discipline, and risk context."
   },
   "coreSkills": [
-    { "title": "AI literacy & judgment", "desc": "Limits, failure modes, verification habits, and when not to use AI." },
-    { "title": "Prompting + iteration", "desc": "Clear constraints, examples, critique loops, and evaluation criteria." },
-    { "title": "Data literacy", "desc": "Data quality, privacy basics, measurement, and experimentation mindset." },
-    { "title": "Responsible AI", "desc": "Bias, privacy/security, transparency, and human oversight." },
-    { "title": "Human skills amplified by AI", "desc": "Problem framing, communication, domain context, ethical reasoning." }
+    {
+      "title": "AI literacy & judgment",
+      "desc": "Limits, failure modes, verification habits, and when not to use AI.",
+      "icon": "judgment"
+    },
+    {
+      "title": "Prompting + iteration",
+      "desc": "Clear constraints, examples, critique loops, and evaluation criteria.",
+      "icon": "iteration"
+    },
+    {
+      "title": "Data literacy",
+      "desc": "Data quality, privacy basics, measurement, and experimentation mindset.",
+      "icon": "data"
+    },
+    {
+      "title": "Responsible AI",
+      "desc": "Bias, privacy/security, transparency, and human oversight.",
+      "icon": "shield"
+    },
+    {
+      "title": "Human skills amplified by AI",
+      "desc": "Problem framing, communication, domain context, ethical reasoning.",
+      "icon": "people"
+    }
   ],
   "charts": {
     "aiMentionsTrend": {
-      "title": "AI mentions in job postings are rising (Indeed AI Tracker)",
+      "title": "AI mentions in job postings are rising",
       "labels": ["2020", "2021", "2022", "2023", "2024", "Dec 2025"],
       "values": [1.0, 1.6, 1.2, 2.0, 3.0, 4.2],
-      "note": "Keep these as placeholders until you replace them with exact points from the Indeed AI Tracker chart. The anchor point is 4.2% in Dec 2025."
+      "sourceId": "indeedLabor2026",
+      "asOfDate": "2025-12",
+      "method": "Share of Indeed postings mentioning AI-related terms by month.",
+      "drilldown": {
+        "2020": {
+          "headline": "AI mentions were niche in 2020",
+          "interpretation": "Only a small share of postings included AI skills, concentrated in specialist roles.",
+          "whyItMatters": "Early baselines help institutions explain how quickly employer demand has shifted.",
+          "implications": [
+            "Legacy curricula likely underprepare students for current AI-enabled work.",
+            "Skills diffusion can be tracked over time to update programs."
+          ],
+          "teachingFocus": "Introduce baseline AI literacy in first-year and core courses."
+        },
+        "2021": {
+          "headline": "Demand started accelerating",
+          "interpretation": "Postings mentioning AI increased as employers tested automation and augmentation use cases.",
+          "whyItMatters": "Programs can use this period to show AI demand is not a short-lived spike.",
+          "implications": [
+            "Employers began expecting practical tool familiarity.",
+            "Cross-functional teams started sharing AI-related responsibilities."
+          ],
+          "teachingFocus": "Teach prompting and verification routines in applied assignments."
+        },
+        "2022": {
+          "headline": "Temporary dip before a larger expansion",
+          "interpretation": "Mentions softened briefly, then resumed strong growth as new tools matured.",
+          "whyItMatters": "Leaders should avoid overreacting to single-year fluctuations.",
+          "implications": [
+            "Trend direction matters more than one-period volatility.",
+            "Strategic curriculum change should be multi-year."
+          ],
+          "teachingFocus": "Build durable foundations in data literacy and critical evaluation."
+        },
+        "2023": {
+          "headline": "Mainstream adoption phase begins",
+          "interpretation": "AI mentions rebounded as organizations scaled copilots and assistant workflows.",
+          "whyItMatters": "Students increasingly compete in markets where AI-enabled productivity is expected.",
+          "implications": [
+            "Hiring managers may differentiate candidates by practical AI fluency.",
+            "Evidence-based portfolio work becomes more valuable."
+          ],
+          "teachingFocus": "Embed AI-supported project work in capstones and internships."
+        },
+        "2024": {
+          "headline": "Strong broad-based growth",
+          "interpretation": "Mentions rose further as adoption expanded beyond early-adopter teams.",
+          "whyItMatters": "AI readiness is now a general employability issue, not just a technical specialty.",
+          "implications": [
+            "All departments should articulate AI learning outcomes.",
+            "Faculty development becomes a strategic priority."
+          ],
+          "teachingFocus": "Create discipline-specific AI use policies and exemplar assignments."
+        },
+        "Dec 2025": {
+          "headline": "AI mentions reached 4.2% in Dec 2025",
+          "interpretation": "The highest point in this series indicates sustained employer interest in AI capabilities.",
+          "whyItMatters": "Executive planning should treat AI skills as core workforce readiness outcomes.",
+          "implications": [
+            "Program reviews should map outcomes to AI-enabled competencies.",
+            "Career services can coach students on AI evidence in resumes and interviews."
+          ],
+          "teachingFocus": "Prioritize assessment rubrics that evaluate responsible and effective AI use."
+        }
+      }
     },
     "aiMentionsByFamily": {
-      "title": "AI mentions differ by job family (Dec 2025)",
+      "title": "AI mentions by job family",
       "labels": ["Data & Analytics", "Marketing", "Human Resources"],
       "values": [45.0, 14.9, 8.8],
-      "note": "From Indeed Hiring Lab’s Jan 22, 2026 labor market update."
+      "sourceId": "indeedLabor2026",
+      "asOfDate": "2025-12",
+      "method": "Share of postings mentioning AI by occupational family in Dec 2025.",
+      "drilldown": {
+        "Data & Analytics": {
+          "headline": "Data & Analytics leads AI demand",
+          "interpretation": "AI skills are deeply embedded in analytic, reporting, and decision-support workflows.",
+          "whyItMatters": "Students entering data-adjacent roles need more than basic prompting—they need model and data judgment.",
+          "implications": [
+            "Employers expect experimentation, validation, and communication of AI outputs.",
+            "Portfolio projects should demonstrate reproducible analysis with AI tooling."
+          ],
+          "teachingFocus": "Expand advanced analytics labs with evaluation and governance checkpoints."
+        },
+        "Marketing": {
+          "headline": "Marketing shows strong practical AI adoption",
+          "interpretation": "Teams use AI for ideation, content generation, testing, and audience analysis.",
+          "whyItMatters": "Graduates need workflow fluency plus brand-safe review processes.",
+          "implications": [
+            "Human-in-the-loop editing remains essential.",
+            "Measurement literacy is needed to validate campaign outcomes."
+          ],
+          "teachingFocus": "Teach prompt libraries, A/B testing, and quality controls for creative work."
+        },
+        "Human Resources": {
+          "headline": "HR adoption is meaningful and rising",
+          "interpretation": "AI appears in recruiting, policy drafting, and employee support workflows.",
+          "whyItMatters": "These use cases are high-impact and can introduce fairness or privacy risk.",
+          "implications": [
+            "Students need strong Responsible AI and compliance habits.",
+            "Policy transparency and audit trails are critical in people operations."
+          ],
+          "teachingFocus": "Include bias checks, documentation templates, and escalation protocols."
+        }
+      }
     },
     "aiOutsideITShare": {
-      "title": "AI demand extends beyond IT/CS (2024)",
+      "title": "AI demand extends beyond IT/CS",
       "labels": ["Outside IT/CS", "IT/CS"],
       "values": [51, 49],
-      "note": "From Lightcast reporting: share of postings requiring AI skills outside IT/CS (as of 2024)."
+      "sourceId": "lightcastBeyondBuzz",
+      "asOfDate": "2024",
+      "method": "Share of AI-skill postings inside vs outside IT and computer science families.",
+      "drilldown": {
+        "Outside IT/CS": {
+          "headline": "Most AI demand is now outside IT/CS",
+          "interpretation": "AI capabilities are diffusing into business, health, education, and creative domains.",
+          "whyItMatters": "Institution-wide strategy is required; AI readiness cannot sit only in technical departments.",
+          "implications": [
+            "General education and major courses should include AI-enabled work.",
+            "Cross-disciplinary faculty communities of practice can accelerate adoption."
+          ],
+          "teachingFocus": "Scale discipline-specific AI assignments and assessment criteria."
+        },
+        "IT/CS": {
+          "headline": "IT/CS remains a major AI talent engine",
+          "interpretation": "Technical programs still supply critical builder and governance expertise.",
+          "whyItMatters": "Institutions need both broad literacy and deep specialist pathways.",
+          "implications": [
+            "Balance advanced technical tracks with campus-wide AI fluency.",
+            "Promote collaboration between technical and non-technical disciplines."
+          ],
+          "teachingFocus": "Strengthen engineering tracks in evaluation, safety, and deployment."
+        }
+      }
+    }
+  },
+  "disciplines": {
+    "Business": {
+      "topSkillsEmphasis": ["AI-assisted decision support", "Prompting for analysis and communication", "AI governance and risk framing"],
+      "learningOutcomes": ["Use AI tools to accelerate market and financial analysis", "Evaluate AI output quality with documented validation steps", "Explain AI-related business risks and mitigation actions"],
+      "sampleAssignments": ["Build a board brief that combines AI-generated market summaries with manual verification", "Run a pricing or segmentation mini-study with AI-assisted analysis and reflection"],
+      "watchOuts": ["Automated bias in customer segmentation", "Leakage of proprietary business data to external tools"],
+      "sources": ["indeedLabor2026", "indeedCareerAdvice2026"]
+    },
+    "Education": {
+      "topSkillsEmphasis": ["Instructional design with AI", "Assessment integrity and evidence of learning", "Inclusive AI classroom practices"],
+      "learningOutcomes": ["Design AI-supported lesson plans with clear pedagogical intent", "Create rubrics that distinguish AI assistance from student reasoning", "Apply responsible AI safeguards in school contexts"],
+      "sampleAssignments": ["Create and critique an AI-supported differentiated lesson", "Develop a school AI-use policy memo with stakeholder guidance"],
+      "watchOuts": ["Over-reliance reducing student critical thinking", "Equity gaps in student access and AI literacy"],
+      "sources": ["indeedCareerAdvice2026"]
+    },
+    "Health": {
+      "topSkillsEmphasis": ["Clinical decision support literacy", "Documentation and communication augmentation", "Safety-focused AI oversight"],
+      "learningOutcomes": ["Interpret AI outputs in patient-care scenarios with human oversight", "Document when and how AI informed decisions", "Identify privacy and bias risks in health AI workflows"],
+      "sampleAssignments": ["Evaluate an AI-assisted triage scenario and justify escalation decisions", "Draft patient education materials using AI then validate for readability and safety"],
+      "watchOuts": ["Hallucinated recommendations in high-stakes settings", "Protected health information privacy risks"],
+      "sources": ["lightcastBeyondBuzz", "indeedCareerAdvice2026"]
+    },
+    "Computing": {
+      "topSkillsEmphasis": ["LLM integration and evaluation", "Secure deployment patterns", "Responsible AI engineering"],
+      "learningOutcomes": ["Build and evaluate AI-enabled applications", "Implement monitoring for quality, safety, and drift", "Document model limitations and governance controls"],
+      "sampleAssignments": ["Prototype a retrieval-augmented app with evaluation metrics", "Create an AI incident response runbook for a student project"],
+      "watchOuts": ["Prompt injection and data exfiltration", "Lack of reproducible evaluation in production pipelines"],
+      "sources": ["indeedLabor2026", "lightcastBeyondBuzz"]
+    },
+    "Arts & Sciences": {
+      "topSkillsEmphasis": ["AI-enhanced inquiry and communication", "Source verification and interpretation", "Ethics and societal impact"],
+      "learningOutcomes": ["Use AI to support research and argument development responsibly", "Critique AI-generated claims using disciplinary evidence", "Discuss social and ethical implications of AI adoption"],
+      "sampleAssignments": ["Produce a comparative essay with documented AI-assisted drafting workflow", "Audit AI-generated references and annotate credibility issues"],
+      "watchOuts": ["Fabricated citations and misinformation", "Loss of original voice and reasoning depth"],
+      "sources": ["indeedCareerAdvice2026", "lightcastBeyondBuzz"]
     }
   },
   "jobFamilies": {
@@ -51,18 +230,18 @@
       "Escalation paths and human-in-the-loop review"
     ]
   },
-  "sources": [
-    {
-      "name": "Indeed Hiring Lab — Jan 2026 Labor Market Update (AI Tracker 4.2% in Dec 2025; 45% data & analytics; ~15% marketing; ~9% HR)",
+  "sources": {
+    "indeedLabor2026": {
+      "name": "Indeed Hiring Lab — Jan 2026 labor market update",
       "url": "https://www.hiringlab.org/2026/01/22/january-labor-market-update-jobs-mentioning-ai-are-growing-amid-broader-hiring-weakness/"
     },
-    {
-      "name": "Indeed Career Advice — AI in job postings (context + trend discussion, updated Jan 2026)",
+    "indeedCareerAdvice2026": {
+      "name": "Indeed Career Advice — AI in job postings (updated Jan 2026)",
       "url": "https://www.indeed.com/career-advice/news/ai-in-job-postings"
     },
-    {
-      "name": "Lightcast — AI skills outside IT/CS (press release summary)",
+    "lightcastBeyondBuzz": {
+      "name": "Lightcast — Beyond the buzz: AI skills outside IT/CS",
       "url": "https://lightcast.io/resources/blog/beyond-the-buzz-press-release-2025-07-23"
     }
-  ]
+  }
 }
