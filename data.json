@@ -1,5 +1,5 @@
 {
-  "lastUpdated": "2026-02-19",
+  "lastUpdated": "2026-02-20",
   "takeaway": {
     "headline": "NKU is well-positioned to lead: make AI literacy a universal baseline, then build role-based depth across every college.",
     "subhead": "Multiple high-credibility labor market and government sources show AI capability is becoming a cross-discipline expectation—not just a tech specialty. The highest-impact approach is a shared foundation (AI literacy + data literacy + responsible use) paired with job-family pathways (power-user, builder, and high-stakes governance).",
@@ -21,7 +21,7 @@
     },
     "onetHotTechnologies": {
       "enabled": false,
-      "asOf": "2026-02-19",
+      "asOf": "2026-02-20",
       "topHotTechnologies": [],
       "note": "Could not fetch O*NET Hot Technologies CSV from the standard export URL. If this persists, we’ll switch to pulling from O*NET Web Services or pinning a downloaded CSV in-repo."
     }
